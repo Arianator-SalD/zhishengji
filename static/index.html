@@ -581,7 +581,7 @@ function renderSuggestedQuestions(i){
   box.innerHTML=questionSets[i%questionSets.length].map(q=>`<button class="question-chip" data-q="${q}"><span>${q}</span><span>→</span></button>`).join('');
   box.querySelectorAll('.question-chip').forEach(btn=>btn.onclick=()=>{detailChatInput.value=btn.dataset.q;detailChatInput.focus()});
 }
-function selectExpert(i){selectedExpert=i;const e=experts[i];document.querySelectorAll('.expert-card').forEach((c,j)=>c.classList.toggle('selected',j===i));detailPhoto.src=e.img;detailName.textContent=e.name;detailQuote.textContent=e.quote;detailQuoteBy.textContent='—— '+e.name;detailRole.textContent=e.full;detailIntro.textContent=e.intro;detailTags.innerHTML=e.tags.concat(['项目管理','职场成长']).map(t=>`<span class="tag">${t}</span>`).join('');chatAvatar.src=e.img;callAvatar.src=e.img;chatExpert.textContent=e.name+' · AI 分身';callExpert.textContent='正在与 '+e.name+' AI 分身通话';renderSuggestedQuestions(i);}
+function selectExpert(i){window.zhijianChat?.select(i);selectedExpert=i;const e=experts[i];document.querySelectorAll('.expert-card').forEach((c,j)=>c.classList.toggle('selected',j===i));detailPhoto.src=e.img;detailName.textContent=e.name;detailQuote.textContent=e.quote;detailQuoteBy.textContent='—— '+e.name;detailRole.textContent=e.full;detailIntro.textContent=e.intro;detailTags.innerHTML=e.tags.concat(['项目管理','职场成长']).map(t=>`<span class="tag">${t}</span>`).join('');chatAvatar.src=e.img;callAvatar.src=e.img;chatExpert.textContent=e.name+' · AI 分身';callExpert.textContent='正在与 '+e.name+' AI 分身通话';renderSuggestedQuestions(i);}
 function openExpertDetail(i){selectExpert(i);showPage('expertDetail');}
 expertCards();
 
@@ -619,11 +619,11 @@ document.querySelectorAll('#expertFilters .pill').forEach(p=>p.onclick=()=>{docu
 chatBtn.onclick=()=>openModal('chatModal');
 callBtn.onclick=()=>openModal('callModal');
 bookBtn.onclick=()=>toast('已打开真人咨询预约：最近可约 9 月 18 日 15:00');
-function openModal(id){if((id==='chatModal'||id==='callModal')&&selectedExpert!==0){toast('当前接入Sally AI 分身');selectExpert(0);}document.getElementById(id).classList.add('show');window.zhijianVoice?.open(id)}
+function openModal(id){if(id==='callModal'&&selectedExpert!==0){toast('当前接入Sally AI 分身');selectExpert(0);}document.getElementById(id).classList.add('show');window.zhijianVoice?.open(id)}
 function closeModal(id){document.getElementById(id).classList.remove('show');window.zhijianVoice?.close(id)}
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>closeModal(b.dataset.close));
 document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeModal(o.id)}));
-sendChat.onclick=sendMessage;chatInput.addEventListener('keydown',e=>{if(e.key==='Enter')sendMessage()});function sendMessage(){window.zhijianVoice?.send()}
+sendChat.onclick=sendMessage;chatInput.addEventListener('keydown',e=>{if(e.key==='Enter')sendMessage()});function sendMessage(){window.zhijianChat?.send()}
 const callScripts=[
   [{q:'我没有产品实习，但做过运营项目，转产品经理应该怎么证明自己的产品能力？',a:'我会先看你有没有“产品能力的证据”，而不是简历上有没有一段叫产品经理的实习。你可以从现有运营经历里挑一个真实问题，按“用户是谁、问题是什么、你做了什么判断、方案如何验证、结果如何”重新组织。这样比临时做一个虚构项目更有说服力。'},{q:'那我接下来一周最值得补什么？',a:'优先补一个可以被面试官追问的完整案例。建议你选一个熟悉的业务场景，完成用户问题定义、竞品分析、方案取舍和指标设计，再把它压缩成 3 分钟项目表达。目标不是做得很大，而是让每一步判断都能讲清楚为什么。'}],
   [{q:'我的简历经常过不了筛选，招聘官第一眼到底在看什么？',a:'第一眼不是看你写了多少，而是判断“你和这个岗位有没有明确相关性”。我通常先看目标岗位、最近两段经历和可量化结果。你需要把最相关的信息放到前半屏，并把职责描述改成“做了什么动作、解决什么问题、带来什么结果”。'},{q:'如果经历不完全匹配，还能怎么补救？',a:'可以用项目证据和能力迁移来补。不要强调“我没有”，而要告诉招聘官你已经在哪些场景里做过相同能力的事情，比如分析、推进、用户洞察或数据验证，再补一个与岗位最相关的作品或案例。'}],
@@ -810,4 +810,4 @@ renderFavorites();
   document.querySelectorAll('#community .expert-answer-tabs button').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('#community .expert-answer-tabs button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');toast('已切换专家回答筛选：'+btn.textContent)}));
 })();
 </script>
-<script src="/static/action-plan.js?v=1"></script><script src="/static/voice.js?v=unified-profile"></script></body></html>
+<script src="/static/action-plan.js?v=1"></script><script src="/static/demo-chat.js?v=1"></script><script src="/static/voice.js?v=expert-mock-chat"></script></body></html>

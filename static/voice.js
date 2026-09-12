@@ -101,6 +101,8 @@
     source.start(playbackTime); playbackTime += audio.duration; state('speaking'); status('正在回答…');
   }
   function handle(m) {
+    // Late Sally events must not appear in another expert's demo conversation.
+    if (selectedExpert !== 0) return;
     const scoped = ['transcript.partial','transcript.final','reply.delta','audio.start','audio.end','turn.end'];
     if ((scoped.includes(m.type) || m.request_id != null) && m.request_id !== requestId) return;
     if (scoped.includes(m.type) && !requestId) return;
@@ -162,6 +164,7 @@
     status('新会话：只使用接下来的对话内容');
   }
   window.zhijianVoice = {
+    suspend() { interrupt(); },
     open(id) { mode = id === 'callModal' ? 'voice' : 'text'; },
     close(id) { if (id === 'callModal') interrupt(); },
     send() { const text = $('chatInput').value.trim(); $('chatInput').value = ''; return submit(text); }

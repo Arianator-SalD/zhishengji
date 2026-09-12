@@ -6,6 +6,8 @@
 
 本次使用最新的 `职升机_Web交互Demo.html`。原文件完整保存在 `prototype/`，线上使用 `static/index.html` 的后端接入版本。其余专家、注册、社区和咨询记录为原型交互；当前实际咨询身份为Sally。
 
+其他专家的 AI Chat 保留原 HTML 的模拟开场、示例对话和固定回复，不调用模型。模拟内容与回复延迟统一配置在 `static/demo-chat.js` 的 `demoChatConfig`；每位专家的聊天内容和输入草稿在本页内分别保存。Sally 继续使用真实后端，切换到其他专家时会停止正在进行的 Sally 回答。
+
 Render 操作见 [部署步骤](RENDER部署.md)。真实 Key 仅在 Render 的 Environment 页面输入。另需设置至少 12 位的 `DEMO_ACCESS_PASSWORD`，供团队成员进入演示使用；它不是模型 Key。Render 环境缺少访问口令时，除健康检查外默认不开放页面和对话。
 
 ## 启动
