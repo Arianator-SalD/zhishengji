@@ -24,3 +24,7 @@ services:
         sync: false
       - key: VOLC_TTS_SPEAKER
         value: zh_female_vv_uranus_bigtts
+      - key: ROBIN_TTS_SPEAKER
+        value: zh_male_m191_uranus_bigtts
+      - key: ROBIN_TTS_RESOURCE_ID
+        value: seed-tts-2.0

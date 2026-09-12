@@ -6,7 +6,8 @@ from server.settings import Settings
 
 class LLM:
     async def stream(self, messages):
-        for text in ['这是浏览器集成测试。', '这段文字用于检验流式传输和两轮对话。']:
+        name = '李彦宏' if '李彦宏 AI 分身' in messages[0]['content'] else 'Sally'
+        for text in [f'这是{name}的浏览器集成测试。', '这段文字用于检验流式传输和两轮对话。']:
             await asyncio.sleep(0.08)
             yield text
 

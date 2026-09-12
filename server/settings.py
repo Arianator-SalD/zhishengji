@@ -23,6 +23,8 @@ class Settings:
     tts_url: str = "https://openspeech.bytedance.com/api/v3/tts/unidirectional/sse"
     tts_resource_id: str = "seed-tts-2.0"
     tts_speaker: str = "zh_female_vv_uranus_bigtts"
+    robin_tts_speaker: str = "zh_male_m191_uranus_bigtts"
+    robin_tts_resource_id: str = "seed-tts-2.0"
     tts_sample_rate: int = 24000
     provider_timeout: float = 45
     max_audio_seconds: float = 60

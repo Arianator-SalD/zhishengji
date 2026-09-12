@@ -1,6 +1,25 @@
 # Render 部署配置
 
-先将项目上传到自己的 GitHub 私有仓库。请使用本次提供的部署包，里面不含 `.env`、虚拟环境或测试音频。
+## 已有 Sally 服务：增加李彦宏分身
+
+在现有 Render 服务的 Environment 中新增以下两项，不需要创建第二个服务：
+
+```env
+ROBIN_TTS_SPEAKER=zh_male_m191_uranus_bigtts
+ROBIN_TTS_RESOURCE_ID=seed-tts-2.0
+```
+
+`ROBIN_TTS_SPEAKER` 为云舟 2.0 预置男声音色，`ROBIN_TTS_RESOURCE_ID` 为该专家使用的 TTS 模型资源。这两项仅在包含李彦宏接入功能的代码部署后生效，代码也提供相同默认值。它们不是 API Key。
+
+现有 `LLM_API_KEY`、`VOLC_ASR_API_KEY`、`VOLC_TTS_API_KEY` 继续共用；已有旧版 App ID / Access Token 鉴权也可继续使用。保留原来的 `VOLC_TTS_SPEAKER` 和 `VOLC_TTS_RESOURCE_ID`，它们继续控制 Sally。云舟音色需要现有火山账号具有对应 TTS 2.0 资源权限；鉴权错误或音色不匹配时页面会显示服务错误，不会悄悄改用 Sally 音色。
+
+两位专家共用 `/ws/voice`，由 `expert_id=sally` 或 `expert_id=robin-li` 在建立连接时选择，各自拥有独立会话。李彦宏默认空白档案，可在聊天窗口选择带入同一份模拟学生资料；切换专家会关闭旧连接，回到真实专家时开始新会话。人物 Prompt 与精选知识随仓库 `content/robin-li/` 交付，不依赖外层工作目录。
+
+验证时先访问有权限的 `/api/config?expert_id=robin-li` 确认对应能力已配置，再在李彦宏页面分别试文字、录音、语音窗口文字播报、打断和切换 Sally。`capabilities` 只表示配置完整，不表示账号余额、权限、网络或实际音质已通过验证。
+
+## 新建服务
+
+将 `zhijian-voice` 当前源码上传到自己的 GitHub 私有仓库，不包含 `.env`、虚拟环境或测试音频。历史部署包不作为本轮源码来源。
 
 在 Render 选择 New → Web Service，连接这个仓库。授权 GitHub 时选择 Only select repositories，仅勾选此仓库。
 

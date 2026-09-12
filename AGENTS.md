@@ -3,8 +3,8 @@
 ## 项目背景与当前边界
 - 面向大学生职业探索、求职决策及专家咨询的产品 Demo，将有来源的专家经验转化为针对用户背景的建议和下一步行动。
 - 原生 HTML/JavaScript + FastAPI，GitHub main 关联 Render 自动部署；站点：[职升机](https://zhishengji-voice.onrender.com)。
-- Sally 接 DeepSeek 与火山引擎 ASR/TTS，其余专家保留 mock；公共组件修改需保持专家身份、资料和会话隔离。
-- Sally 默认带入“金融转 AI 产品”模拟同学档案，可切换空白会话；对话仅使用本次连接历史。“我的”三页共用大学生示例数据，任务、成果、兴趣反馈与复盘分开存入 localStorage；游戏化测评结果单独保存，不覆盖示例 RIASEC，也尚未自动接入 Sally 咨询上下文。
+- 当前本地 Sally 与李彦宏均接入 DeepSeek 与火山引擎 ASR/TTS，其余专家保留 mock；李彦宏接入尚未部署，线上状态以日志为准。真实专家通过 voiceId / expert_id 路由，公共组件修改需保持专家身份、资料、音色和会话隔离。
+- Sally 默认带入“金融转 AI 产品”模拟同学档案，李彦宏默认空白，两者均可切换；对话仅使用本次连接历史，切换专家会关闭连接，返回真实专家时开启新会话。“我的”三页共用大学生示例数据，任务、成果、兴趣反馈与复盘分开存入 localStorage；游戏化测评结果单独保存，不覆盖示例 RIASEC，也尚未自动接入专家咨询上下文。
 - 用户最新要求优先于历史方案；prototype、旧截图、压缩包和方案不是当前源码的替代来源。
 
 ## 每次迭代必须更新日志
@@ -30,7 +30,7 @@
 | [static/career-assessment.js](static/career-assessment.js)、[static/career-assessment.css](static/career-assessment.css) | 注册/更新画像入口、全屏测评容器、受校验的结果回传和单独的本机测评结果展示 |
 | [tests/career-assessment.test.cjs](tests/career-assessment.test.cjs) | 测评结果校验、来源及轮次隔离、重新测评与主页回程回归 |
 | [static/index.html](static/index.html) | 当前页面、专家数据、原型交互与内联样式；含大段嵌入图片，读取时限制输出 |
-| [static/consultation-ui.js](static/consultation-ui.js) | Sally 与公共专家页面的 UI 适配、已有信息面板 |
+| [static/consultation-ui.js](static/consultation-ui.js) | Sally、李彦宏与公共专家页面的 UI 适配、已有信息面板及真实通话入口 |
 | [static/voice.js](static/voice.js)、[static/voice.css](static/voice.css) | 真实对话连接、录音/播放生命周期及补充样式 |
 | [static/audio-worklet.js](static/audio-worklet.js) | 麦克风采样与 PCM 处理 |
 | [static/demo-chat.js](static/demo-chat.js) | 其他专家 mock 回复、按专家隔离的聊天状态 |
@@ -45,9 +45,12 @@
 | [Sally语气调优说明.md](Sally语气调优说明.md) | Sally 语气样本来源、第三方技能取舍与本地验证边界 |
 | [content/persona.md](content/persona.md) | Sally 本人经历、观点和对话策略，进入 system prompt |
 | [content/qa.json](content/qa.json)、[content/demo_user.json](content/demo_user.json) | 展示 QA 与模拟咨询者档案，不得混淆专家与咨询者身份 |
+| [content/robin-li/persona.md](content/robin-li/persona.md)、[knowledge.md](content/robin-li/knowledge.md)、[qa.json](content/robin-li/qa.json) | 李彦宏运行版 Prompt、带时间语境的精选公开观点与 6 组咨询 QA；与 Sally 独立，模型建议不冒充本人原话 |
+| [server/experts.py](server/experts.py)、[tests/test_experts.py](tests/test_experts.py) | 专家白名单与供应商／资料注册、默认档案模式、真实 TTS 请求参数及跨专家隔离回归 |
 | [server/main.py](server/main.py)、[server/access.py](server/access.py) | FastAPI 路由、静态资源、访问控制 |
 | [server/context.py](server/context.py)、[server/session.py](server/session.py) | 上下文拼装、会话历史、语音轮次与打断处理 |
 | [server/providers.py](server/providers.py)、[server/settings.py](server/settings.py) | 模型/语音供应商协议与配置；server/__init__.py 是包入口 |
+| [tests/demo-memory.test.cjs](tests/demo-memory.test.cjs) | 真实前端配置／连接竞态、专家切换、档案模式及录音初始化超时与取消回归 |
 | [tests/](tests/) | 后端、访问控制、供应商协议、录音算法、档案及浏览器回归；browser_harness.py 只用于模拟供应商测试 |
 | [prototype/](prototype/) | 用户提供的两个原始 HTML 留档，线上入口不是这些文件 |
 | artifacts/、frontend-preview.png | 素材生成记录、辅助脚本、历史图片与预览；先确认归属，不自动删除或提交 |

@@ -1,22 +1,20 @@
 from pathlib import Path
 from urllib.parse import urlparse
 
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
-from .context import Content
 from .access import DemoAccess
-from .providers import Providers
+from .experts import build_experts
 from .session import VoiceSession
 from .settings import ROOT, Settings
 
 
 def create_app(settings=None, providers=None, content_dir=None, static_dir=None):
     settings = settings if settings is not None else Settings.from_env()
-    providers = providers if providers is not None else Providers.configured(settings)
-    content = Content(Path(content_dir) if content_dir else ROOT / "content")
+    experts = build_experts(settings, providers, content_dir)
     static = Path(static_dir) if static_dir else ROOT / "static"
     app = FastAPI(title="职升机语音演示", docs_url=None, redoc_url=None, openapi_url=None)
     app.add_middleware(DemoAccess, password=settings.demo_access_password,
@@ -26,15 +24,22 @@ def create_app(settings=None, providers=None, content_dir=None, static_dir=None)
 
     @app.get("/health")
     async def health():
-        return {"status": "ok", "capabilities": providers.capabilities}
+        return {"status": "ok", "capabilities": experts["sally"].providers.capabilities}
 
     @app.get("/api/config")
-    async def config():
-        return {"capabilities": providers.capabilities, "qa": content.qa, "profile": content.profile}
+    async def config(expert_id: str = "sally"):
+        expert = experts.get(expert_id)
+        if expert is None:
+            raise HTTPException(status_code=404, detail="未知专家")
+        return expert.public_config()
 
     @app.websocket("/ws/voice")
     async def voice(socket: WebSocket):
         nonlocal active_sessions
+        expert = experts.get(socket.query_params.get("expert_id", "sally"))
+        if expert is None:
+            await socket.close(code=1008)
+            return
         origin = socket.headers.get("origin")
         if origin:
             parsed = urlparse(origin)
@@ -49,7 +54,7 @@ def create_app(settings=None, providers=None, content_dir=None, static_dir=None)
         active_sessions += 1
         try:
             await socket.accept()
-            await VoiceSession(socket, providers, settings, content).run()
+            await VoiceSession(socket, expert.providers, settings, expert.content, expert_id=expert.id).run()
         finally:
             active_sessions -= 1
 

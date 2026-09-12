@@ -33,13 +33,16 @@ test('each added demo has its own question set and independent simulated answer'
   const end=html.indexOf('\n}',begin)+2;
   vm.runInContext(html.slice(begin,end),context);
   const answers=new Set();
-  for(let i=10;i<experts.length;i++) {
+  for(let i=11;i<experts.length;i++) {
     assert.ok(questions[i].length>=4);
     const answer=context.generateExpertReply(questions[i][0],i,{q:'',a:''});
     assert.match(answer,/模拟回复/);
     assert.ok(answer.includes(experts[i].demoAnswer));
     answers.add(answer);
   }
-  assert.equal(answers.size,experts.length-10);
-  assert.match(context.generateExpertReply('你怎么看 AI？',10,{q:'',a:''}),/非本人观点/);
+  assert.equal(answers.size,experts.length-11);
+  assert.equal(experts[0].voiceId, 'sally');
+  assert.equal(experts[10].voiceId, 'robin-li');
+  assert.equal(experts[10].publicFigure, true);
+  for (const field of ['demoProfile', 'demoAnswer', 'demoPerspective']) assert.equal(experts[10][field], undefined);
 });

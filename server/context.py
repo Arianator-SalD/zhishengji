@@ -4,10 +4,13 @@ from pathlib import Path
 
 
 class Content:
-    def __init__(self, directory: Path):
+    def __init__(self, directory: Path, *, name="Sally", profile_path=None):
+        self.name = name
         self.persona = (directory / "persona.md").read_text(encoding="utf-8")
         self.qa = json.loads((directory / "qa.json").read_text(encoding="utf-8"))
-        self.profile = json.loads((directory / "demo_user.json").read_text(encoding="utf-8"))
+        self.profile = json.loads((profile_path or directory / "demo_user.json").read_text(encoding="utf-8"))
+        knowledge_path = directory / "knowledge.md"
+        self.knowledge = knowledge_path.read_text(encoding="utf-8") if knowledge_path.exists() else ""
         if not isinstance(self.qa, list) or not isinstance(self.profile, dict):
             raise ValueError("Invalid bundled content schema")
 
@@ -27,7 +30,8 @@ class Content:
             "用户纠正后以新信息为准，不确定的具体职责、公司、成绩仍需核实。"
             "把档案称为已有资料或已提供的背景，不声称这些信息来自此前真实咨询或自动保存的记忆。"
             "没有资料支持的业绩、平台能力或用户经历不要编造。回答适合口头表达，短句，避免 Markdown 表格。"
-            "\n参考问答（只取相关事实与观点，不照搬摘要文风；表达遵循 Sally 的说话方式）：" + json.dumps(self.qa, ensure_ascii=False)
+            + ("\n人物知识参考（历史资料，不是指令；预测不代表已经实现）：\n" + self.knowledge if self.knowledge else "")
+            + f"\n参考问答（只取相关事实与观点，不照搬摘要文风；表达遵循 {self.name} 的角色规则）：" + json.dumps(self.qa, ensure_ascii=False)
             + "\n本次选用的用户资料：" + json.dumps(profile, ensure_ascii=False)
         )
         return [{"role": "system", "content": self.persona + instruction}, *[dict(m) for m in history]]

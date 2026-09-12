@@ -3,11 +3,14 @@
   const $ = id => document.getElementById(id);
   let socket, connecting, config, turn = null, activeSegment = null, playbackTime = 0;
   let audioContext, sources = new Set(), mic, micNode, micSource, silentGain;
-  let recording = false, micEpoch = 0, frames = 0;
+  let recording = false, micEpoch = 0, frames = 0, cancelWorklet;
   let mode = 'text', liveReply, voiceReply, busy = false, generationDone = false;
   let ignoreTurn = false, ignoredTurns = new Set(), currentReplyText = '';
   let requestId = null, failed = false;
-  let useDemoProfile = true;
+  let activeId = experts[selectedExpert]?.voiceId || null, sessionEpoch = 0, configLoading;
+  const profileModes = new Map();
+  let useDemoProfile = activeId === 'sally';
+  const isActive = () => Boolean(activeId) && experts[selectedExpert]?.voiceId === activeId;
   const send = obj => { if (socket?.readyState === WebSocket.OPEN) socket.send(JSON.stringify(obj)); };
   function status(text, error = false) {
     $('voiceStatus').textContent = text; $('voiceStatus').classList.toggle('voice-error', error);
@@ -31,7 +34,8 @@
     return audioContext;
   }
   function endMic(notify = true) {
-    ++micEpoch; const wasRecording = recording; recording = false;
+    ++micEpoch; cancelWorklet?.();
+    const wasRecording = recording; recording = false;
     if (micNode) { micNode.port.onmessage = null; micNode.disconnect(); micNode = null; }
     micSource?.disconnect(); micSource = null; silentGain?.disconnect(); silentGain = null;
     mic?.getTracks().forEach(t => t.stop()); mic = null;
@@ -45,30 +49,83 @@
     if (currentReplyText && wasActive) { liveReply?.append('\n（已打断）'); voiceReply?.append('\n（已打断）'); }
     turn = null; liveReply = voiceReply = null; currentReplyText = ''; state('idle'); status('已停止，可以继续提问');
   }
+  async function loadConfig() {
+    if (!isActive()) return null;
+    if (config) return config;
+    if (configLoading) return configLoading;
+    const id = activeId, epoch = sessionEpoch;
+    const pending = fetch(`/api/config?expert_id=${encodeURIComponent(id)}`).then(r => {
+      if (!r.ok) throw new Error('暂时无法读取咨询配置');
+      return r.json();
+    }).then(c => {
+      if (epoch !== sessionEpoch || id !== activeId) return null;
+      if (c.expert_id && c.expert_id !== id) throw new Error('专家配置不匹配，请重新选择');
+      config = c;
+      if (!profileModes.has(id)) useDemoProfile = c.default_use_demo_profile ?? (id === 'sally');
+      window.zhijianUI.memory(useDemoProfile, c.profile, id);
+      const ready = c.capabilities;
+      status(`DeepSeek ${ready.llm?'已配置':'待配置'} · 语音识别 ${ready.asr?'已配置':'待配置'} · 语音合成 ${ready.tts?'已配置':'待配置'}`);
+      const i = experts.findIndex(e => e.voiceId === id);
+      questionSets[i] = c.qa.map(q => q.question);
+      renderSuggestedQuestions(i);
+      return c;
+    }).finally(() => { if (configLoading === pending) configLoading = null; });
+    configLoading = pending;
+    return pending;
+  }
   async function connect() {
-    if (socket?.readyState === WebSocket.OPEN) return;
+    if (!isActive()) return;
     if (connecting) return connecting;
-    connecting = new Promise((resolve, reject) => {
-      const ws = new WebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/ws/voice`);
+    if (socket?.readyState === WebSocket.OPEN) return;
+    const id = activeId, epoch = sessionEpoch;
+    const pending = new Promise((resolve, reject) => {
+      const ws = new WebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/ws/voice?expert_id=${encodeURIComponent(id)}`);
       socket = ws; ws.binaryType = 'arraybuffer';
+      const current = () => ws === socket && epoch === sessionEpoch && id === activeId && isActive();
       const timeout = setTimeout(() => { ws.close(); reject(new Error('连接超时，请确认后端已启动')); }, 8000);
       ws.onopen = () => {
-        if (ws === socket) send({type:'session.start',use_demo_profile:useDemoProfile});
+        if (current()) send({type:'session.start',use_demo_profile:useDemoProfile});
       };
       ws.onmessage = e => {
-        if (ws !== socket) return;
+        if (!current()) return;
         if (typeof e.data !== 'string') { playPCM(e.data); return; }
         let m; try { m = JSON.parse(e.data); } catch { return; }
-        if (m.type === 'session.ready') { clearTimeout(timeout); resolve(); }
+        if (m.type === 'session.ready') {
+          if (m.expert_id && m.expert_id !== id) { ws.close(); return; }
+          clearTimeout(timeout); resolve();
+        }
         handle(m);
       };
       ws.onerror = () => { clearTimeout(timeout); reject(new Error('无法连接对话后端')); };
       ws.onclose = () => {
         clearTimeout(timeout); reject(new Error('对话连接已断开'));
-        if (socket === ws) { socket = null; endMic(false); stopPlayback(); busy = false; state('idle'); status('连接已断开，重新提问可连接', true); }
+        if (current()) { socket = null; endMic(false); stopPlayback(); busy = false; state('idle'); status('连接已断开，重新提问可连接', true); }
       };
-    }).finally(() => { connecting = null; });
-    return connecting;
+    }).finally(() => { if (connecting === pending) connecting = null; });
+    connecting = pending;
+    return pending;
+  }
+  function discardSession() {
+    ++sessionEpoch;
+    endMic(false); stopPlayback();
+    const oldSocket = socket; socket = null; connecting = null; configLoading = null;
+    oldSocket?.close();
+    busy = false; failed = false; generationDone = false; ignoreTurn = true;
+    requestId = turn = null; ignoredTurns.clear(); liveReply = voiceReply = null; currentReplyText = '';
+    $('chatBody').textContent = ''; $('callTranscript').textContent = '';
+    $('chatInput').value = ''; $('voiceTextInput').value = '';
+    window.zhijianUI.clear(); state('idle');
+  }
+  function select(i) {
+    const id = experts[i]?.voiceId || null;
+    if (id === activeId) return;
+    discardSession(); activeId = id; config = null;
+    useDemoProfile = profileModes.get(id) ?? (id === 'sally');
+    window.zhijianUI.memory(useDemoProfile, null, id);
+    if (!id) return;
+    state('idle'); status('正在读取咨询配置…');
+    const epoch = sessionEpoch;
+    loadConfig().catch(e => { if (epoch === sessionEpoch) status(e.message, true); });
   }
   function acceptTurn(m) {
     if (ignoredTurns.has(m.turn_id) || ignoreTurn) return false;
@@ -103,8 +160,7 @@
     source.start(playbackTime); playbackTime += audio.duration; state('speaking'); status('正在回答…');
   }
   function handle(m) {
-    // Late Sally events must not appear in another expert's demo conversation.
-    if (selectedExpert !== 0) return;
+    if (!isActive()) return;
     const scoped = ['transcript.partial','transcript.final','reply.delta','audio.start','audio.end','turn.end'];
     if ((scoped.includes(m.type) || m.request_id != null) && m.request_id !== requestId) return;
     if (scoped.includes(m.type) && !requestId) return;
@@ -122,17 +178,37 @@
     if (m.type === 'turn.end' && !ignoreTurn && !ignoredTurns.has(m.turn_id)) { generationDone = true; finished(); }
     if (m.type === 'error') { failed = true; endMic(false); stopPlayback(); busy = false; const message = m.message + (m.diagnostic ? `（${m.diagnostic}）` : ''); status(message, true); state('idle'); bubble(mode === 'voice' ? 'callTranscript' : 'chatBody', message, 'ai'); }
   }
+  function prepareWorklet(ctx) {
+    return new Promise((resolve, reject) => {
+      let settled = false;
+      const finish = error => {
+        if (settled) return;
+        settled = true; clearTimeout(timeout);
+        if (cancelWorklet === cancel) cancelWorklet = null;
+        if (error) reject(error); else resolve();
+      };
+      const cancel = () => finish(new Error('录音准备已取消'));
+      const timeout = setTimeout(() => finish(new Error('录音初始化超时，请重试或改用文字提问')), 8000);
+      cancelWorklet = cancel;
+      try { Promise.resolve(ctx.audioWorklet.addModule('/static/audio-worklet.js')).then(() => finish(), finish); }
+      catch (error) { finish(error); }
+    });
+  }
   async function beginMic() {
     if (recording) { endMic(); return; }
+    const openingEpoch = sessionEpoch, openingMicEpoch = micEpoch;
+    try { await loadConfig(); } catch (e) { if (openingEpoch === sessionEpoch) status(e.message, true); return; }
+    if (openingEpoch !== sessionEpoch || openingMicEpoch !== micEpoch || !isActive()) return;
     if (!config?.capabilities?.asr || !config?.capabilities?.llm || !config?.capabilities?.tts) { status('语音咨询需要配置 DeepSeek、语音识别和语音合成 API', true); return; }
     interrupt(); ignoreTurn = false; generationDone = false; failed = false;
+    status('正在准备麦克风…');
     const epoch = ++micEpoch;
     try {
       const ctx = await context(); if (epoch !== micEpoch) return;
       await connect(); if (epoch !== micEpoch) return;
       const stream = await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true}});
       if (epoch !== micEpoch) { stream.getTracks().forEach(t => t.stop()); return; }
-      mic = stream; await ctx.audioWorklet.addModule('/static/audio-worklet.js');
+      mic = stream; await prepareWorklet(ctx);
       if (epoch !== micEpoch) return;
       micSource = ctx.createMediaStreamSource(stream); micNode = new AudioWorkletNode(ctx,'pcm-recorder');
       silentGain = ctx.createGain(); silentGain.gain.value = 0;
@@ -150,7 +226,11 @@
   }
   async function submit(text, speak = false) {
     if (!text.trim()) return;
-    if (!config?.capabilities?.llm) { status('管理员尚未配置 DeepSeek API Key', true); toast('暂时无法连接咨询服务，请稍后重试'); return; }
+    const openingEpoch = sessionEpoch, openingMicEpoch = micEpoch;
+    try { await loadConfig(); } catch (e) { if (openingEpoch === sessionEpoch) status(e.message, true); return; }
+    if (openingEpoch !== sessionEpoch || openingMicEpoch !== micEpoch || !isActive()) return;
+    if (!config?.capabilities?.llm) { status('暂时无法连接咨询服务，请稍后重试', true); return; }
+    speak = speak && Boolean(config.capabilities.tts);
     interrupt(); const epoch = micEpoch;
     try {
       if (speak) await context(); if (epoch !== micEpoch) return;
@@ -158,37 +238,43 @@
       ignoreTurn = false; generationDone = false; failed = false; turn = null; currentReplyText = ''; liveReply = voiceReply = null;
       bubble('chatBody',text,'me'); bubble('callTranscript',text,'me'); busy = true; state('thinking'); status('正在思考…');
       requestId = crypto.randomUUID(); send({type:'input.text',text,speak,request_id:requestId});
+      return true;
     } catch (e) { if (epoch === micEpoch) status(e.message,true); }
   }
   function reset() {
-    interrupt(); send({type:'session.reset'}); socket?.close(); socket = null; connecting = null;
-    $('chatBody').textContent = ''; $('callTranscript').textContent = ''; window.zhijianUI.clear();
-    window.zhijianUI.memory(useDemoProfile, config?.profile);
+    if (!isActive()) return;
+    send({type:'session.reset'}); discardSession();
+    window.zhijianUI.memory(useDemoProfile, config?.profile, activeId);
     status(useDemoProfile ? '新会话：已带入演示档案，可以直接提问' : '新会话：不带入档案，只使用接下来的对话');
   }
   window.zhijianVoice = {
+    select,
     suspend() { interrupt(); },
     setDemoProfile(enabled) {
-      if (selectedExpert !== 0 || typeof enabled !== 'boolean' || enabled === useDemoProfile) return;
-      useDemoProfile = enabled;
+      if (!isActive() || typeof enabled !== 'boolean' || enabled === useDemoProfile) return;
+      useDemoProfile = enabled; profileModes.set(activeId, enabled);
       reset();
     },
     beginMic,
-    startCall() { mode = 'voice'; state('idle'); status('点击说话，说完后手动发送'); },
-    open(id) { mode = id === 'callModal' ? 'voice' : 'text'; },
+    startCall() { select(selectedExpert); mode = 'voice'; state('idle'); status('点击说话，说完后手动发送'); },
+    open(id) { select(selectedExpert); mode = id === 'callModal' ? 'voice' : 'text'; },
     close(id) { if (id === 'callModal') interrupt(); },
-    send() { const text = $('chatInput').value.trim(); $('chatInput').value = ''; return submit(text); }
+    async send() {
+      const text = $('chatInput').value.trim();
+      if (await submit(text)) { if ($('chatInput').value.trim() === text) $('chatInput').value = ''; }
+    }
   };
   $('resetSession').onclick = reset;
-  $('voiceTextSend').onclick = () => { const text = $('voiceTextInput').value; $('voiceTextInput').value = ''; submit(text, !!config?.capabilities?.tts); };
+  $('voiceTextSend').onclick = async () => {
+    const text = $('voiceTextInput').value;
+    if (await submit(text, true)) { if ($('voiceTextInput').value === text) $('voiceTextInput').value = ''; }
+  };
   $('voiceTextInput').onkeydown = e => { if (e.key === 'Enter' && !e.isComposing) $('voiceTextSend').click(); };
   window.addEventListener('pagehide',() => { endMic(false); stopPlayback(); socket?.close(); });
-  fetch('/api/config').then(r => { if (!r.ok) throw new Error('后端尚未启动'); return r.json(); }).then(c => {
-    config = c; const ready = c.capabilities;
-    window.zhijianUI.memory(useDemoProfile, c.profile);
-    status(`DeepSeek ${ready.llm?'已配置':'待配置'} · 语音识别 ${ready.asr?'已配置':'待配置'} · 语音合成 ${ready.tts?'已配置':'待配置'}`);
-    questionSets[0] = c.qa.map(q => q.question); renderSuggestedQuestions(selectedExpert);
-
-  }).catch(e => status(e.message + '。请通过 FastAPI 提供的网址打开页面。',true));
+  if (activeId) {
+    window.zhijianUI.memory(useDemoProfile, null, activeId);
+    const epoch = sessionEpoch;
+    loadConfig().catch(e => { if (epoch === sessionEpoch) status(e.message, true); });
+  }
   state('idle');
 })();

@@ -21,7 +21,7 @@ const demoChatConfig = {
         const greeting = document.createElement('div'); greeting.className = 'chat-bubble ai';
         greeting.textContent = '这是' + experts[i].name + '的演示分身。' + (experts[i].publicFigure ? '未获本人授权，以下为模拟回复，不代表本人观点。' : '这是虚构角色，以下为模拟回复。') + '可以从推荐问题开始体验。';
         row.append(avatar, greeting); seed.append(row);
-      } else if (i !== 0) {
+      } else if (!experts[i].voiceId) {
         seed.innerHTML = demoChatConfig.initialHTML;
         seed.querySelectorAll('img').forEach(img => { img.src = experts[i].img; img.alt = experts[i].name; });
         const greeting = seed.querySelector('.chat-bubble.ai');
@@ -35,17 +35,19 @@ const demoChatConfig = {
   function select(i) {
     window.zhijianUI.profile(i);
     if (i !== activeExpert) {
-      if (activeExpert === 0) window.zhijianVoice?.suspend();
       stopCallDemo(); stopTimer();
-      const previous = sessionFor(activeExpert);
-      previous.nodes = [...body.childNodes];
-      previous.draft = input.value;
+      if (!experts[activeExpert].voiceId) {
+        const previous = sessionFor(activeExpert);
+        previous.nodes = [...body.childNodes];
+        previous.draft = input.value;
+      }
+      window.zhijianVoice?.select(i);
       activeExpert = i;
       const next = sessionFor(i);
-      body.replaceChildren(...next.nodes);
-      input.value = next.draft;
+      body.replaceChildren(...(experts[i].voiceId ? [] : next.nodes));
+      input.value = experts[i].voiceId ? '' : next.draft;
     }
-    document.querySelector('.chat-session-bar').style.display = i === 0 ? '' : 'none';
+    document.querySelector('.chat-session-bar').style.display = experts[i].voiceId ? '' : 'none';
   }
   function append(i, node) {
     sessionFor(i).nodes.push(node);
@@ -58,7 +60,7 @@ const demoChatConfig = {
     select,
     send() {
       select(selectedExpert);
-      if (selectedExpert === 0) return window.zhijianVoice?.send();
+      if (experts[selectedExpert].voiceId) return window.zhijianVoice?.send();
       const text = input.value.trim();
       if (!text) return;
       const expert = selectedExpert;

@@ -32,8 +32,9 @@ class VoiceSession:
     No disk storage, global session registry, or shared conversation messages.
     The client must send known playback ACKs before interrupt/new input.
     """
-    def __init__(self, socket, providers, settings, content):
+    def __init__(self, socket, providers, settings, content, *, expert_id="sally"):
         self.ws, self.p, self.s, self.content = socket, providers, settings, content
+        self.expert_id = expert_id
         self.history = []
         self.use_demo_profile = False
         self.started = False
@@ -91,7 +92,7 @@ class VoiceSession:
             await self.send("state", value="idle", **tags)
 
     async def ready(self):
-        await self.send("session.ready", capabilities=self.p.capabilities,
+        await self.send("session.ready", expert_id=self.expert_id, capabilities=self.p.capabilities,
                         qa=self.content.questions, profile=self.content.profile)
         await self.send("state", value="idle")
 
@@ -289,6 +290,8 @@ class VoiceSession:
             if request_id is not None:
                 request_tags["request_id"] = request_id
         if kind == "session.start":
+            if message.get("expert_id", self.expert_id) != self.expert_id:
+                return await self.error("INVALID_EXPERT", "切换专家需要重新连接。")
             if type(message.get("use_demo_profile", False)) is not bool:
                 return await self.error("INVALID_MESSAGE", "档案选择格式无效。")
             await self.stop()

@@ -14,6 +14,22 @@
   if(!frame)return;
   const status=document.getElementById('assessmentSaveStatus');
   let attempt='',currentProfile=null,pending=false;
+  // 在宿主页接管接待入口，保留游戏原稿及其画像确认交互。
+  frame.addEventListener('load',()=>{
+    const gameDocument=frame.contentDocument;
+    const loadedAttempt=new URL(frame.contentWindow.location.href).searchParams.get('attempt');
+    if(!gameDocument||!attempt||loadedAttempt!==attempt)return;
+    gameDocument.addEventListener('click',event=>{
+      const button=event.target.closest?.('#expert');
+      if(!button||loadedAttempt!==attempt||gameDocument!==frame.contentDocument)return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      if(button.disabled||!gameDocument.getElementById('consent')?.checked)return;
+      const expertIndex=experts.findIndex(expert=>expert.voiceId==='robin-li');
+      if(expertIndex<0){status.textContent='暂时无法打开专家详情，请稍后重试';return;}
+      openExpertDetail(expertIndex);
+    },true);
+  });
   function renderProfile(profile){
     currentProfile=profile;
     for(const id of ['campusResultHome','campusResultDetail']){
