@@ -7,6 +7,7 @@
   let mode = 'text', liveReply, voiceReply, busy = false, generationDone = false;
   let ignoreTurn = false, ignoredTurns = new Set(), currentReplyText = '';
   let requestId = null, failed = false;
+  let useDemoProfile = true;
   const send = obj => { if (socket?.readyState === WebSocket.OPEN) socket.send(JSON.stringify(obj)); };
   function status(text, error = false) {
     $('voiceStatus').textContent = text; $('voiceStatus').classList.toggle('voice-error', error);
@@ -51,7 +52,9 @@
       const ws = new WebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/ws/voice`);
       socket = ws; ws.binaryType = 'arraybuffer';
       const timeout = setTimeout(() => { ws.close(); reject(new Error('连接超时，请确认后端已启动')); }, 8000);
-      ws.onopen = () => send({type:'session.start',use_demo_profile:false});
+      ws.onopen = () => {
+        if (ws === socket) send({type:'session.start',use_demo_profile:useDemoProfile});
+      };
       ws.onmessage = e => {
         if (ws !== socket) return;
         if (typeof e.data !== 'string') { playPCM(e.data); return; }
@@ -160,10 +163,16 @@
   function reset() {
     interrupt(); send({type:'session.reset'}); socket?.close(); socket = null; connecting = null;
     $('chatBody').textContent = ''; $('callTranscript').textContent = ''; window.zhijianUI.clear();
-    status('新会话：只使用接下来的对话内容');
+    window.zhijianUI.memory(useDemoProfile, config?.profile);
+    status(useDemoProfile ? '新会话：已带入演示档案，可以直接提问' : '新会话：不带入档案，只使用接下来的对话');
   }
   window.zhijianVoice = {
     suspend() { interrupt(); },
+    setDemoProfile(enabled) {
+      if (selectedExpert !== 0 || typeof enabled !== 'boolean' || enabled === useDemoProfile) return;
+      useDemoProfile = enabled;
+      reset();
+    },
     beginMic,
     startCall() { mode = 'voice'; state('idle'); status('点击说话，说完后手动发送'); },
     open(id) { mode = id === 'callModal' ? 'voice' : 'text'; },
@@ -176,6 +185,7 @@
   window.addEventListener('pagehide',() => { endMic(false); stopPlayback(); socket?.close(); });
   fetch('/api/config').then(r => { if (!r.ok) throw new Error('后端尚未启动'); return r.json(); }).then(c => {
     config = c; const ready = c.capabilities;
+    window.zhijianUI.memory(useDemoProfile, c.profile);
     status(`DeepSeek ${ready.llm?'已配置':'待配置'} · 语音识别 ${ready.asr?'已配置':'待配置'} · 语音合成 ${ready.tts?'已配置':'待配置'}`);
     questionSets[0] = c.qa.map(q => q.question); renderSuggestedQuestions(selectedExpert);
 

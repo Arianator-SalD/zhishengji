@@ -2,6 +2,13 @@
 .chat-session-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 24px;background:#fff;border-bottom:1px solid #eceef5;font-size:12px;color:#778198;flex-shrink:0}
 .chat-session-bar button{border:0;background:#f0f2ff;color:#606bce;padding:6px 12px;border-radius:10px;cursor:pointer;white-space:nowrap}
 .voice-error{color:#af4141!important}
+.sally-memory{margin:0;padding:8px 24px;background:#f7f8ff;border-bottom:1px solid #e8ebf5;color:#59637d;font-size:12px;flex-shrink:0;max-height:180px;overflow:auto}
+.sally-memory[hidden]{display:none}
+.sally-memory summary{cursor:pointer;color:#5967cf;font-weight:600}
+.sally-memory label{display:flex;gap:6px;align-items:center;margin-top:10px;cursor:pointer}
+.sally-memory input{accent-color:#5967cf}
+.sally-memory p{margin:8px 0}.sally-memory ul{margin:8px 0;padding-left:18px;line-height:1.7}.sally-memory small{display:block;color:#778198;line-height:1.6}
+.call-v12-profile .sally-memory{border:1px solid #e8ebf5;border-radius:12px;padding:12px;margin:14px 0;max-height:240px}
 .chat-answer-card p,.chat-bubble,.call-line-text{white-space:pre-wrap;overflow-wrap:anywhere}
 .sally-voice-compose{display:flex;gap:8px;padding:10px 18px;border-top:1px solid #e8e6e2;background:#fff;flex-shrink:0}
 .sally-voice-compose[hidden]{display:none}

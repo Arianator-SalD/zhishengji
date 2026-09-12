@@ -166,6 +166,33 @@ def test_reset_clears_history_preserves_profile():
         assert llm.messages[-1][0] == llm.messages[0][0]
 
 
+def test_demo_memory_reaches_text_and_asr_requests_and_retains_user_correction():
+    llm = Chat()
+    expected = Content(ROOT / "content").profile
+    with client(Providers(llm=llm, asr=Recognition())) as c, c.websocket_connect("/ws/voice") as ws:
+        start(ws, True)
+        ws.send_json({"type": "input.text", "text": "纠正一下，我做过战略研究，没有投研实习。", "speak": False})
+        until(ws, "turn.end")
+        ws.send_json({"type": "audio.start"})
+        ws.send_bytes(b"\x00\x01" * 100)
+        ws.send_json({"type": "audio.end"})
+        until(ws, "turn.end")
+        assert len(llm.messages) == 2
+        for messages in llm.messages:
+            supplied = json.loads(messages[0]["content"].split("\n本次选用的用户资料：", 1)[1])
+            assert supplied == expected
+        assert llm.messages[-1][1]["content"] == "纠正一下，我做过战略研究，没有投研实习。"
+        assert llm.messages[-1][-1]["content"] == "最终问题"
+        # Switching the same socket to blank mode must clear both profile and history.
+        ws.send_json({"type": "session.start", "use_demo_profile": False})
+        until(ws, "session.ready")
+        ws.send_json({"type": "input.text", "text": "全新的咨询者", "speak": False})
+        until(ws, "turn.end")
+        supplied = json.loads(llm.messages[-1][0]["content"].split("\n本次选用的用户资料：", 1)[1])
+        assert supplied["confirmed"] == {}
+        assert len(llm.messages[-1]) == 2
+
+
 def test_malformed_and_limits_remain_usable():
     with client(Providers(llm=Chat(), asr=Recognition()), max_text_chars=5, max_audio_frame_bytes=20) as c:
         with c.websocket_connect("/ws/voice") as ws:

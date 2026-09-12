@@ -10,6 +10,18 @@
   compose.className = 'sally-voice-compose';
   compose.innerHTML = '<input id="voiceTextInput" aria-label="语音咨询文字输入" placeholder="也可以输入问题，听语音回答"><button id="voiceTextSend" type="button">发送</button>';
   document.querySelector('.call-v12-dialogue').append(compose);
+  let memoryEnabled = true;
+  function memoryPanel(id) {
+    const panel = document.createElement('details');
+    panel.id = id;
+    panel.className = 'sally-memory';
+    panel.innerHTML = '<summary>已有信息 · 演示档案</summary><label><input type="checkbox" checked> 带入金融转 AI 产品同学档案</label><p class="memory-hint">正在读取档案…</p><ul></ul><small>这是预设演示资料。切换会开始新会话；本轮补充暂不保存到下次。</small>';
+    panel.querySelector('input').onchange = e => window.zhijianVoice?.setDemoProfile(e.target.checked);
+    return panel;
+  }
+  const chatMemory = memoryPanel('chatMemory'), callMemory = memoryPanel('callMemory');
+  bar.after(chatMemory);
+  document.querySelector('.call-v12-profile').append(callMemory);
   let thinking, partial;
   const originalIntro = $('detailIntro2').textContent;
   const identityCopy = document.querySelector('.ai-identity-line > span:last-child');
@@ -32,8 +44,27 @@
   function removeThinking() { thinking?.remove(); thinking = null; }
   window.zhijianUI = {
     bindAnswer,
+    memory(enabled, profile) {
+      memoryEnabled = enabled;
+      const known = profile?.confirmed;
+      for (const panel of [chatMemory, callMemory]) {
+        panel.querySelector('input').checked = enabled;
+        panel.querySelector('summary').textContent = enabled ? '已带入演示档案 · 查看已有信息' : '空白会话 · 可带入演示档案';
+        panel.querySelector('.memory-hint').textContent = !enabled ? '当前未向模型提供这份档案。' : known ? '回答会结合以下演示背景及本次对话；你可以在对话中纠正。' : '正在读取档案…';
+        const list = panel.querySelector('ul');
+        list.replaceChildren();
+        if (enabled && known) {
+          for (const text of [known.education, ...(known.experience || []), known.ai_exposure, known.goal, known.decision_stage]) {
+            if (!text) continue;
+            const li = document.createElement('li'); li.textContent = text; list.append(li);
+          }
+        }
+      }
+      if (selectedExpert === 0) document.querySelector('.chat-v12-actions .context-chip').textContent = enabled ? '已结合演示档案与本次对话' : '基于本次对话';
+    },
     profile(i) {
-      document.querySelector('.chat-v12-actions .context-chip').textContent = i === 0 ? '基于本次对话' : '已结合你的职业画像';
+      chatMemory.hidden = callMemory.hidden = i !== 0;
+      document.querySelector('.chat-v12-actions .context-chip').textContent = i === 0 ? (memoryEnabled ? '已结合演示档案与本次对话' : '基于本次对话') : '已结合你的职业画像';
       identityCopy.textContent = i === 0 ? '基于本人资料与精选问答生成' : originalIdentity;
       $('detailIntro2').textContent = i === 0 ? '这里是 Sally 的 AI 分身，回答根据已整理的本人资料和本次对话生成，不是本人实时回复。' : originalIntro;
     },
@@ -41,7 +72,7 @@
       if (who === 'me') return appendChatUser(text);
       removeThinking();
       const row = appendChatAI(text);
-      if (selectedExpert === 0) row.querySelector('.answer-context').textContent = 'Sally · AI 分身 · 基于本人资料与本次对话生成';
+      if (selectedExpert === 0) row.querySelector('.answer-context').textContent = memoryEnabled ? 'Sally · AI 分身 · 已结合演示档案与本次对话' : 'Sally · AI 分身 · 基于本人资料与本次对话生成';
       bindAnswer(row);
       return row;
     },
@@ -77,7 +108,7 @@
       $('callWave').classList.toggle('speaking', value === 'speaking');
       if (value === 'thinking' && mode === 'text' && !thinking) {
         thinking = appendChatThinking();
-        thinking.querySelector('.chat-thinking-bubble > span').textContent = '正在结合你的问题与 Sally 的资料思考';
+        thinking.querySelector('.chat-thinking-bubble > span').textContent = memoryEnabled ? '正在结合你的已有经历、问题与 Sally 的资料思考' : '正在结合你的问题与 Sally 的资料思考';
       } else if (value !== 'thinking') removeThinking();
       if (value === 'idle') { partial?.remove(); partial = null; }
     },
@@ -87,7 +118,7 @@
       $('callTranscript').textContent = '';
       partial = null;
       $('callRemaining').textContent = '单次录音最长 60 秒';
-      this.bubble('callTranscript', '你好，我是 Sally 的 AI 分身。点击左侧「点击说话」，说完后点「说完了，发送」，我会结合你的问题和 Sally 的资料回答。', 'ai');
+      this.bubble('callTranscript', memoryEnabled ? '你好，我是 Sally 的 AI 分身。已带入这位模拟同学的金融实习与 AI 产品转型档案，你可以直接聊这次最想解决的问题。点击左侧「点击说话」，说完后点「说完了，发送」。' : '你好，我是 Sally 的 AI 分身。点击左侧「点击说话」，说完后点「说完了，发送」，我会结合你的问题和 Sally 的资料回答。', 'ai');
     }
   };
 
@@ -96,6 +127,7 @@
   const nativeListen = $('callNext').onclick;
   function updateCallProfile() {
     const e = experts[selectedExpert];
+    callMemory.hidden = selectedExpert !== 0 || $('callModal').dataset.replay === 'true';
     $('callExpertRole').textContent = e.full;
     $('callExpertTags').innerHTML = e.tags.map(t => '<span>' + escapeHTML(t) + '</span>').join('');
     compose.hidden = selectedExpert !== 0 || $('callModal').dataset.replay === 'true';
