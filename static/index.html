@@ -243,9 +243,11 @@ svg.ico{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;st
 .profile-source{display:inline-block;font-size:12px;color:#626bd5;margin-top:10px}.profile-title-row .verify[hidden],.profile-source[hidden]{display:none}
 @media(max-width:650px){#expertStrip{grid-auto-columns:78vw;max-width:calc(100% + 10px)}#expertFilters{gap:8px}#expertFilters .pill{padding:8px 12px}.expert-browse-bar .expert-filter-note{font-size:11px}}
 @media(prefers-reduced-motion:reduce){#expertStrip .expert-card-filter-enter{animation:none}}
+img[src="/static/robin-li.png"]{object-position:center 5%}
 </style>
-<link rel="stylesheet" href="/static/voice.css?v=call-cleanup-4">
+<link rel="stylesheet" href="/static/voice.css?v=dialogue-width-5">
 <link rel="icon" type="image/svg+xml" href="/static/careerfly-logo.svg">
+<link rel="stylesheet" href="/static/career-assessment.css?v=1">
 </head>
 <body>
 <svg height="0" style="position:absolute" width="0"><defs>
@@ -308,56 +310,21 @@ svg.ico{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;st
           </div>
         </div>
         <div class="onboard-form-card">
-          <div class="onboard-step-label">STEP 1 / 3 · 创建账号</div>
+          <div class="onboard-step-label">创建账号 · 开始校园探索</div>
           <h2>开始你的职业探索</h2>
-          <p>注册后将进入第一版职业画像测评，约 6 分钟，可随时退出保存。</p>
+          <p>注册后直接进入「夏日未完」游戏化测评，约 4 分钟，探索进度保存在当前浏览器。</p>
           <label>手机号</label>
           <div class="onboard-field"><span>+86</span><input id="onboardPhone" inputmode="numeric" placeholder="请输入手机号" value="138 0013 8000"/></div>
           <label>验证码</label>
           <div class="onboard-code-row"><input id="onboardCode" placeholder="请输入验证码" value="2027"/><button id="onboardGetCode">获取验证码</button></div>
           <label class="onboard-check"><input type="checkbox" id="onboardTerms" checked/> <span>我已阅读并同意《用户协议》和《隐私政策》</span></label>
-          <button class="onboard-primary" id="onboardRegisterBtn">注册并继续 <span>→</span></button>
+          <p id="onboardFeedback" role="status" style="color:#a04430;min-height:20px;margin:0 0 10px"></p><button class="onboard-primary" id="onboardRegisterBtn">注册并继续 <span>→</span></button>
           <div class="onboard-login">已有账号？<button id="onboardExistingBtn">返回现有用户 Demo</button></div>
         </div>
       </div>
     </section>
 
-    <section class="onboard-panel" data-onboard-step="intent">
-      <div class="onboard-narrow">
-        <div class="onboard-progress-head"><span>STEP 2 / 3</span><div><i></i><i class="active"></i><i></i></div><b>先告诉我们你现在最想解决什么</b></div>
-        <h1>不需要一次把所有信息都填完。</h1>
-        <p class="onboard-lead">先从你眼下最重要的求职问题开始，我们会在后续使用中逐步补全画像。</p>
-        <div class="onboard-problem-grid" id="onboardProblems">
-          <button data-problem="职业定位"><span>🧭</span><b>我不知道适合什么岗位</b><small>想先看清方向和优势</small></button>
-          <button data-problem="简历优化"><span>📄</span><b>我想优化简历</b><small>投递反馈低，不知道哪里有问题</small></button>
-          <button data-problem="面试准备"><span>💬</span><b>我正在准备面试</b><small>需要梳理项目和高频追问</small></button>
-          <button data-problem="Offer选择"><span>⚖️</span><b>我需要比较 Offer / 转行</b><small>希望做更有把握的选择</small></button>
-        </div>
-        <div class="onboard-basics">
-          <div><label>当前阶段</label><select id="onboardStage"><option>探索方向</option><option selected>准备求职</option><option>正在投递</option><option>面试中</option><option>Offer 选择</option></select></div>
-          <div><label>目标岗位</label><input id="onboardRole" value="产品经理" placeholder="例如：产品经理"/></div>
-          <div><label>目标城市</label><input id="onboardCity" value="北京" placeholder="例如：北京"/></div>
-        </div>
-        <div class="onboard-actions"><button class="onboard-secondary" id="onboardIntentBack">← 上一步</button><button class="onboard-primary compact" id="onboardIntentNext" disabled>继续 <span>→</span></button></div>
-      </div>
-    </section>
 
-    <section class="onboard-panel" data-onboard-step="ready">
-      <div class="onboard-ready-card">
-        <div class="onboard-step-label">STEP 3 / 3 · 开始画像</div>
-        <div class="onboard-ready-icon">✦</div>
-        <h1>好，我们从第一版职业画像开始。</h1>
-        <p>接下来不会给你贴一个固定标签，而是通过 6 个情境问题，形成一组<strong>可以继续验证和修改的职业假设</strong>。</p>
-        <div class="onboard-summary">
-          <div><span>当前问题</span><b id="onboardSummaryProblem">职业定位</b></div>
-          <div><span>目标岗位</span><b id="onboardSummaryRole">产品经理</b></div>
-          <div><span>当前阶段</span><b id="onboardSummaryStage">准备求职</b></div>
-          <div><span>预计用时</span><b>约 6 分钟</b></div>
-        </div>
-        <div class="onboard-privacy-note"><span>🔒</span><div><b>你的画像默认仅自己可见</b><small>分享给真人专家前，我们会再次让你确认范围。</small></div></div>
-        <div class="onboard-actions center"><button class="onboard-secondary" id="onboardReadyBack">← 修改信息</button><button class="onboard-primary compact" id="onboardStartAssessment">开始职业画像测评 <span>→</span></button></div>
-      </div>
-    </section>
   </div>
 </div>
 
@@ -366,7 +333,7 @@ svg.ico{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;st
 <section class="page active" id="experts">
 <div class="hero">
 <div><h1>今天先解决哪个 <em>求职问题</em>？</h1><p>与各领域资深专家的 AI 分身对话，获得专业、实用、可落地的建议，遇见更好的职业自己。</p></div>
-<div class="card goalcard"><div class="goalhead"><span>🎯 我的求职目标</span><a class="link" data-page-jump="assessment">查看详情 ›</a></div><div class="goalbig"><span data-plan-count>1/5</span> <small data-plan-caption style="font-size:12px;color:var(--muted);font-weight:500">完成 1 个关键步骤</small></div><div class="progress"><span></span></div></div>
+<div class="card goalcard"><div class="goalhead"><span>🎯 我的求职目标</span><a class="link" data-page-jump="myActionPlan">查看详情 ›</a></div><div class="goalbig"><span data-plan-count>1/5</span> <small data-plan-caption style="font-size:12px;color:var(--muted);font-weight:500">完成 1 个关键步骤</small></div><div class="progress"><span></span></div></div>
 </div>
 <div class="pills" id="expertFilters" aria-label="专家分类"><button class="pill active" data-filter="全部" aria-pressed="true">全部</button><button class="pill" data-filter="行业大牛" aria-pressed="false">行业大牛</button><button class="pill" data-filter="师兄师姐" aria-pressed="false">师兄师姐</button><button class="pill" data-filter="职业规划师" aria-pressed="false">职业规划师</button></div>
 <div class="expert-browse-bar"><div class="expert-filter-note" id="expertFilterNote" role="status"></div><div class="expert-scroll-controls"><button id="expertPrev" type="button" aria-label="向左浏览专家" aria-controls="expertStrip"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg></button><button id="expertNext" type="button" aria-label="向右浏览专家" aria-controls="expertStrip"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6 6 6-6 6"/></svg></button></div></div>
@@ -548,38 +515,17 @@ svg.ico{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;st
 </div>
 </section>
 <!-- My -->
-<section class="page assessment-subpage" id="assessment">
-<div class="my-grid assessment-my-grid"><aside class="card my-side assessment-side">
-<div class="side-item" data-page-jump="my"><svg class="ico"><use href="#i-home"></use></svg>我的主页</div>
-<div class="side-item active" data-page-jump="assessment"><svg class="ico"><use href="#i-pie"></use></svg>我的职业画像</div>
-<div class="side-item" data-page-jump="myActionPlan"><svg class="ico"><use href="#i-check"></use></svg>我的行动计划</div>
-<div class="side-item" data-page-jump="myConsultations"><svg class="ico"><use href="#i-msg"></use></svg>咨询记录</div>
-<div class="side-item" data-page-jump="myFavorites"><svg class="ico"><use href="#i-star"></use></svg>我的收藏</div>
-<div class="side-item" data-page-jump="mySettings"><svg class="ico"><use href="#i-gear"></use></svg>账号设置</div>
-<div class="invitebox assessment-note"><strong>更清晰的自己<br/>走向更大的可能</strong><div class="paperplane">➤</div></div>
-</aside>
-<div class="assessment-content">
-<div class="assessment-crumb">我的 <span>›</span> 我的职业画像</div>
-<div class="assess-head"><div><h1>职业画像测评</h1><p>基于你的经历、选择、目标与约束，生成专属的职业画像，帮你找到更适合的发展方向。</p></div><div class="spark">认识自己<br/>是职业成长的第一步</div></div>
-<div class="card steps assessment-steps"><div class="step done"><span class="step-num">✓</span><div><strong>经历</strong><small>过去的积累</small></div></div><div class="step active"><span class="step-num">2</span><div><strong>选择</strong><small>当前的偏好</small></div></div><div class="step"><span class="step-num">3</span><div><strong>目标</strong><small>未来的期待</small></div></div><div class="step"><span class="step-num">4</span><div><strong>约束</strong><small>现实的条件</small></div></div><div class="assessment-progress-row"><div class="progress"><span id="assessProgress" style="width:68%"></span></div><b id="progressPct">68%</b><small>预计还需 3 分钟</small></div></div>
-<div class="assess-grid assessment-grid-v2">
-<div class="card question-card"><div class="qprogress"><b id="qCount">选择 2/6</b><span class="tag">单选题</span></div><div class="question"><h2 id="questionTitle">当你面对一个全新的项目机会时，你更倾向于？</h2><p id="questionSub">请选择最符合你情况的选项</p><div id="options"></div></div><div class="qnav"><button class="btn" id="prevQ">← 上一步</button><button class="btn primary" id="nextQ">下一步 →</button></div></div>
-<aside class="assessment-right">
-<div class="card portrait"><div class="portrait-topline"><h3>▣ 你的职业画像 <small>（实时生成中）</small></h3><a>查看完整报告 →</a></div><div class="portrait-user"><img class="avatar" src="/static/user-avatar.jpg"><div><strong>林小北 ✎</strong><div class="meta">3 年互联网运营经验 · 北京</div><div class="meta portrait-motto">“善于用户洞察，关注产品价值，希望向产品经理方向发展”</div></div><div class="donut"><span>68%</span><small>画像完成度</small></div></img></div><div class="tags portrait-tags"><span class="tag">互联网运营</span><span class="tag">用户增长</span><span class="tag">产品经理（目标）</span><span class="tag">北京</span><span class="tag">3-5年</span></div><div class="trait-grid"><div class="trait"><h4 style="color:#159a6d">★ 核心优势</h4><span>用户洞察能力</span><span>数据分析思维</span><span>沟通协作能力</span></div><div class="trait"><h4 style="color:#d98231">◆ 待提升项</h4><span>产品系统思维</span><span>项目落地经验</span><span>技术基础知识</span></div><div class="trait direction"><h4 style="color:#5b5de4">◈ 推荐发展方向</h4><b>产品经理 →</b><p>结合你的运营经验、用户洞察和目标偏好，产品经理是当前值得优先验证的方向。</p></div></div></div>
-<div class="card expert-mini"><div class="mini-head"><h3>🚀 为你推荐的专家</h3><a>换一批专家 ›</a></div><div class="mini-grid" id="miniExperts"></div></div>
-<div class="card why-card"><b>AI　为什么这样判断？</b><p>你的职业画像基于你填写的经历、选择、目标与约束，并结合相似人群的发展数据生成，旨在提供个性化的参考建议。</p></div>
-</aside>
-</div>
-</div>
-</div>
+<section class="page campus-assessment-page" id="assessment" aria-label="游戏化职业测评">
+  <div class="campus-assessment-toolbar"><button type="button" class="btn" id="assessmentBack">← 返回我的主页</button><span id="assessmentSaveStatus" role="status">校园职业探索 · 六站测评</span></div>
+  <iframe id="campusAssessmentFrame" title="夏日未完 · 校园职业探索游戏化测评"></iframe>
 </section>
 <section class="page" id="my">
 <div class="my-grid">
-<aside class="card my-side"><div class="side-item active" data-page-jump="my"><svg class="ico"><use href="#i-home"></use></svg>我的主页</div><div class="side-item" data-page-jump="assessment"><svg class="ico"><use href="#i-pie"></use></svg>我的职业画像</div><div class="side-item" data-page-jump="myActionPlan"><svg class="ico"><use href="#i-check"></use></svg>我的行动计划</div><div class="side-item" data-page-jump="myConsultations"><svg class="ico"><use href="#i-msg"></use></svg>咨询记录</div><div class="side-item" data-page-jump="myFavorites"><svg class="ico"><use href="#i-star"></use></svg>我的收藏</div><div class="side-item" data-page-jump="mySettings"><svg class="ico"><use href="#i-gear"></use></svg>账号设置</div><div class="invitebox" style="margin-top:40px"><strong>持续行动<br/>看见更大的自己</strong><div style="font-size:40px;margin-top:12px">➤</div></div></aside>
+<aside class="card my-side"><div class="side-item active" data-page-jump="my"><svg class="ico"><use href="#i-home"></use></svg>我的主页</div><div class="side-item" data-page-jump="myActionPlan"><svg class="ico"><use href="#i-check"></use></svg>我的行动计划</div><div class="side-item" data-page-jump="myConsultations"><svg class="ico"><use href="#i-msg"></use></svg>咨询记录</div><div class="side-item" data-page-jump="myFavorites"><svg class="ico"><use href="#i-star"></use></svg>我的收藏</div><div class="side-item" data-page-jump="mySettings"><svg class="ico"><use href="#i-gear"></use></svg>账号设置</div><div class="invitebox" style="margin-top:40px"><strong>持续行动<br/>看见更大的自己</strong><div style="font-size:40px;margin-top:12px">➤</div></div></aside>
 <div class="my-main">
 <div class="card profile-hero"><img class="avatar" src="/static/user-avatar.jpg"/><div class="profile-title"><h2>林小北 <span class="verify" style="vertical-align:4px">✓</span> <span class="tag" style="color:#6a5be7">职升机会员</span></h2><p>保持热爱，持续成长，遇见更好的自己。</p></div><div class="profile-stats"><div><small>目标职位</small><strong>产品经理</strong></div><div><small>目标城市</small><strong>上海</strong></div><div><small>当前阶段</small><strong>积极求职中</strong></div><div><small>工作经验</small><strong>3年</strong></div></div><button class="btn" id="editProfileBtn">编辑资料 ›</button></div>
 <div>
-<div class="card wide my-click-card" data-page-jump="assessment"><h3>👤 我的职业画像 <small>更新职业画像 ›</small></h3><div class="careerbox" data-page-jump="assessment" role="button" tabindex="0"><div class="radar"></div><div><h2 style="font-size:19px">具备互联网产品经理潜力的复合型人才</h2><div class="strengths"><span>产品思维强</span><span>用户导向</span><span>数据驱动</span><span>沟通协作</span><span>成长潜力大</span></div><p style="color:#69758c;line-height:1.65">你具备良好的用户思维和产品敏感度，过往经历中展现出较强的学习能力和跨团队协作能力。建议继续通过真实项目表达与高匹配岗位投递验证产品方向。</p><div class="quote">“你擅长从用户视角发现问题，并能用产品思维寻找解决方案。继续积累项目证据，你会走得更远。” —— 职升机 · AI 职业顾问</div></div></div></div>
+<div class="card wide" id="careerProfileCard"><h3>👤 我的职业画像 <button type="button" class="profile-update-link" id="updateCareerProfile">更新职业画像 ›</button></h3><div class="careerbox"><div class="radar"></div><div><h2 style="font-size:19px">具备互联网产品经理潜力的复合型人才</h2><div class="strengths"><span>产品思维强</span><span>用户导向</span><span>数据驱动</span><span>沟通协作</span><span>成长潜力大</span></div><p style="color:#69758c;line-height:1.65">你具备良好的用户思维和产品敏感度，过往经历中展现出较强的学习能力和跨团队协作能力。建议继续通过真实项目表达与高匹配岗位投递验证产品方向。</p><div class="quote">“你擅长从用户视角发现问题，并能用产品思维寻找解决方案。继续积累项目证据，你会走得更远。” —— 职升机 · AI 职业顾问</div></div></div></div>
 <div class="card wide my-click-card" data-page-jump="myActionPlan" style="margin-top:14px"><h3>▣ 我的行动计划 <small>查看全部 ›</small></h3><div class="taskgrid simple-task-preview"><div class="task done" data-plan-preview="rewrite-project"><strong>✓ 重写一段核心项目经历</strong><small>突出问题、判断、动作与结果</small><span class="status done">已完成</span></div><div class="task" data-plan-preview="apply-jobs"><strong>○ 完成 3 个高匹配岗位投递</strong><small>优先投递产品经理方向</small><span class="status">进行中</span></div><div class="task" data-plan-preview="review-consultation"><strong>○ 复盘本周专家建议</strong><small>把咨询结论转成下一步行动</small><span class="status">待完成</span></div></div></div>
 <div class="card wide my-click-card" data-page-jump="myConsultations" style="margin-top:14px"><h3>◷ 咨询记录 <small>查看全部 ›</small></h3><div class="consult-row"><img class="avatar community-dynamic-avatar" data-expert-avatar="0"/><strong>陈思远</strong><span>非相关专业转产品经理，如何补齐项目经历？</span><button class="btn consult-open" data-consult="0">查看纪要</button></div><div class="consult-row"><img class="avatar community-dynamic-avatar" data-expert-avatar="1"/><strong>张明轩</strong><span>简历项目经历怎么写得更像产品经理？</span><button class="btn consult-open" data-consult="1">查看纪要</button></div><div class="consult-row"><img class="avatar community-dynamic-avatar" data-expert-avatar="2"/><strong>李若溪</strong><span>秋招阶段如何确定岗位优先级？</span><button class="btn consult-open" data-consult="2">查看纪要</button></div></div>
 </div>
@@ -591,7 +537,7 @@ svg.ico{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;st
 </aside>
 </div></div></section>
 
-<section class="page my-subpage" id="myActionPlan"><div class="my-grid"><aside class="card my-side"><div class="side-item" data-page-jump="my"><svg class="ico"><use href="#i-home"></use></svg>我的主页</div><div class="side-item" data-page-jump="assessment"><svg class="ico"><use href="#i-pie"></use></svg>我的职业画像</div><div class="side-item active" data-page-jump="myActionPlan"><svg class="ico"><use href="#i-check"></use></svg>我的行动计划</div><div class="side-item" data-page-jump="myConsultations"><svg class="ico"><use href="#i-msg"></use></svg>咨询记录</div><div class="side-item" data-page-jump="myFavorites"><svg class="ico"><use href="#i-star"></use></svg>我的收藏</div><div class="side-item" data-page-jump="mySettings"><svg class="ico"><use href="#i-gear"></use></svg>账号设置</div><div class="invitebox" style="margin-top:40px"><strong>持续行动<br/>看见更大的自己</strong><div style="font-size:40px;margin-top:12px">➤</div></div></aside><div class="my-sub-content">
+<section class="page my-subpage" id="myActionPlan"><div class="my-grid"><aside class="card my-side"><div class="side-item" data-page-jump="my"><svg class="ico"><use href="#i-home"></use></svg>我的主页</div><div class="side-item active" data-page-jump="myActionPlan"><svg class="ico"><use href="#i-check"></use></svg>我的行动计划</div><div class="side-item" data-page-jump="myConsultations"><svg class="ico"><use href="#i-msg"></use></svg>咨询记录</div><div class="side-item" data-page-jump="myFavorites"><svg class="ico"><use href="#i-star"></use></svg>我的收藏</div><div class="side-item" data-page-jump="mySettings"><svg class="ico"><use href="#i-gear"></use></svg>账号设置</div><div class="invitebox" style="margin-top:40px"><strong>持续行动<br/>看见更大的自己</strong><div style="font-size:40px;margin-top:12px">➤</div></div></aside><div class="my-sub-content">
 <div class="my-sub-crumb">我的 <span>›</span> 我的行动计划</div><div class="my-sub-head"><div><h1>我的行动计划</h1><p>把每次咨询的建议沉淀成少量、明确、可完成的下一步。</p></div><button class="btn primary" id="addActionBtn">＋ 新增行动</button></div>
 <div class="card plan-summary"><div class="plan-ring"><b>3/5</b><span>本周完成</span></div><div><h3>当前目标：产品经理秋招推进</h3><p>这周只聚焦三件事：把核心项目讲清楚、完成高匹配投递、复盘专家建议。</p><div class="progress"><span style="width:60%"></span></div></div><div class="plan-meta"><small>本周剩余</small><strong>2 项</strong></div></div>
 <div class="plan-columns"><div class="card plan-block"><div class="plan-block-head"><h3>今天优先</h3><span>2 项</span></div><label class="plan-task" data-plan-task="rewrite-project" data-plan-due="今天"><input type="checkbox" checked><span><strong>重写一段核心项目经历</strong><small>按“问题 → 判断 → 动作 → 结果”整理</small></span><em>已完成</em></label><label class="plan-task" data-plan-task="shortlist-jobs" data-plan-due="今天"><input type="checkbox"><span><strong>筛选 3 个高匹配产品岗位</strong><small>优先与你的运营 / 用户增长经历强相关的岗位</small></span><em>今天</em></label></div>
@@ -599,7 +545,7 @@ svg.ico{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;st
 <div class="card plan-source"><div><span class="plan-source-badge">来自咨询纪要</span><h3>陈思远 AI 分身：先把已有运营经历转成“产品证据”</h3><p>不需要为了转产品凭空造项目。优先选一个真实参与过的增长或用户问题，把目标、用户、关键判断和数据结果讲清楚。</p></div><button class="btn" data-page-jump="myConsultations">查看咨询记录 ›</button></div>
 </div></div></section>
 
-<section class="page my-subpage" id="myConsultations"><div class="my-grid"><aside class="card my-side"><div class="side-item" data-page-jump="my"><svg class="ico"><use href="#i-home"></use></svg>我的主页</div><div class="side-item" data-page-jump="assessment"><svg class="ico"><use href="#i-pie"></use></svg>我的职业画像</div><div class="side-item" data-page-jump="myActionPlan"><svg class="ico"><use href="#i-check"></use></svg>我的行动计划</div><div class="side-item active" data-page-jump="myConsultations"><svg class="ico"><use href="#i-msg"></use></svg>咨询记录</div><div class="side-item" data-page-jump="myFavorites"><svg class="ico"><use href="#i-star"></use></svg>我的收藏</div><div class="side-item" data-page-jump="mySettings"><svg class="ico"><use href="#i-gear"></use></svg>账号设置</div><div class="invitebox" style="margin-top:40px"><strong>每一次咨询<br/>都沉淀成下一步</strong><div style="font-size:40px;margin-top:12px">➤</div></div></aside><div class="my-sub-content">
+<section class="page my-subpage" id="myConsultations"><div class="my-grid"><aside class="card my-side"><div class="side-item" data-page-jump="my"><svg class="ico"><use href="#i-home"></use></svg>我的主页</div><div class="side-item" data-page-jump="myActionPlan"><svg class="ico"><use href="#i-check"></use></svg>我的行动计划</div><div class="side-item active" data-page-jump="myConsultations"><svg class="ico"><use href="#i-msg"></use></svg>咨询记录</div><div class="side-item" data-page-jump="myFavorites"><svg class="ico"><use href="#i-star"></use></svg>我的收藏</div><div class="side-item" data-page-jump="mySettings"><svg class="ico"><use href="#i-gear"></use></svg>账号设置</div><div class="invitebox" style="margin-top:40px"><strong>每一次咨询<br/>都沉淀成下一步</strong><div style="font-size:40px;margin-top:12px">➤</div></div></aside><div class="my-sub-content">
 <div class="consult-v14-overview" id="consultOverviewV14">
   <div class="my-sub-crumb">我的 <span>›</span> 咨询记录</div>
   <div class="my-sub-head"><div><h1>咨询记录</h1><p>先浏览历史咨询列表，再进入单次咨询详情查看 AI 纪要、咨询原文与下一步建议。</p></div><div class="consult-filters"><button class="active" data-consult-filter="all">全部</button><button data-consult-filter="call">AI Call</button><button data-consult-filter="chat">AI Chat</button></div></div>
@@ -620,9 +566,9 @@ svg.ico{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;st
 </div>
 </div></div></section>
 
-<section class="page my-subpage" id="myFavorites"><div class="my-grid"><aside class="card my-side"><div class="side-item" data-page-jump="my"><svg class="ico"><use href="#i-home"></use></svg>我的主页</div><div class="side-item" data-page-jump="assessment"><svg class="ico"><use href="#i-pie"></use></svg>我的职业画像</div><div class="side-item" data-page-jump="myActionPlan"><svg class="ico"><use href="#i-check"></use></svg>我的行动计划</div><div class="side-item" data-page-jump="myConsultations"><svg class="ico"><use href="#i-msg"></use></svg>咨询记录</div><div class="side-item active" data-page-jump="myFavorites"><svg class="ico"><use href="#i-star"></use></svg>我的收藏</div><div class="side-item" data-page-jump="mySettings"><svg class="ico"><use href="#i-gear"></use></svg>账号设置</div><div class="invitebox" style="margin-top:40px"><strong>持续行动<br/>看见更大的自己</strong><div style="font-size:40px;margin-top:12px">➤</div></div></aside><div class="my-sub-content"><div class="my-sub-crumb">我的 <span>›</span> 我的收藏</div><div class="my-sub-head"><div><h1>我的收藏</h1><p>这里保存你在社区中收藏的帖子，方便后续继续阅读和复盘。</p></div></div><div class="favorites-grid" id="favoritesList"></div></div></div></section>
+<section class="page my-subpage" id="myFavorites"><div class="my-grid"><aside class="card my-side"><div class="side-item" data-page-jump="my"><svg class="ico"><use href="#i-home"></use></svg>我的主页</div><div class="side-item" data-page-jump="myActionPlan"><svg class="ico"><use href="#i-check"></use></svg>我的行动计划</div><div class="side-item" data-page-jump="myConsultations"><svg class="ico"><use href="#i-msg"></use></svg>咨询记录</div><div class="side-item active" data-page-jump="myFavorites"><svg class="ico"><use href="#i-star"></use></svg>我的收藏</div><div class="side-item" data-page-jump="mySettings"><svg class="ico"><use href="#i-gear"></use></svg>账号设置</div><div class="invitebox" style="margin-top:40px"><strong>持续行动<br/>看见更大的自己</strong><div style="font-size:40px;margin-top:12px">➤</div></div></aside><div class="my-sub-content"><div class="my-sub-crumb">我的 <span>›</span> 我的收藏</div><div class="my-sub-head"><div><h1>我的收藏</h1><p>这里保存你在社区中收藏的帖子，方便后续继续阅读和复盘。</p></div></div><div class="favorites-grid" id="favoritesList"></div></div></div></section>
 
-<section class="page my-subpage" id="mySettings"><div class="my-grid"><aside class="card my-side"><div class="side-item" data-page-jump="my"><svg class="ico"><use href="#i-home"></use></svg>我的主页</div><div class="side-item" data-page-jump="assessment"><svg class="ico"><use href="#i-pie"></use></svg>我的职业画像</div><div class="side-item" data-page-jump="myActionPlan"><svg class="ico"><use href="#i-check"></use></svg>我的行动计划</div><div class="side-item" data-page-jump="myConsultations"><svg class="ico"><use href="#i-msg"></use></svg>咨询记录</div><div class="side-item" data-page-jump="myFavorites"><svg class="ico"><use href="#i-star"></use></svg>我的收藏</div><div class="side-item active" data-page-jump="mySettings"><svg class="ico"><use href="#i-gear"></use></svg>账号设置</div><div class="invitebox" style="margin-top:40px"><strong>持续行动<br/>看见更大的自己</strong><div style="font-size:40px;margin-top:12px">➤</div></div></aside><div class="my-sub-content"><div class="my-sub-crumb">我的 <span>›</span> 账号设置</div><div class="my-sub-head"><div><h1>账号设置</h1><p>管理你的个人信息、通知偏好和数据授权。</p></div></div><div class="settings-grid"><div class="card settings-card"><h3>个人资料</h3><p>姓名、头像、当前阶段和求职目标。</p><button class="btn">编辑资料</button></div><div class="card settings-card"><h3>隐私与授权</h3><p>管理简历、职业画像和咨询记录的使用范围。</p><button class="btn">管理授权</button></div><div class="card settings-card"><h3>通知设置</h3><p>专家回复、社区互动和行动计划提醒。</p><button class="btn">设置通知</button></div></div></div></div></section>
+<section class="page my-subpage" id="mySettings"><div class="my-grid"><aside class="card my-side"><div class="side-item" data-page-jump="my"><svg class="ico"><use href="#i-home"></use></svg>我的主页</div><div class="side-item" data-page-jump="myActionPlan"><svg class="ico"><use href="#i-check"></use></svg>我的行动计划</div><div class="side-item" data-page-jump="myConsultations"><svg class="ico"><use href="#i-msg"></use></svg>咨询记录</div><div class="side-item" data-page-jump="myFavorites"><svg class="ico"><use href="#i-star"></use></svg>我的收藏</div><div class="side-item active" data-page-jump="mySettings"><svg class="ico"><use href="#i-gear"></use></svg>账号设置</div><div class="invitebox" style="margin-top:40px"><strong>持续行动<br/>看见更大的自己</strong><div style="font-size:40px;margin-top:12px">➤</div></div></aside><div class="my-sub-content"><div class="my-sub-crumb">我的 <span>›</span> 账号设置</div><div class="my-sub-head"><div><h1>账号设置</h1><p>管理你的个人信息、通知偏好和数据授权。</p></div></div><div class="settings-grid"><div class="card settings-card"><h3>个人资料</h3><p>姓名、头像、当前阶段和求职目标。</p><button class="btn">编辑资料</button></div><div class="card settings-card"><h3>隐私与授权</h3><p>管理简历、职业画像和咨询记录的使用范围。</p><button class="btn">管理授权</button></div><div class="card settings-card"><h3>通知设置</h3><p>专家回复、社区互动和行动计划提醒。</p><button class="btn">设置通知</button></div></div></div></div></section>
 <div class="overlay" id="resumeModal"><div class="modal resume-modal"><div class="modal-head"><div><strong>我的简历与附件</strong><small style="display:block;color:var(--muted);margin-top:3px">只在你主动选择时分享给专家</small></div><button class="iconbtn close" data-close="resumeModal">×</button></div><div class="resume-modal-body"><div class="resume-file-card"><div class="resume-file-icon">PDF</div><div><strong>我的简历-产品经理.pdf</strong><p>最近更新：2026.09.10 · 1.8 MB</p></div><button class="btn" id="previewResumeBtn">预览</button></div><div class="resume-file-card"><div class="resume-file-icon alt">DOC</div><div><strong>项目作品集-增长案例.docx</strong><p>最近更新：2026.09.06 · 3.2 MB</p></div><button class="btn">查看</button></div><button class="btn primary" id="uploadResume" style="width:100%;margin-top:14px">＋ 上传新文件</button></div></div></div>
 
 <div class="overlay" id="chatModal" role="dialog" aria-modal="true" aria-label="专家 AI 分身对话">
@@ -906,7 +852,7 @@ const experts=[
 {group:'行业大牛',name:'沈嘉禾',role:'前宝洁品牌经理 · 10年经验',full:'前宝洁品牌经理 ｜ 10 年品牌、增长与消费者洞察经验',img:IMG.e8,tags:['市场营销','品牌增长'],categories:['市场营销','职业定位','简历优化','模拟面试','应届生','互联网'],quote:'把营销经历讲成真正的商业价值',intro:'长期负责品牌策略、消费者研究和增长项目，也参与过校园招聘。擅长帮助市场、品牌、增长方向求职者梳理项目成果，并把创意与商业结果连接起来。'},
 {group:'行业大牛',name:'唐可宁',role:'前字节增长策略负责人 · 8年经验',full:'前字节增长策略负责人 ｜ 8 年增长、用户与商业化经验',img:IMG.e9,tags:['市场营销','增长策略'],categories:['市场营销','互联网','产品经理','数据分析','模拟面试','应届生'],quote:'用增长视角连接用户、产品与商业',intro:'做过用户增长、商业化策略和内容生态增长，擅长把市场营销经验转译成增长策略、产品协作和数据驱动能力，适合互联网增长、商业化与策略岗位。'},
 {group:'职业规划师',name:'顾言川',role:'前京东校招负责人 · 9年经验',full:'前京东校招负责人 ｜ 9 年校园招聘与人才评估经验',img:IMG.e1,tags:['应届生','校招面试'],categories:['应届生','简历优化','模拟面试','职业定位','互联网','产品经理'],quote:'帮你把校招每一步走得更清楚',intro:'长期参与大型互联网企业校园招聘、面试官培训与人才评估。熟悉应届生在简历、群面、业务面和 HR 面中的常见问题，尤其擅长帮助缺少“标准经历”的同学建立可验证的竞争力。'},
-{"name":"李彦宏","group":"行业大牛","featured":true,"demoProfile":true,"publicFigure":true,"role":"百度联合创始人 · 演示分身","full":"百度联合创始人｜行业大牛 · 演示分身","img":"/static/robin-li.jpg","tags":["AI 应用","技术创业"],"categories":["AI","互联网","产品经理"],"quote":"AI 应用机会与技术职业选择","intro":"李彦宏是百度联合创始人。本 Demo 以 AI 应用、技术创业与职业探索为讨论场景，演示与行业人物数字分身交流的产品体验。","intro2":"这是产品演示角色，未获本人授权或入驻。以下推荐问题与模拟回复由 Demo 编写，不代表李彦宏本人的言论、观点或建议。","source":"https://ir.baidu.com/management/robin-li","demoPerspective":"AI 应用与技术职业探索","demoAnswer":"先选一个具体场景，观察用户当前怎样完成任务、哪里耗时或容易出错，再做一个能验证效果的小型 AI 应用。记录使用前后的质量、时间和成本，把结果整理成作品；这比只列出用过哪些模型更能说明你的能力。"},
+{"name":"李彦宏","group":"行业大牛","featured":true,"demoProfile":true,"publicFigure":true,"role":"百度联合创始人 · 演示分身","full":"百度联合创始人｜行业大牛 · 演示分身","img":"/static/robin-li.png","tags":["AI 应用","技术创业"],"categories":["AI","互联网","产品经理"],"quote":"AI 应用机会与技术职业选择","intro":"李彦宏是百度联合创始人。本 Demo 以 AI 应用、技术创业与职业探索为讨论场景，演示与行业人物数字分身交流的产品体验。","intro2":"这是产品演示角色，未获本人授权或入驻。以下推荐问题与模拟回复由 Demo 编写，不代表李彦宏本人的言论、观点或建议。","source":"https://ir.baidu.com/management/robin-li","demoPerspective":"AI 应用与技术职业探索","demoAnswer":"先选一个具体场景，观察用户当前怎样完成任务、哪里耗时或容易出错，再做一个能验证效果的小型 AI 应用。记录使用前后的质量、时间和成本，把结果整理成作品；这比只列出用过哪些模型更能说明你的能力。"},
 {"name":"林知夏","group":"师兄师姐","demoProfile":true,"role":"产品校招生 · 入职第 2 年","full":"师姐 Demo｜产品实习与校招经验","img":"/static/demo-senior-lin.svg","tags":["第一份实习","产品校招"],"categories":["产品经理","实习","应届生"],"quote":"从第一份实习聊到第一份工作","intro":"虚构师姐角色，模拟从校园项目、产品实习到校招入职的求职路径。适合讨论没有实习怎么开始、如何选第一份工作，以及入职后的适应。","intro2":"你可以从一份目标岗位描述或一段校园经历开始，试着把“我还差什么”拆成这一周能完成的准备。该角色与回复均为产品演示。","demoPerspective":"产品校招与早期实习准备","demoAnswer":"如果还没有产品实习，可以先选一个真实校园需求，做几次用户访谈，再把发现的问题、方案取舍和验证结果写成两页案例。拿这份案例投一小批匹配岗位，根据过筛和面试反馈迭代，避免一直准备却迟迟不开始。"},
 {"name":"陈一舟","group":"师兄师姐","demoProfile":true,"role":"计算机专业学长 · 研发求职","full":"师兄 Demo｜技术求职与项目准备","img":"/static/demo-senior-chen.svg","tags":["技术面试","项目复盘"],"categories":["技术","互联网","应届生"],"quote":"让一个小项目经得住追问","intro":"虚构学长角色，模拟计算机专业学生准备研发实习、整理项目与参加技术面试的过程。帮助你把复习清单和项目表达放到同一条主线上。","intro2":"可以带着一个做过的项目来聊：实现了什么、为什么这样设计、哪里遇到瓶颈。该角色没有真实公司背书，回答为预设演示。","demoPerspective":"研发实习与技术项目准备","demoAnswer":"先把一个项目跑通，再围绕一个具体瓶颈做深入复盘：问题怎样复现、考虑过哪些方案、为什么选择当前实现、测试结果是什么。每天留一段时间补基础和做题，同时练习三分钟讲项目，避免项目和面试准备脱节。"},
 {"name":"许望舒","group":"职业规划师","demoProfile":true,"role":"职业探索与方向选择 · Demo","full":"职业规划师 Demo｜职业探索与行动设计","img":"/static/demo-planner-xu.svg","tags":["职业探索","方向选择"],"categories":["职业定位","转型","职业规划"],"quote":"把模糊的方向变成一次小尝试","intro":"虚构职业规划师角色，模拟兴趣、能力与现实约束的梳理过程。适合还没确定方向、想比较不同岗位，或希望把选择转成行动的同学。","intro2":"先说清你最近犹豫的两三个选择，再找出影响决定的信息缺口。这里提供产品体验，不代表真实咨询师资质或服务。","demoPerspective":"职业探索与行动验证","demoAnswer":"把候选方向控制在两三个，分别写下你想做的具体任务、已有能力证据和不能妥协的现实条件。每个方向安排一次岗位访谈或小任务体验，一周后比较实际感受与反馈，再决定哪一个值得继续投入。"}
@@ -984,18 +930,7 @@ if(recommendedExpertsEl) recommendedExpertsEl.innerHTML=experts.slice(1,4).map((
 const miniExpertsEl=document.getElementById('miniExperts');
 if(miniExpertsEl) miniExpertsEl.innerHTML=experts.slice(1,4).map(e=>`<div class="mini"><img src="${e.img}"><div><strong>${e.name}</strong><span class="meta">${e.tags[0]}</span><button class="btn soft" onclick="jumpExpert('${e.name}')">预约咨询</button></div></div>`).join('');
 function jumpExpert(n){const i=experts.findIndex(e=>e.name===n);openExpertDetail(i<0?0:i)}
-const questions=[
-{t:'当你面对一个全新的项目机会时，你更倾向于？',s:'这有助于我们了解你的工作风格和优势领域',o:[['⚡','主动承担，快速上手，在实践中学习','我喜欢挑战，愿意在不确定性中探索和成长'],['👥','先充分调研，制定详细计划后再行动','我注重准备和规划，希望把风险降到最低'],['▥','与他人合作，共同推进项目','我擅长团队协作，喜欢集思广益'],['💬','视项目的回报和发展空间再决定','我会综合评估项目价值和对个人发展的帮助']]},
-{t:'你更希望在什么样的工作环境中发挥自己的优势？',s:'不同的工作环境会带来不同的成长体验',o:[['🏢','大厂 / 成熟企业','完善的体系与稳定的发展空间'],['🚀','互联网 / 快速成长公司','节奏快、机会多'],['💡','创业公司','从 0 到 1、多元化挑战'],['🌿','自由职业 / 远程工作','时间灵活，自主性强']]},
-{t:'当你需要说服团队接受一个新方案时，你通常会？',s:'了解你的沟通与推动风格',o:[['📊','先拿数据和事实建立共识','我更相信证据和结构化分析'],['🧭','先理解关键人的关注点','我会针对不同角色调整沟通方式'],['🧪','先做小范围试验','让结果替方案说话'],['🤝','组织讨论共同设计方案','我更看重参与感和协同']]},
-{t:'对于职业选择，你最看重什么？',s:'帮助我们理解你的职业价值排序',o:[['📈','成长速度与学习机会','希望持续获得挑战'],['💰','薪资与稳定回报','重视确定性和生活质量'],['🌟','工作内容与成就感','希望做有价值的事'],['🧩','团队与文化匹配','和优秀的人一起工作']]},
-{t:'遇到陌生业务问题时，你通常从哪里开始？',s:'了解你的问题分析路径',o:[['🔎','用户和场景','先理解真实需求'],['📚','行业与竞品','建立外部参照'],['📉','数据与漏斗','从指标定位问题'],['🗣','访谈经验者','借助一线经验快速建模']]},
-{t:'你更希望未来三年成为哪类人才？',s:'帮助我们确定更值得验证的方向',o:[['🎯','独立负责业务的产品经理','能从问题到结果完整闭环'],['🧠','深入某个专业领域的专家','建立不可替代的专业壁垒'],['🧑‍🤝‍🧑','带团队的管理者','通过组织放大影响力'],['🌍','跨行业的复合型人才','保持更多职业选择']]}
-];let q=0;let answers={};let newUserAssessmentMode=false;
-const questionTitleEl=document.getElementById('questionTitle'),questionSubEl=document.getElementById('questionSub'),qCountEl=document.getElementById('qCount'),assessProgressEl=document.getElementById('assessProgress'),progressPctEl=document.getElementById('progressPct'),optionsEl=document.getElementById('options'),prevQEl=document.getElementById('prevQ'),nextQEl=document.getElementById('nextQ');
-function renderQ(){if(!questionTitleEl||!questionSubEl||!qCountEl||!assessProgressEl||!progressPctEl||!optionsEl||!prevQEl||!nextQEl)return;const x=questions[q];questionTitleEl.textContent=x.t;questionSubEl.textContent=x.s;qCountEl.textContent=(newUserAssessmentMode?'新用户画像 ':'选择 ')+(q+1)+' / '+questions.length;const pct=newUserAssessmentMode?Math.round(((q+1)/questions.length)*100):Math.round(62+((q+1)/questions.length)*36);assessProgressEl.style.width=pct+'%';progressPctEl.textContent=pct+'%';const donut=document.querySelector('#assessment .donut');if(donut){donut.style.background=`conic-gradient(#5264ff 0 ${pct}%,#edf0f7 ${pct}%)`;const ds=donut.querySelector('span');if(ds)ds.textContent=pct+'%';}optionsEl.innerHTML=x.o.map((o,i)=>`<div class="option ${answers[q]===i?'selected':''}" data-o="${i}"><span class="option-ico">${o[0]}</span><div><strong>${String.fromCharCode(65+i)}. ${o[1]}</strong><div class="meta">${o[2]}</div></div><span class="radio"></span></div>`).join('');optionsEl.querySelectorAll('.option').forEach(el=>el.onclick=()=>{answers[q]=+el.dataset.o;renderQ();});prevQEl.disabled=q===0;nextQEl.textContent=q===questions.length-1?'生成画像结果 →':'继续下一题 →'}
-if(questionTitleEl){renderQ();nextQEl.onclick=()=>{if(answers[q]===undefined)return toast('请选择一个最符合你的选项');if(q<questions.length-1){q++;renderQ()}else{toast('画像已生成：推荐方向「互联网产品经理」');setTimeout(()=>showPage('my'),700)}};prevQEl.onclick=()=>{if(q>0){q--;renderQ()}};}
-function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));const parent=id==='expertDetail'?'experts':(['assessment','myActionPlan','myConsultations','myFavorites','mySettings'].includes(id)?'my':id);document.querySelectorAll('.topnav button').forEach(b=>b.classList.toggle('active',b.dataset.page===parent));if(id==='community'&&window.switchCommunity)window.switchCommunity('recommend');window.scrollTo({top:0,behavior:'smooth'})}
+function showPage(id){document.body.classList.toggle('assessment-open',id==='assessment');document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));const parent=id==='expertDetail'?'experts':(['assessment','myActionPlan','myConsultations','myFavorites','mySettings'].includes(id)?'my':id);document.querySelectorAll('.topnav button').forEach(b=>b.classList.toggle('active',b.dataset.page===parent));if(id==='community'&&window.switchCommunity)window.switchCommunity('recommend');window.scrollTo({top:0,behavior:'smooth'})}
 document.querySelectorAll('.topnav button').forEach(b=>b.onclick=()=>showPage(b.dataset.page));document.querySelectorAll('[data-page-jump]').forEach(b=>b.onclick=()=>showPage(b.dataset.pageJump));
 document.querySelectorAll('#expertFilters .pill').forEach(p=>p.onclick=()=>{document.querySelectorAll('#expertFilters .pill').forEach(x=>{x.classList.remove('active');x.setAttribute('aria-pressed','false')});p.classList.add('active');p.setAttribute('aria-pressed','true');const filter=p.dataset.filter||p.textContent.trim();expertCards(filter);toast('已按「'+filter+'」更新专家推荐')});
 chatBtn.onclick=()=>openModal('chatModal');
@@ -1230,7 +1165,6 @@ document.querySelectorAll('.community-dynamic-avatar').forEach((img,i)=>{const i
   const newUserBtn=document.getElementById('newUserDemoBtn');
   const closeBtn=document.getElementById('onboardClose');
   if(!overlay||!newUserBtn)return;
-  let selectedProblem='';
   const panels=[...overlay.querySelectorAll('.onboard-panel')];
   const showStep=(name)=>{panels.forEach(p=>p.classList.toggle('active',p.dataset.onboardStep===name));overlay.scrollTop=0};
   const openOnboarding=()=>{overlay.classList.remove('hidden');overlay.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';showStep('register')};
@@ -1238,37 +1172,17 @@ document.querySelectorAll('.community-dynamic-avatar').forEach((img,i)=>{const i
   newUserBtn.onclick=openOnboarding;
   if(closeBtn)closeBtn.onclick=closeOnboarding;
   const existing=document.getElementById('onboardExistingBtn');if(existing)existing.onclick=closeOnboarding;
-  const getCode=document.getElementById('onboardGetCode');if(getCode)getCode.onclick=()=>{getCode.textContent='已发送 59s';getCode.disabled=true;toast('验证码已发送（Demo）');setTimeout(()=>{getCode.textContent='重新获取';getCode.disabled=false},1600)};
+  const getCode=document.getElementById('onboardGetCode');if(getCode)getCode.onclick=()=>{getCode.textContent='已发送 59s';getCode.disabled=true;document.getElementById('onboardFeedback').textContent='验证码已发送（Demo）';setTimeout(()=>{getCode.textContent='重新获取';getCode.disabled=false},1600)};
   const registerBtn=document.getElementById('onboardRegisterBtn');
   if(registerBtn)registerBtn.onclick=()=>{
     const phone=document.getElementById('onboardPhone')?.value.trim();
     const code=document.getElementById('onboardCode')?.value.trim();
     const terms=document.getElementById('onboardTerms')?.checked;
-    if(!phone||!code)return toast('请填写手机号和验证码');
-    if(!terms)return toast('请先同意用户协议和隐私政策');
-    registerBtn.innerHTML='注册成功 ✓';
-    setTimeout(()=>{showStep('intent');registerBtn.innerHTML='注册并继续 <span>→</span>'},450);
-  };
-  const problemBtns=[...document.querySelectorAll('#onboardProblems button')];
-  const intentNext=document.getElementById('onboardIntentNext');
-  problemBtns.forEach(b=>b.onclick=()=>{problemBtns.forEach(x=>x.classList.remove('selected'));b.classList.add('selected');selectedProblem=b.dataset.problem||'';if(intentNext)intentNext.disabled=false});
-  const intentBack=document.getElementById('onboardIntentBack');if(intentBack)intentBack.onclick=()=>showStep('register');
-  if(intentNext)intentNext.onclick=()=>{
-    if(!selectedProblem)return;
-    document.getElementById('onboardSummaryProblem').textContent=selectedProblem;
-    document.getElementById('onboardSummaryRole').textContent=document.getElementById('onboardRole').value.trim()||'待确认';
-    document.getElementById('onboardSummaryStage').textContent=document.getElementById('onboardStage').value;
-    showStep('ready');
-  };
-  const readyBack=document.getElementById('onboardReadyBack');if(readyBack)readyBack.onclick=()=>showStep('intent');
-  const startAssessment=document.getElementById('onboardStartAssessment');
-  if(startAssessment)startAssessment.onclick=()=>{
+    if(!phone||!code){document.getElementById('onboardFeedback').textContent='请填写手机号和验证码';return;}
+    if(!terms){document.getElementById('onboardFeedback').textContent='请先同意用户协议和隐私政策';return;}
+    document.getElementById('onboardFeedback').textContent='';
     closeOnboarding();
-    newUserAssessmentMode=true;
-    q=0;answers={};
-    showPage('assessment');
-    renderQ();
-    toast('欢迎来到职升机：从第一版职业画像开始');
+    window.startCareerAssessment('register');
   };
   window.openNewUserOnboarding=openOnboarding;
 })();
@@ -1281,7 +1195,6 @@ const shuffleQuestionsBtn=document.getElementById('shuffleQuestions'); if(shuffl
 const detailChatSendBtn=document.getElementById('detailChatSend');
 if(detailChatSendBtn) detailChatSendBtn.onclick=()=>{const v=detailChatInput.value.trim();openModal('chatModal');if(v){chatInput.value=v;detailChatInput.value='';sendMessage();}};
 if(document.getElementById('detailChatInput')) detailChatInput.addEventListener('keydown',e=>{if(e.key==='Enter') detailChatSendBtn.click()});
-const profileCard=document.querySelector('#my .careerbox'); if(profileCard){profileCard.onclick=()=>showPage('assessment');profileCard.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')showPage('assessment')})}
 
 
 
@@ -1735,5 +1648,5 @@ document.querySelectorAll('.consult-record-v13').forEach((el,i)=>el.onclick=()=>
 
 
 
-<script src="/static/action-plan.js?v=1"></script><script src="/static/consultation-ui.js?v=call-cleanup-4"></script><script src="/static/demo-chat.js?v=expert-demo-3"></script><script src="/static/voice.js?v=v4-migration"></script><script src="/static/search.js?v=1"></script>
+<script src="/static/career-assessment.js?v=1"></script><script src="/static/action-plan.js?v=1"></script><script src="/static/consultation-ui.js?v=call-cleanup-4"></script><script src="/static/demo-chat.js?v=expert-demo-3"></script><script src="/static/voice.js?v=v4-migration"></script><script src="/static/search.js?v=1"></script>
 </body></html>

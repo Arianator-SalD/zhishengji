@@ -4,7 +4,7 @@
 - 面向大学生职业探索、求职决策及专家咨询的产品 Demo，将有来源的专家经验转化为针对用户背景的建议和下一步行动。
 - 原生 HTML/JavaScript + FastAPI，GitHub main 关联 Render 自动部署；站点：[职升机](https://zhishengji-voice.onrender.com)。
 - Sally 接 DeepSeek 与火山引擎 ASR/TTS，其余专家保留 mock；公共组件修改需保持专家身份、资料和会话隔离。
-- Sally 默认带入“金融转 AI 产品”模拟同学档案，可切换空白会话；对话仅使用本次连接历史。行动计划勾选保存在 localStorage，完整画像、记录和规划数据链路尚未打通。
+- Sally 默认带入“金融转 AI 产品”模拟同学档案，可切换空白会话；对话仅使用本次连接历史。行动计划勾选和校园测评画像保存在 localStorage；测评画像尚未自动接入 Sally 咨询上下文，完整记录和规划数据链路尚未打通。
 - 用户最新要求优先于历史方案；prototype、旧截图、压缩包和方案不是当前源码的替代来源。
 
 ## 每次迭代必须更新日志
@@ -25,6 +25,10 @@
 | [RENDER部署.md](RENDER部署.md)、[render.yaml](render.yaml) | 部署说明与服务配置，现有环境变量在部署平台维护 |
 | [VALIDATION.md](VALIDATION.md)、[新版HTML移植说明.md](新版HTML移植说明.md) | 历史验证说明、新版原型迁移对照 |
 | [requirements.txt](requirements.txt)、[启动本地Demo.command](启动本地Demo.command) | Python 依赖、本地启动入口 |
+| [static/campus-assessment.html](static/campus-assessment.html) | 用户提供的《夏日未完》六站校园游戏化测评，保留问答、画像计算、手记及接待演示；原文件不修改 |
+| [static/campus-guide.png](static/campus-guide.png)、[static/campus-campus.png](static/campus-campus.png) | 从用户 HTML 内嵌数据原样提取的校园场景图，无重绘或编辑 |
+| [static/career-assessment.js](static/career-assessment.js)、[static/career-assessment.css](static/career-assessment.css) | 注册/更新画像入口、全屏测评容器、受校验的结果回传和本机主页画像展示 |
+| [tests/career-assessment.test.cjs](tests/career-assessment.test.cjs) | 测评结果校验、来源及轮次隔离、重新测评与主页回程回归 |
 | [static/index.html](static/index.html) | 当前页面、专家数据、原型交互与内联样式；含大段嵌入图片，读取时限制输出 |
 | [static/consultation-ui.js](static/consultation-ui.js) | Sally 与公共专家页面的 UI 适配、已有信息面板 |
 | [static/voice.js](static/voice.js)、[static/voice.css](static/voice.css) | 真实对话连接、录音/播放生命周期及补充样式 |
@@ -32,10 +36,11 @@
 | [static/demo-chat.js](static/demo-chat.js) | 其他专家 mock 回复、按专家隔离的聊天状态 |
 | [static/action-plan.js](static/action-plan.js) | 行动勾选、进度与本地持久化 |
 | [static/search.js](static/search.js)、[tests/search.test.cjs](tests/search.test.cjs) | 本地专家/岗位方向/推荐问题搜索、结果导航及检索回归；选择问题不自动发送 |
-| [static/robin-li.jpg](static/robin-li.jpg)、[static/demo-senior-lin.svg](static/demo-senior-lin.svg)、[static/demo-senior-chen.svg](static/demo-senior-chen.svg)、[static/demo-planner-xu.svg](static/demo-planner-xu.svg) | 新增演示专家头像；李彦宏照片来源于 [Stanford STVP 人物页](https://stvp.stanford.edu/people/robin-li)，人物简介核对 [百度官网](https://ir.baidu.com/management/robin-li)；其余为虚构角色文字头像 |
+| [static/robin-li.png](static/robin-li.png)、[static/demo-senior-lin.svg](static/demo-senior-lin.svg)、[static/demo-senior-chen.svg](static/demo-senior-chen.svg)、[static/demo-planner-xu.svg](static/demo-planner-xu.svg) | 新增演示专家头像；李彦宏照片使用用户本次提供的原图，人物简介核对 [百度官网](https://ir.baidu.com/management/robin-li)；其余为虚构角色文字头像 |
 | [tests/expert-discovery.test.cjs](tests/expert-discovery.test.cjs) | 专家分类、显示顺序、原专家索引、Demo 问题与回复隔离回归 |
 | [static/careerfly-logo.svg](static/careerfly-logo.svg) | 职升机品牌标志：蓝色对话气泡直升机与橙色旋翼，用于导航、新用户入口、咨询窗口及站点图标 |
 | [static/sally-profile.jpg](static/sally-profile.jpg)、[static/user-avatar.jpg](static/user-avatar.jpg)、[static/advisor.svg](static/advisor.svg) | 页面图片资产 |
+| [Sally语气调优说明.md](Sally语气调优说明.md) | Sally 语气样本来源、第三方技能取舍与本地验证边界 |
 | [content/persona.md](content/persona.md) | Sally 本人经历、观点和对话策略，进入 system prompt |
 | [content/qa.json](content/qa.json)、[content/demo_user.json](content/demo_user.json) | 展示 QA 与模拟咨询者档案，不得混淆专家与咨询者身份 |
 | [server/main.py](server/main.py)、[server/access.py](server/access.py) | FastAPI 路由、静态资源、访问控制 |

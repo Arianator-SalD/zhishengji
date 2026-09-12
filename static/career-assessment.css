@@ -1,0 +1,10 @@
+.profile-update-link{float:right;border:0;background:none;color:#626bdf;font-size:12px;font-weight:600;padding:4px 0 4px 12px;cursor:pointer}
+.profile-update-link:focus-visible{outline:2px solid #626bdf;outline-offset:4px;border-radius:4px}
+body.assessment-open{overflow:hidden}
+body.assessment-open>.header{display:none}
+body.assessment-open>.shell{padding:0;margin:0;max-width:none}
+.campus-assessment-page.active{position:fixed;inset:0;z-index:1000;display:flex;flex-direction:column;background:#edf3e8}
+.campus-assessment-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 20px;border-bottom:1px solid #dce5d6;background:#fffef8;color:#58705d;font-size:13px;flex:none}
+.campus-assessment-toolbar .btn{padding:9px 14px;border-color:#dce5d6;color:#355b42;background:#fffef8;white-space:nowrap}
+#campusAssessmentFrame{display:block;width:100%;flex:1;min-height:0;border:0;background:#dfebdd}
+@media(max-width:600px){.campus-assessment-toolbar{padding:8px 12px;font-size:11px;gap:8px}.campus-assessment-toolbar .btn{padding:8px 10px;font-size:12px}}

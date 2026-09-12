@@ -19,6 +19,11 @@
 .chat-v12-compose input{min-width:0}
 #callModal .modal{max-height:90vh;max-height:90dvh;display:flex;flex-direction:column}
 .call-v12-topbar{flex-shrink:0}.call-v12-layout{min-height:0;flex:1}.call-v12-profile{overflow-y:auto;min-height:0}.call-v12-dialogue{min-height:0}.call-transcript{min-height:100px}
+/* Let both speakers use the full dialogue column, with user messages at its right edge. */
+.call-modal-v12 .call-transcript{width:100%;max-width:none;box-sizing:border-box}
+.call-modal-v12 .call-line.user{flex-direction:row;justify-content:flex-end}
+.call-modal-v12 .call-line.user .call-line-main{margin-left:auto;max-width:80%}
+@media(max-width:720px){.call-modal-v12 .call-line.user .call-line-main{max-width:90%}}
 .voice-side-btn:disabled{opacity:.45;cursor:default}.expert-chat-dock input,.expert-profile-main{min-width:0}
 @media(max-width:650px){header{padding:12px!important;gap:12px!important;flex-wrap:wrap}.header-right{display:none!important}.topnav{gap:16px!important}.expert-profile-grid{grid-template-columns:1fr!important}.expert-profile-left{max-width:260px}.expert-profile-wrap{padding:16px!important}.expert-chat-dock{width:calc(100vw - 24px);flex-wrap:wrap;border-radius:16px;bottom:10px}.expert-chat-dock .attach-btn{display:none}.expert-chat-dock input{width:calc(100% - 45px);flex:auto;min-height:36px}.expert-chat-dock .dock-call{white-space:nowrap;min-height:40px}.question-grid{grid-template-columns:1fr!important}.expert-profile-main .profile-actions{flex-wrap:wrap}.chat-session-bar{padding:6px 14px}.call-v12-layout{overflow-y:auto;display:block}.call-v12-profile{overflow:visible}.call-v12-dialogue{min-height:340px}.call-v12-controls{position:relative}.call-brand-mini small{display:none}}
 
