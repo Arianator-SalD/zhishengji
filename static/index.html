@@ -18,6 +18,7 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;background:rad
 .brand{display:flex;align-items:center;gap:12px;min-width:285px}.brandmark{width:28px;height:28px;position:relative}.brandmark:before,.brandmark:after{content:"";position:absolute;top:3px;width:13px;height:22px;border-radius:8px;background:linear-gradient(155deg,#6e56f8,#4a76ff);box-shadow:0 7px 17px rgba(82,100,255,.25)}.brandmark:before{left:0;transform:rotate(-7deg)}.brandmark:after{right:0;transform:rotate(7deg)}
 .brand strong{font-size:23px;letter-spacing:.5px}.tagline{font-size:13px;color:var(--muted)}
 .topnav{display:flex;gap:36px;height:100%;align-items:center}.topnav button{height:100%;border:0;background:transparent;color:#4c5670;padding:0 4px;font-weight:650;position:relative}.topnav button.active{color:var(--primary)}.topnav button.active:after{content:"";position:absolute;left:4px;right:4px;bottom:10px;height:3px;border-radius:4px;background:linear-gradient(90deg,var(--primary),var(--primary2))}
+.header-user-link{display:inline-flex;align-items:center;gap:8px;padding:0;border:0;border-radius:22px;background:transparent;color:inherit;white-space:nowrap}.header-user-link:focus-visible{outline:2px solid var(--primary);outline-offset:4px}
 .header-right{margin-left:auto;display:flex;align-items:center;gap:14px}.search{height:40px;width:310px;border:1px solid var(--line);border-radius:22px;background:#f8f9fd;display:flex;align-items:center;padding:0 14px;gap:8px;color:var(--muted)}.search input{width:100%;border:0;background:transparent;outline:none;color:var(--ink)}
 .iconbtn{width:40px;height:40px;border:1px solid var(--line);background:#fff;border-radius:13px;display:grid;place-items:center;position:relative}.notif{position:absolute;right:-4px;top:-5px;background:#f05a59;color:#fff;font-size:10px;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;border:2px solid #fff}.avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,.08)}
 .shell{max-width:1510px;margin:0 auto;padding:28px 40px 46px}.page{display:none}.page.active{display:block}.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
@@ -259,7 +260,7 @@ svg.ico{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;st
 <div class="header-right">
 <div class="search"><svg class="ico"><use href="#i-search"></use></svg><input placeholder="搜索专家、职位、求职问题..."/></div>
 <button class="iconbtn"><svg class="ico"><use href="#i-bell"></use></svg><span class="notif">3</span></button>
-<img alt="头像" class="avatar" src="/static/user-avatar.jpg"/><button class="new-user-demo-btn" id="newUserDemoBtn">新用户体验</button><strong style="font-size:13px">林小北⌄</strong>
+<button class="new-user-demo-btn" id="newUserDemoBtn">新用户体验</button><button class="header-user-link" type="button" data-page-jump="my" aria-label="林小北，进入我的"><img alt="" class="avatar" src="/static/user-avatar.jpg"/><strong style="font-size:13px">林小北⌄</strong></button>
 </div>
 </header>
 <div class="onboard-overlay hidden" id="onboardOverlay" aria-hidden="true">
