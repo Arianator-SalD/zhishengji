@@ -64,8 +64,8 @@
     profile(i) {
       chatMemory.hidden = i !== 0;
       const expert = experts[i];
-      identityCopy.textContent = expert.demoProfile ? (expert.publicFigure ? '未获本人授权 · 模拟回复不代表本人观点' : '虚构角色 · 预设回复 · 产品演示') : i === 0 ? '基于本人资料与精选问答生成' : originalIdentity;
-      document.querySelector('.ai-identity-line b').textContent = expert.demoProfile ? '演示分身' : 'AI 分身 · 非本人实时回复';
+      identityCopy.textContent = expert.demoProfile ? (expert.publicFigure ? '基于公开人物资料' : '虚构角色 · 预设回复 · 产品演示') : i === 0 ? '基于本人资料与精选问答生成' : originalIdentity;
+      document.querySelector('.ai-identity-line b').textContent = expert.publicFigure ? 'AI 分身' : expert.demoProfile ? '演示分身' : 'AI 分身 · 非本人实时回复';
       document.querySelector('.profile-title-row .verify').hidden = Boolean(expert.demoProfile);
       document.querySelector('.chat-v12-actions .context-chip').textContent = expert.demoProfile ? '演示会话 · 模拟回复' : i === 0 ? (memoryEnabled ? '已结合演示档案与本次对话' : '基于本次对话') : '已结合你的职业画像';
       let source = $('expertProfileSource');

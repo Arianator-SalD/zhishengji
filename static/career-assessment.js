@@ -13,42 +13,43 @@
   const frame=document.getElementById('campusAssessmentFrame');
   if(!frame)return;
   const status=document.getElementById('assessmentSaveStatus');
-  const card=document.querySelector('#careerProfileCard .careerbox');
-  let attempt='';
+  let attempt='',currentProfile=null,pending=false;
   function renderProfile(profile){
-    if(!card)return;
-    const tags=card.querySelector('.strengths');
-    tags.replaceChildren();
-    if(!profile){
-      card.querySelector('h2').textContent='你的校园探索，正要开始';
-      card.querySelector('p').textContent='完成六站游戏化测评后，这里会展示你的兴趣线索与候选职业方向。';
-      card.querySelector('.quote').textContent='点击“更新职业画像”，开始一段新的校园故事。';
-      return;
+    currentProfile=profile;
+    for(const id of ['campusResultHome','campusResultDetail']){
+      const host=document.getElementById(id);if(!host)continue;
+      host.replaceChildren();
+      if(!profile&&!pending)continue;
+      const details=document.createElement('details'),summary=document.createElement('summary');
+      summary.textContent=profile?'我的游戏化测评结果 · 单独保存的个人线索':'你的校园探索，正要开始 · 完成后在此查看';
+      details.append(summary);
+      if(profile){
+        const description=document.createElement('p');description.textContent='值得探索：'+profile.directions.map(d=>d.name).join('、')+'。'+profile.action;details.append(description);
+        const list=document.createElement('ul');profile.entries.forEach(e=>{const li=document.createElement('li');li.textContent=e.name+'：'+e.value+' — '+e.note;list.append(li)});details.append(list);
+        const note=document.createElement('p');note.textContent='以上是你的测评线索；示例档案与 RIASEC 演示分数保持独立，任务记录不改变兴趣分数。';details.append(note);
+      }
+      host.append(details);
     }
-    card.querySelector('h2').textContent='值得探索：'+profile.directions.map(d=>d.name).join('、');
-    profile.entries.slice(0,2).forEach(entry=>{const tag=document.createElement('span');tag.textContent=entry.value;tags.append(tag)});
-    card.querySelector('p').textContent=profile.action;
-    card.querySelector('.quote').textContent='来自本次测评的兴趣与价值取舍，作为探索线索；能力与岗位适配仍需进一步验证。';
   }
+  window.renderCampusAssessmentResult=()=>renderProfile(currentProfile);
   try{
     const saved=JSON.parse(localStorage.getItem(PROFILE_KEY));
     if(validProfile(saved))renderProfile(saved);
-    else if(saved?.pending===true)renderProfile(null);
+    else if(saved?.pending===true){pending=true;renderProfile(null);}
   }catch{}
   window.startCareerAssessment=function(entry='update'){
     attempt=window.crypto?.randomUUID?.()||Date.now()+'-'+Math.random().toString(36).slice(2);
     if(entry==='register'){
-      renderProfile(null);
+      pending=true;renderProfile(null);
       try{localStorage.setItem(PROFILE_KEY,JSON.stringify({pending:true}))}catch{}
     }
     status.textContent='校园职业探索 · 六站测评';
     frame.src='/static/campus-assessment.html?attempt='+encodeURIComponent(attempt);
     showPage('assessment');
   };
-  document.getElementById('updateCareerProfile').addEventListener('click',()=>window.startCareerAssessment('update'));
   document.getElementById('assessmentBack').addEventListener('click',()=>{
     showPage('my');
-    document.getElementById('updateCareerProfile').focus({preventScroll:true});
+    document.querySelector('#my [data-ws-page=\"myCareerProfile\"]')?.focus({preventScroll:true});
   });
   window.addEventListener('message',event=>{
     if(event.origin!==location.origin||event.source!==frame.contentWindow)return;

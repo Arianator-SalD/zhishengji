@@ -1,77 +1,88 @@
-(() => {
-  const plan = document.getElementById('myActionPlan');
-  if (!plan) return;
-  const storageKey = 'zhishengji.action-plan.v1';
-  const tasks = [...plan.querySelectorAll('[data-plan-task]')].map(row => ({
-    id: row.dataset.planTask,
-    due: row.dataset.planDue,
-    row,
-    input: row.querySelector('input[type="checkbox"]'),
-    badge: row.querySelector('em'),
-  }));
-  const previews = [...document.querySelectorAll('[data-plan-preview]')].map(row => ({
-    row,
-    task: tasks.find(task => task.id === row.dataset.planPreview),
-    title: row.querySelector('strong').textContent.replace(/^[✓○]\s*/, ''),
-    pending: row.querySelector('.status').textContent === '已完成' ? '待完成' : row.querySelector('.status').textContent,
-  }));
-
-  try {
-    const saved = JSON.parse(localStorage.getItem(storageKey));
-    if (saved && typeof saved === 'object' && !Array.isArray(saved)) {
-      tasks.forEach(task => {
-        if (typeof saved[task.id] === 'boolean') task.input.checked = saved[task.id];
-      });
-    }
-  } catch {
-    // Unavailable storage or invalid saved data must not disable the checklist.
+/* Student workspace views and local demo interactions; no backend or model calls. */
+(function(){
+  "use strict";
+  const D=window.CareerWorkspace,KEY="careerfly-student-workspace-v2";
+  if(!D||!document.getElementById("studentHero"))return;
+  const esc=v=>String(v??"").replace(/[&<>"\x27]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","\x27":"&#39;"}[c]));
+  let state=D.initialState(),view="week",filter="all",selectedWeek=1,returnFocus=null;
+  try{state=D.restore(JSON.parse(localStorage.getItem(KEY)))}catch{}
+  const el=id=>document.getElementById(id),button=(label,attrs="",primary=false)=>`<button type="button" class="btn ${primary?"primary":""}" ${attrs}>${label}</button>`;
+  const tags=items=>`<div class="ws-tags">${items.map(v=>`<span>${esc(v)}</span>`).join("")}</div>`;
+  const note="示例档案·信息与数据仅用于演示";
+  const notice=()=>`<p class="ws-note">${note}</p>`;
+  const heading=(title,action="")=>`<div class="ws-heading"><h3>${title}</h3>${action}</div>`;
+  const section=(id,title,body)=>`<section class="card ws-section" id="${id}">${heading(title)}${body}</section>`;
+  const text=(label,value)=>`<div class="ws-fact"><small>${esc(label)}</small><strong>${esc(value)}</strong></div>`;
+  const list=rows=>`<ul class="ws-list">${rows.map(v=>`<li>${esc(v)}</li>`).join("")}</ul>`;
+  const field=(name,label,value="",type="textarea")=>`<label class="ws-field">${esc(label)}${type==="textarea"?`<textarea name="${name}" maxlength="8000" rows="3">${esc(value)}</textarea>`:`<input name="${name}" type="${type}" maxlength="400" value="${esc(value)}">`}</label>`;
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(state));document.querySelectorAll(".ws-storage").forEach(n=>n.textContent="已保存在本机");return true}catch{document.querySelectorAll(".ws-storage").forEach(n=>n.textContent="浏览器无法保存；本次更改仅在当前页面有效");return false}}
+  function radar(id){
+    const point=(i,r)=>[180+Math.sin(i*Math.PI/3)*r,162-Math.cos(i*Math.PI/3)*r];
+    const polygon=r=>D.interest.map((d,i)=>point(i,r).join(",")).join(" ");
+    return `<figure class="ws-radar"><figcaption>职业兴趣倾向（RIASEC）</figcaption><svg viewBox="0 0 360 330" aria-labelledby="${id}-title"><title id="${id}-title">职业兴趣倾向：R35、I80、A65、S75、E85、C55</title>${[20,40,60,80,100].map(n=>`<polygon points="${polygon(n)}" class="ws-grid"/><text x="185" y="${162-n+3}" class="ws-tick">${n}</text>`).join("")}${D.interest.map((d,i)=>{const p=point(i,100);return `<line x1="180" y1="162" x2="${p[0]}" y2="${p[1]}" class="ws-grid"/>`}).join("")}<polygon class="ws-area" points="${D.interest.map((d,i)=>point(i,d.score).join(",")).join(" ")}"/>${D.interest.map((d,i)=>{const p=point(i,d.score),l=point(i,132);return `<g tabindex="0" role="button" data-interest="${d.id}" aria-label="${d.id} ${d.name} ${d.score}：${d.description}"><title>${d.id} ${d.name} ${d.score}：${d.description}</title><circle cx="${p[0]}" cy="${p[1]}" r="5"/><text class="ws-axis" x="${l[0]}" y="${l[1]+5}" text-anchor="middle">${d.id} ${d.name}</text></g>`}).join("")}</svg><p class="ws-interest-detail" aria-live="polite">点击或悬停六个维度，查看分数与解释</p><strong>E–I–S｜企业型·研究型·社会型</strong><p>你更偏好发起和推动事情、分析问题，以及帮助他人。</p><small>模拟数据｜0–100 表示兴趣倾向，不代表能力或岗位匹配率。</small></figure>`;
   }
-
-  function render() {
-    const total = tasks.length;
-    const completed = tasks.filter(task => task.input.checked).length;
-    const percent = total ? completed / total * 100 : 0;
-    const count = `${completed}/${total}`;
-    const ring = plan.querySelector('.plan-ring');
-    ring.querySelector('b').textContent = count;
-    ring.style.setProperty('--plan-progress', `${percent}%`);
-    ring.setAttribute('role', 'progressbar');
-    ring.setAttribute('aria-label', '本周行动完成进度');
-    ring.setAttribute('aria-valuemin', '0');
-    ring.setAttribute('aria-valuemax', String(total));
-    ring.setAttribute('aria-valuenow', String(completed));
-    plan.querySelector('.plan-meta strong').textContent = `${total - completed} 项`;
-    plan.querySelector('.plan-summary .progress span').style.width = `${percent}%`;
-    document.querySelectorAll('[data-plan-count]').forEach(node => { node.textContent = count; });
-    document.querySelectorAll('[data-plan-caption]').forEach(node => { node.textContent = `完成 ${completed} 个关键步骤`; });
-    document.querySelectorAll('.goalcard .progress span').forEach(node => { node.style.width = `${percent}%`; });
-
-    tasks.forEach(task => {
-      task.row.classList.toggle('checked', task.input.checked);
-      task.badge.textContent = task.input.checked ? '已完成' : task.due;
-    });
-    previews.forEach(({row, task, title, pending}) => {
-      if (!task) return;
-      row.classList.toggle('done', task.input.checked);
-      row.querySelector('strong').textContent = `${task.input.checked ? '✓' : '○'} ${title}`;
-      const status = row.querySelector('.status');
-      status.classList.toggle('done', task.input.checked);
-      status.textContent = task.input.checked ? '已完成' : pending;
-    });
+  function status(t){const v=state.tasks[t.id];return v.status==="done"?`已完成${t.total>1?` ${v.count}/${t.total}`:""}`:v.status==="doing"?`进行中 ${v.count}/${t.total}`:t.week===1?"待开始":"未开始";}
+  function taskCard(t,compact=false){const v=state.tasks[t.id];return `<button type="button" class="ws-task ${v.status}" data-task="${t.id}"><span class="ws-task-status">${status(t)}</span><strong>${esc(t.title)}</strong><p>${esc(t.id==="w1-1"?"对比 3 份产品、2 份运营实习岗位说明，记下日常任务和主要要求。":t.id==="w1-2"?"围绕校园活动报名，了解一次具体经历与遇到的困难。":t.deliverable)}</p>${v.arrangement?`<small>当前安排：${esc(v.arrangement)}</small>`:""}${t.id==="w1-3"?"<small>前置条件：完成探索访谈</small>":""}<span class="ws-task-foot">${v.plannedMinutes} 分钟${compact&&v.scheduledWeek===t.week?"":` · 第 ${v.scheduledWeek} 周`}<b>${v.status==="done"?"查看成果":v.status==="doing"?"继续任务":"查看要求"} ›</b></span></button>`;}
+  function renderHome(){
+    const p=state.profile,st=D.stats(state);
+    el("studentHero").innerHTML=`<img class="avatar" src="/static/user-avatar.jpg" alt="示例用户头像"><div class="profile-title"><h2>${esc(p.name)} <span class="verify">✓</span> <span class="tag">职升机会员</span></h2><small>${esc(p.grade)}在读·${esc(p.graduation)}</small><p>${esc(p.signature)}</p></div><div class="profile-stats">${text("探索方向",p.direction)}${text("意向城市",p.city)}${text("当前阶段","首次实习准备")}${text("年级／专业",p.grade+"·"+(p.major===D.profile.major?"信息管理":p.major))}</div>${button("编辑资料 ›","id=editProfileBtn data-edit-profile")}`;
+    el("careerProfileCard").innerHTML=heading("我的职业画像",button("查看完整画像 ›","data-ws-page=myCareerProfile"))+notice()+`<div class="ws-careerbox">${radar("home-radar")}<div><h2>对用户问题有好奇心，正在探索产品经理方向</h2>${tags(["喜欢分析问题","愿意倾听反馈","有校园协作经历","产品方向探索中"])}<p>${D.summary}</p><p><b>已有基础：</b>问卷整理、小组表达、校园协作。<br><b>优先补足：</b>真实需求访谈、方案验证、项目复盘。</p><div class="ws-direction">${esc(p.direction)}·待体验验证</div><blockquote>${D.advice}<footer>职升机·AI 职业顾问</footer></blockquote></div></div><div id="campusResultHome" class="ws-campus"></div>`;
+    el("studentPlanPreview").innerHTML=heading("我的行动计划",button("查看全部 ›","data-ws-page=myActionPlan"))+`<h4>${D.goal}</h4><p class="ws-muted">每周投入 ${esc(p.hours)} 小时｜本周聚焦：发现一个值得继续研究的校园问题。</p><div class="ws-tasks">${D.tasks.filter(t=>t.week===1&&!t.buffer).map(t=>taskCard(t,true)).join("")}</div><p class="ws-note">本周已完成 ${st.done}/${st.total} 项任务 · 原计划三项合计 3 小时，另留 1 小时用于反馈和调整。</p>${state.adjustments.length?`<p class="ws-inline">计划已调整：${esc(state.adjustments.at(-1).description)} ${button("查看新安排","data-ws-page=myActionPlan")}</p>`:""}`;
+    el("studentConsultPreview").innerHTML=heading("咨询记录",button("查看纪要 ›","data-consult-demo"))+`<p class="ws-note">演示咨询 · ${D.consultation.name}</p><h4>${D.consultation.question}</h4><p>${D.consultation.summary}</p><span class="ws-direction">${D.consultation.result}</span>`;
+    document.querySelectorAll(".ws-student-name").forEach(n=>n.textContent=p.name);const header=document.querySelector(".header-user-link");if(header){header.querySelector("strong").textContent=p.name+"⌄";header.setAttribute("aria-label",p.name+"，进入我的")};
   }
-
-  tasks.forEach(task => task.input.addEventListener('change', () => {
-    render();
-    let saved = true;
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(Object.fromEntries(tasks.map(item => [item.id, item.input.checked]))));
-    } catch {
-      saved = false;
-    }
-    if (typeof window.toast === 'function') {
-      window.toast(saved ? (task.input.checked ? '行动已标记完成' : '已恢复为待完成') : '状态已更新，但浏览器未能保存，刷新后可能丢失');
-    }
-  }));
+  const dimensions=["学业背景与发展阶段","职业兴趣","职业价值观","能力与技能基础","行为风格与协作偏好","经历与成果证据","职业认知与决策准备度","资源支持与现实约束","候选方向与发展差距"];
+  function renderProfile(){
+    const p=state.profile;
+    const skills=[
+      ["用户理解","有基础 / 待体验","有问卷整理经历；需求访谈待体验","课程调研中的 24 份问卷","完成 3 位同学访谈"],
+      ["问题定义与优先级","待验证","有课程问题讨论经验；独立判断待验证","课程小组讨论，本人提供的线索","形成一页问题与证据"],
+      ["数据分析与效果验证","有基础 / 待体验","有基础描述统计经验","课程问卷统计；SQL 尚未练习","Excel 或 SQL 练习与指标定义"],
+      ["方案表达与原型","有基础 / 待体验","有小组汇报经验","课程汇报；产品流程和原型尚未体验","关键流程与低保真原型"],
+      ["沟通协作与任务推进","有基础 / 待验证","有社团协作经历","与 2 名同学整理招新信息","获取反馈，验证复杂协作情境"],
+      ["业务与技术基础","待体验","用户价值、组织目标与实现限制需进一步理解","尚未提供相关实践证据","学习任务场景、方案边界与约束"]
+    ];
+    el("studentProfileDetail").innerHTML=`<div class="my-sub-crumb">我的 › 我的职业画像</div><header class="ws-page-head"><div><h1>我的职业画像</h1><p>把兴趣、经历和现实条件放在一起，找到值得尝试的下一步。</p>${tags([p.grade+"在读","首次实习准备","产品方向探索中"])}${notice()}</div><div class="ws-actions">${button("补充经历","data-evidence=experience",true)}${button("编辑资料","data-edit-profile")}</div></header><nav class="ws-anchors" aria-label="画像维度">${dimensions.map((d,i)=>`<a href="#profile-d${i+1}">${i+1}. ${d}</a>`).join("")}</nav>`+
+    section("profile-d1","01 学业背景与发展阶段",`<div class="ws-facts">${text("姓名／学校",p.name+" · "+p.school)}${text("学历／年级",p.degree+" · "+p.grade)}${text("专业／毕业",p.major+" · "+p.graduation)}${text("实习经历",p.internship)}${text("发展阶段",p.stage)}${text("意向时间",p.intention)}</div><p>已有课程调研、小组汇报和社团招新经历。当前诉求：探索产品与运营方向，为第一段实习做准备。</p><blockquote>${esc(p.dilemma)}</blockquote>`)+
+    section("profile-d2","02 职业兴趣",`<div class="ws-interest-layout">${radar("detail-radar")}<div class="ws-interest-table">${D.interest.map(d=>`<div>${text(d.id+" "+d.name+" / "+d.english,d.score+" / 100")}<p>${d.description}。</p></div>`).join("")}</div></div><p>对组织推动、分析问题和帮助他人的活动更感兴趣，可以优先体验涉及这些活动的校园任务。</p><p class="ws-inline"><b>待验证：</b>真实体验需求访谈、方案设计和用户测试之后，你是否仍然愿意继续做？</p><div id="studentInterestFeedback"></div>`)+
+    section("profile-d3","03 职业价值观",`<p class="ws-muted">前三项偏好 · 可调整优先顺序</p><div class="ws-values">${state.values.map((v,i)=>`<div><span class="ws-number">${i+1}</span><div><strong>${D.values[v].name}</strong><p>${D.values[v].description}</p></div><div class="ws-actions">${button("↑",`data-value-index="${i}" data-move="-1" aria-label="上移${D.values[v].name}" ${i===0?"disabled":""}`)}${button("↓",`data-value-index="${i}" data-move="1" aria-label="下移${D.values[v].name}" ${i===2?"disabled":""}`)}</div></div>`).join("")}</div><p>岗位选择时，除了职位名称，也关注任务内容、指导方式和团队氛围。</p>`)+
+    section("profile-d4","04 能力与技能基础",`<p class="ws-note">缺少证据不能直接判定能力低；下面是已有线索和待验证事项。</p><div class="ws-skill-grid">${skills.map(([name,status,basis,evidence,next])=>`<article><h4>${name}</h4>${tags([status])}<p><b>现有基础：</b>${basis}</p><p><b>依据：</b>${evidence}</p><p><b>下一步：</b>${next}</p></article>`).join("")}</div>`)+
+    section("profile-d5","05 行为风格与协作偏好",tags(["本人描述"])+list(["喜欢先整理信息，再参与讨论。","有明确分工时更容易开始行动。","愿意听取反馈，但面对模糊任务时需要示例帮助。"])+"<p class=ws-inline>把开放任务拆成小步骤，每次完成后获取一条具体反馈。</p>")+
+    section("profile-d6","06 经历与成果证据",`<div class="ws-two">${D.experiences.map(e=>`<article class="ws-inset"><h4>${e.name} · ${e.topic}</h4><p><b>个人贡献：</b>${e.contribution}</p><p><b>可以支持：</b>${e.supports}</p><p class="ws-muted"><b>待补证据：</b>${e.missing}</p>${tags(["示例经历 · 附件尚未提供"])}</article>`).join("")}</div><div id="studentEvidence"></div><div class="ws-actions">${button("补充经历","data-evidence=experience")}${button("补充成果","data-evidence=artifact")}</div>`)+
+    section("profile-d7","07 职业认知与决策准备度",`<div class="ws-three">${[text("已了解","产品工作会涉及用户问题、需求和方案"),text("待了解","产品与运营的具体分工、实习生日常、不同团队的要求"),text("愿意尝试","校园访谈、问题整理、低保真原型")].join("")}</div><p><b>当前顾虑：</b>没有实习，不知道怎样提问和积累项目。</p><p><b>任务信心：</b>愿意开始，但访谈和方案验证需要指导。</p><p class="ws-note">有信心开始，不等于已经能做好；需要实践和反馈。</p>`)+
+    section("profile-d8","08 资源支持与现实约束",`<div class="ws-facts">${text("每周准备时间",p.hours+" 小时（非实习到岗时间）")}${text("意向城市",p.city)}${text("可用支持","课程老师、社团同伴、学校就业信息渠道")}${text("待争取支持","学长或行业人士的项目反馈")}</div><p><b>实习到岗条件：</b>${esc(p.availability)}</p><p><b>考试周策略：</b>任务缩减为 30–60 分钟的整理与复盘，其余顺延。</p>`)+
+    section("profile-d9","09 综合判断：候选方向与发展差距",`<div class="ws-two"><article class="ws-inset"><h4>产品经理｜优先探索</h4><p><b>为什么值得尝试：</b>对分析问题、组织推动有兴趣，已有问卷整理和校园协作经历。</p><p><b>现有基础：</b>信息整理、基础分析、小组表达。</p><p><b>待验证：</b>是否喜欢真实需求探索、方案取舍和反复测试。</p><p><b>下一步：</b>完成校园活动报名场景的小实践。</p>${button("查看关联行动计划","data-ws-page=myActionPlan",true)}</article><article class="ws-inset"><h4>用户运营｜对照探索</h4><p><b>为什么值得尝试：</b>有社团招新和答疑经历，愿意与同学交流。</p><p><b>现有基础：</b>活动协作、信息沟通。</p><p><b>待验证：</b>是否更喜欢活动组织、用户沟通和持续运营。</p><p><b>下一步：</b>结合岗位对照与实际体验，记录自己对两类工作的偏好。</p></article></div>`)+
+    section("profile-assessment","更新职业画像",`<p>进入《夏日未完》游戏化测评，保留你的实际选择与探索线索。结果单独展示，不替换上面的示例 RIASEC 数据。</p>${button("更新职业画像","id=updateCareerProfile data-start-assessment",true)}<div id="campusResultDetail" class="ws-campus"></div>`)+
+    `<details class="card ws-section"><summary>画像依据与说明</summary><p>职业兴趣参考 Holland RIASEC；信息组织参考 O*NET；价值观及职业探索考虑个人偏好、任务信心、经历与环境条件。当前建议会随着新经历和反馈更新。</p></details><p class="ws-storage" role="status">仅保存在本机</p>`;
+    el("studentEvidence").innerHTML=state.evidence.map(e=>`<article class="ws-inset"><h4>${esc(e.title)}</h4><p>${esc(e.content)}</p><small>${esc(e.kind==="artifact"?"成果记录":"经历记录")} · 本人补充，尚未核验附件</small></article>`).join("")+D.tasks.filter(t=>state.tasks[t.id].record).map(t=>`<details class="ws-inset"><summary>任务成果 · ${esc(t.title)}</summary><p class="ws-pre">${esc(state.tasks[t.id].record)}</p><small>本人记录，尚未核验；任务状态：${status(t)}</small></details>`).join("");
+    el("studentInterestFeedback").innerHTML=state.interestFeedback.length?`<h4>体验后的兴趣反馈（不改写示例分数）</h4>${state.interestFeedback.map(f=>`<p class="ws-inline">第 ${esc(f.week)} 周 · ${esc(f.liked)} · ${esc(f.direction)}</p>`).join("")}`:"";
+  }
+  function renderPlan(){
+    const p=state.profile,st=D.stats(state),availableWeeks=[...new Set([...D.weeks.map(w=>w.week),...D.tasks.map(t=>state.tasks[t.id].scheduledWeek)])].sort((a,b)=>a-b);
+    const rows=D.tasks.filter(t=>filter==="all"||t.category===filter);
+    el("studentPlanDetail").innerHTML=`<div class="my-sub-crumb">我的 › 我的行动计划</div><header class="ws-page-head"><div><h1>我的行动计划</h1><p>${D.goal}</p>${notice()}</div><div class="ws-actions">${button("本周复盘","data-review",true)}${button("调整计划","data-adjust")}</div></header><section class="card ws-section ws-plan-summary"><div class="ws-plan-count"><b>${st.done}/${st.total}</b><span>本周任务完成</span></div><div><h3>第 1 周／共 8 周 · 每周准备 ${esc(p.hours)} 小时</h3><p>${st.done} 项已完成、${st.doing} 项进行中、${st.pending} 项待开始</p><p class="ws-muted">预期成果：一份校园产品实践案例、一版实习简历、一次基于体验的方向判断。</p></div></section>${state.adjustments.length?`<section class="card ws-section"><h3>新的安排</h3>${state.adjustments.map(a=>`<p class="ws-inline">${esc(a.description)}</p>`).join("")}</section>`:""}<div class="ws-plan-controls"><div class="ws-segment" aria-label="计划查看方式">${button("按周查看",`data-view=week aria-pressed="${view==="week"}"`)}${button("按行动维度查看",`data-view=category aria-pressed="${view==="category"}"`)}</div><label>行动类别 <select id="wsCategory"><option value="all">全部行动</option>${D.categories.map(c=>`<option value="${c.id}" ${c.id===filter?"selected":""}>${c.name}</option>`).join("")}</select></label></div><p class="ws-note">七类是任务分类，不是七周；无需每周完成所有类别。原计划每周合计 240 分钟，包含学习和复盘。</p><div id="wsPlanGroups">${view==="week"?availableWeeks.map(w=>{const tasks=rows.filter(t=>state.tasks[t.id].scheduledWeek===w),minutes=D.tasks.filter(t=>state.tasks[t.id].scheduledWeek===w).reduce((a,t)=>a+state.tasks[t.id].plannedMinutes,0),meta=D.weeks[w-1];return `<details class="card ws-week" ${w===selectedWeek?"open":""}><summary><span>第 ${w} 周 · ${meta?.name||"顺延安排"}</span><span>${minutes} 分钟 · ${tasks.every(t=>state.tasks[t.id].status==="pending")?"未开始":"查看进度"}</span></summary><p class="ws-muted">成果：${meta?.outcome||"完成顺延任务，按实际证据复盘"}</p><div class="ws-tasks">${tasks.map(t=>taskCard(t)).join("")||"该周没有符合筛选的任务"}</div>${button("记录本周复盘",`data-review data-week="${w}"`)}</details>`}).join(""):D.categories.filter(c=>filter==="all"||c.id===filter).map(c=>`<section class="card ws-section"><h3>${c.name}</h3><p>目标：${c.goal}<br>成果：${c.outcome}</p><div class="ws-tasks">${rows.filter(t=>t.category===c.id).map(t=>taskCard(t)).join("")}</div></section>`).join("")}</div><section class="card ws-section"><h3>复盘记录</h3>${state.reviews.length?state.reviews.map(r=>`<details class="ws-inset"><summary>第 ${esc(r.week)} 周 · ${esc(r.direction)} · 下周 ${esc(r.hours)} 小时</summary><p><b>完成了什么：</b>${esc(r.completed)}</p><p><b>喜欢什么：</b>${esc(r.liked)}</p><p><b>困难：</b>${esc(r.difficulties)}</p></details>`).join(""):"<p class=ws-muted>完成一次小尝试后，记录感受、困难和下一步。任务进度不会自动提高兴趣分数。</p>"}</section><p class="ws-storage" role="status">仅保存在本机</p>`;
+  }
+  function render(){renderHome();renderProfile();renderPlan();if(window.renderCampusAssessmentResult)window.renderCampusAssessmentResult();}
+  const dialog=document.createElement("dialog");dialog.id="workspaceDialog";dialog.setAttribute("aria-labelledby","workspaceDialogTitle");dialog.className="ws-dialog";document.body.append(dialog);
+  function openDialog(title,body,onSubmit){returnFocus=document.activeElement;dialog.innerHTML=`<form method="dialog"><header><h2 id="workspaceDialogTitle">${esc(title)}</h2><button type="button" class="iconbtn" data-ws-close aria-label="关闭">×</button></header><div class="ws-dialog-body">${body}<p class="ws-form-status" role="status"></p></div></form>`;dialog.querySelector("[data-ws-close]").onclick=()=>dialog.close();dialog.querySelector("form").onsubmit=e=>{e.preventDefault();if(onSubmit)onSubmit(new FormData(e.currentTarget));else dialog.close()};if(!dialog.open)dialog.showModal();}
+  dialog.addEventListener("close",()=>{if(returnFocus?.isConnected)returnFocus.focus({preventScroll:true});else document.querySelector(".page.active .ws-page-head button,.page.active [data-task]")?.focus({preventScroll:true})});
+  function savedMessage(){const ok=save();render();dialog.querySelector(".ws-form-status").textContent=ok?"已保存，主页与详情页已同步。":"已更新；浏览器无法保存，刷新后可能丢失。";}
+  function taskDialog(id){
+    const t=D.tasks.find(t=>t.id===id),v=state.tasks[id],cat=D.categories.find(c=>c.id===t.category);
+    if(!t)return;
+    openDialog(t.title,`${tags([cat.name,t.direction])}<div class="ws-two">${text("关联缺口",t.gap)}${text("安排",`第 ${v.scheduledWeek} 周 · ${v.plannedMinutes} 分钟（原计划 ${t.minutes} 分钟）`)}${text("优先级",t.priority)}${text("前置条件",t.precondition)}</div>${v.arrangement?`<p class="ws-inline">当前安排：${esc(v.arrangement)}</p>`:""}<h3>为什么做</h3><p>${t.why}</p><h3>具体步骤</h3><ol class="ws-list">${t.steps.map(s=>`<li>${s}</li>`).join("")}</ol><h3>所需资源与支持</h3><p>${t.resources}</p><h3>交付物与完成标准</h3><p>${t.deliverable}</p>${id==="w1-1"?`<details class="ws-inset" open><summary>查看演示成果 · 5/5 岗位对照</summary><p>模拟岗位，非实时招聘信息。</p><table><thead><tr><th>岗位示例</th><th>日常任务</th><th>主要要求</th></tr></thead><tbody>${[["产品实习 A","整理需求与使用场景","能提问、能记录"],["产品实习 B","画流程与原型","表达清晰、愿意修改"],["产品实习 C","观察测试与分析数据","基本统计、记录证据"],["运营实习 A","活动执行与答疑","沟通、细节与协作"],["运营实习 B","内容整理与用户反馈","表达、耐心与持续跟进"]].map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table><p>初步观察：产品侧重问题与方案，运营更多涉及活动和持续沟通；实际分工还需向团队核实。</p></details>`:""}${id==="w1-2"?"<details class=ws-inset><summary>演示记录 1/3（匿名，非真实访谈）</summary><p>场景：同学 A 在群里找校园活动报名入口。行为：翻群消息后询问同学。困难：入口被后续消息淹没。原话：‘我找了一会儿才看到链接。’ 解释：入口可发现性可能有问题；样本仅一人，证据不足。</p></details>":""}<div class="ws-two"><label class="ws-field">当前状态<select name="status">${[["pending",t.week===1?"待开始":"未开始"],["doing","进行中"],["done","已完成"]].map(([k,l])=>`<option value="${k}" ${v.status===k?"selected":""}>${l}</option>`).join("")}</select></label><label class="ws-field">已完成数量 / ${t.total}<input type="number" name="count" min="0" max="${t.total}" value="${v.count}"></label></div>${field("record","成果记录（请使用匿名内容；示例附件不代表已核验）",v.record)}${field("feedback","收到的反馈与下一步",v.feedback)}<h3>反馈与受阻方案</h3><p>${t.feedback}</p><p class="ws-inline">${t.alternative}</p><div class="ws-actions"><button class="btn primary" type="submit">保存任务</button>${button("调整安排",`data-adjust-task="${id}"`)}</div>`,form=>{const record=String(form.get("record")||"").trim();if(form.get("status")==="done"&&!record&&id!=="w1-1"){dialog.querySelector(".ws-form-status").textContent="请先记录交付物和完成依据，再标记完成。";return}if(form.get("status")==="done"&&id==="w1-3"&&state.tasks["w1-2"].status!=="done"){dialog.querySelector(".ws-form-status").textContent="探索访谈尚未完成；可以先保存草稿，标记为进行中。";return}D.updateTask(state,id,{status:form.get("status"),count:form.get("count"),record,feedback:form.get("feedback")});savedMessage()});
+    dialog.querySelector("[data-adjust-task]").onclick=()=>adjustDialog(id);
+  }
+  function editProfile(){const p=state.profile;openDialog("编辑资料",`<p class="ws-note">示例档案，修改保存在本机并同步到三个页面。</p><div class="ws-two">${field("name","姓名",p.name,"text")}${field("school","学校",p.school,"text")}${field("grade","年级",p.grade,"text")}${field("major","专业",p.major,"text")}${field("graduation","毕业年份",p.graduation,"text")}${field("city","意向城市",p.city,"text")}</div>${field("signature","个人签名",p.signature)}${field("dilemma","当前困惑",p.dilemma)}${field("availability","实习到岗条件（与准备时间区分）",p.availability)}<button type="submit" class="btn primary">保存资料</button>`,form=>{for(const [k,v] of form.entries())if(Object.hasOwn(p,k)){if(!String(v).trim()){dialog.querySelector(".ws-form-status").textContent="请填写完整资料。";return}}for(const [k,v] of form.entries())if(Object.hasOwn(p,k))p[k]=String(v).trim().slice(0,400);savedMessage()});}
+  function evidenceDialog(kind){openDialog(kind==="artifact"?"补充成果":"补充经历",`${field("title","名称")}${field("content","你的贡献、成果线索与待补证据")}<p class="ws-note">此处记录文字和材料名称，不上传或核验附件。请勿填写他人身份或联系方式。</p><button type="submit" class="btn primary">保存记录</button>`,form=>{const title=String(form.get("title")).trim(),content=String(form.get("content")).trim();if(!title||!content){dialog.querySelector(".ws-form-status").textContent="请填写名称和具体内容。";return}state.evidence.push({title:title.slice(0,200),content:content.slice(0,8000),kind,date:new Date().toISOString()});savedMessage();dialog.querySelector("button[type=submit]").disabled=true;});}
+  function reviewDialog(week=1){const old=state.reviews.findLast(r=>r.week===week)||{};openDialog(`第 ${week} 周复盘`,`${field("completed","完成了什么",old.completed)}${field("liked","喜欢什么，为什么",old.liked)}${field("difficulties","遇到什么困难",old.difficulties)}<label class="ws-field">下周准备时间（小时）<input name="hours" type="number" min="0.5" max="40" step="0.5" value="${old.hours||state.profile.hours}"></label><label class="ws-field">下一步方向<select name="direction">${["继续探索产品经理","增加用户运营对照体验","暂缓决定，继续补充证据"].map(x=>`<option ${old.direction===x?"selected":""}>${x}</option>`).join("")}</select></label><p class="ws-note">兴趣反馈单独保存；时间和方向变化请在“调整计划”中落实到任务安排。</p><div class="ws-actions"><button type="submit" class="btn primary">保存复盘</button>${button("调整计划","data-review-adjust")}</div>`,form=>{const r=Object.fromEntries(form);r.week=week;r.hours=Number(r.hours);if(!r.completed.trim()||!r.liked.trim()||!r.difficulties.trim()){dialog.querySelector(".ws-form-status").textContent="请填写完成情况、感受和困难；没有困难可填写暂无。";return}state.reviews=state.reviews.filter(x=>x.week!==week);state.reviews.push(r);state.interestFeedback=state.interestFeedback.filter(x=>x.week!==week);state.interestFeedback.push({week,liked:r.liked,direction:r.direction});savedMessage()});dialog.querySelector("[data-review-adjust]").onclick=()=>adjustDialog();}
+  function adjustDialog(id){const candidates=D.tasks.filter(t=>state.tasks[t.id].status!=="done"),current=candidates.find(t=>t.id===id)||candidates[0];if(!current)return;openDialog("调整计划",`<p>将受阻任务顺延；也可缩减为一次整理与复盘。原始交付要求仍保留，缩减时间不会自动标记完成。</p><label class="ws-field">选择任务<select name="task">${candidates.map(t=>`<option value="${t.id}" ${t.id===current.id?"selected":""}>第 ${state.tasks[t.id].scheduledWeek} 周 · ${t.title}</option>`).join("")}</select></label><div class="ws-two"><label class="ws-field">新的计划周次<input type="number" name="week" value="${Math.min(16,state.tasks[current.id].scheduledWeek+1)}" min="1" max="16"></label><label class="ws-field">本次安排分钟数<input type="number" name="minutes" value="${state.tasks[current.id].plannedMinutes}" min="15" max="240" step="15"></label></div><label class="ws-field">调整方式<select name="mode"><option value="defer">顺延原任务</option><option value="review">改为整理已有材料与复盘（保留待完成事项）</option></select></label>${field("reason","原因与剩余工作的安排","例如：考试周只保留整理与复盘，剩余工作下周再安排。")}<p class="ws-note" id="adjustCapacity"></p><button type="submit" class="btn primary">保存新安排</button>`,form=>{const task=D.tasks.find(t=>t.id===form.get("task")),v=state.tasks[task.id],week=Number(form.get("week")),minutes=Number(form.get("minutes"));if(!String(form.get("reason")).trim()){dialog.querySelector(".ws-form-status").textContent="请说明调整原因和剩余工作的安排。";return}v.scheduledWeek=week;v.plannedMinutes=minutes;v.arrangement=(form.get("mode")==="review"?"整理已有材料与复盘；原交付物仍待完成。":"顺延原任务。")+String(form.get("reason"));const sum=D.tasks.filter(t=>state.tasks[t.id].scheduledWeek===week).reduce((a,t)=>a+state.tasks[t.id].plannedMinutes,0);state.adjustments.push({task:task.id,week,description:`${task.title} → 第 ${week} 周，${minutes} 分钟；${form.get("mode")==="review"?"本次改为整理已有材料与复盘；原任务仍待完成。":""}${form.get("reason")}（该周现在合计 ${sum} 分钟${sum>state.profile.hours*60?"，超出准备预算，请继续调整其他任务":""}）`});selectedWeek=week;view="week";filter="all";savedMessage()});const capacity=()=>{const f=new FormData(dialog.querySelector("form")),week=Number(f.get("week")),minutes=Number(f.get("minutes"));const total=D.tasks.filter(t=>t.id!==f.get("task")&&state.tasks[t.id].scheduledWeek===week).reduce((a,t)=>a+state.tasks[t.id].plannedMinutes,0)+minutes;el("adjustCapacity").textContent=`调整后第 ${week} 周共 ${total} 分钟；每周预算 ${state.profile.hours*60} 分钟。${total>state.profile.hours*60?"超出预算，可继续顺延该周其他任务。":""}`;};dialog.querySelector("form").addEventListener("input",capacity);capacity();}
+  document.querySelectorAll(".my-side").forEach(side=>{const home=side.querySelector("[data-page-jump=my]");if(!side.querySelector("[data-page-jump=myCareerProfile]"))home.insertAdjacentHTML("afterend",`<div class="side-item" role="button" tabindex="0" data-page-jump="myCareerProfile"><svg class="ico"><use href="#i-user"></use></svg>我的职业画像</div>`);side.querySelectorAll("[data-page-jump]").forEach(n=>{n.setAttribute("role","button");n.tabIndex=0;if(!n.onclick)n.onclick=()=>showPage(n.dataset.pageJump);n.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();n.click()}}});});
+  document.addEventListener("click",e=>{const b=e.target.closest("button,[data-interest]");if(!b)return;if(b.hasAttribute("data-ws-page"))showPage(b.dataset.wsPage);else if(b.hasAttribute("data-task"))taskDialog(b.dataset.task);else if(b.hasAttribute("data-edit-profile"))editProfile();else if(b.hasAttribute("data-start-assessment"))window.startCareerAssessment("update");else if(b.hasAttribute("data-value-index")){const i=Number(b.dataset.valueIndex),j=i+Number(b.dataset.move);[state.values[i],state.values[j]]=[state.values[j],state.values[i]];render();save();el("profile-d3").querySelector(`[data-value-index="${j}"][data-move="${b.dataset.move}"]`)?.focus({preventScroll:true})}else if(b.hasAttribute("data-evidence"))evidenceDialog(b.dataset.evidence);else if(b.hasAttribute("data-view")){view=b.dataset.view;renderPlan()}else if(b.hasAttribute("data-review"))reviewDialog(Number(b.dataset.week)||1);else if(b.hasAttribute("data-adjust"))adjustDialog();else if(b.hasAttribute("data-consult-demo"))openDialog("产品方向 AI 顾问 · 演示纪要",`${notice()}<h3>${D.consultation.question}</h3><p>${D.consultation.summary}</p><p>${D.consultation.result}</p>${button("查看本周任务","data-ws-page=myActionPlan data-dialog-navigate")}`);if(b.hasAttribute("data-dialog-navigate"))dialog.close();});
+  document.addEventListener("change",e=>{if(e.target.id==="wsCategory"){filter=e.target.value;renderPlan()}});
+  const showInterest=e=>{const g=e.target.closest("[data-interest]");if(g){const d=D.interest.find(d=>d.id===g.dataset.interest);g.closest("figure").querySelector(".ws-interest-detail").textContent=`${d.id} ${d.name} ${d.score}/100 · ${d.description}`;}};
+  document.addEventListener("mouseover",showInterest);document.addEventListener("focusin",showInterest);document.addEventListener("click",showInterest);document.addEventListener("keydown",e=>{if(e.target.matches("[data-interest]")&&["Enter"," "].includes(e.key)){e.preventDefault();showInterest(e)}});
   render();
-  plan.dataset.ready = 'true';
+  const settingsEdit=document.querySelector("#mySettings .settings-card button");if(settingsEdit)settingsEdit.onclick=editProfile;
+  window.studentWorkspace={getState:()=>structuredClone(state),render};
 })();

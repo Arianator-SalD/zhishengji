@@ -4,7 +4,7 @@
 - 面向大学生职业探索、求职决策及专家咨询的产品 Demo，将有来源的专家经验转化为针对用户背景的建议和下一步行动。
 - 原生 HTML/JavaScript + FastAPI，GitHub main 关联 Render 自动部署；站点：[职升机](https://zhishengji-voice.onrender.com)。
 - Sally 接 DeepSeek 与火山引擎 ASR/TTS，其余专家保留 mock；公共组件修改需保持专家身份、资料和会话隔离。
-- Sally 默认带入“金融转 AI 产品”模拟同学档案，可切换空白会话；对话仅使用本次连接历史。行动计划勾选和校园测评画像保存在 localStorage；测评画像尚未自动接入 Sally 咨询上下文，完整记录和规划数据链路尚未打通。
+- Sally 默认带入“金融转 AI 产品”模拟同学档案，可切换空白会话；对话仅使用本次连接历史。“我的”三页共用大学生示例数据，任务、成果、兴趣反馈与复盘分开存入 localStorage；游戏化测评结果单独保存，不覆盖示例 RIASEC，也尚未自动接入 Sally 咨询上下文。
 - 用户最新要求优先于历史方案；prototype、旧截图、压缩包和方案不是当前源码的替代来源。
 
 ## 每次迭代必须更新日志
@@ -27,16 +27,18 @@
 | [requirements.txt](requirements.txt)、[启动本地Demo.command](启动本地Demo.command) | Python 依赖、本地启动入口 |
 | [static/campus-assessment.html](static/campus-assessment.html) | 用户提供的《夏日未完》六站校园游戏化测评，保留问答、画像计算、手记及接待演示；原文件不修改 |
 | [static/campus-guide.png](static/campus-guide.png)、[static/campus-campus.png](static/campus-campus.png) | 从用户 HTML 内嵌数据原样提取的校园场景图，无重绘或编辑 |
-| [static/career-assessment.js](static/career-assessment.js)、[static/career-assessment.css](static/career-assessment.css) | 注册/更新画像入口、全屏测评容器、受校验的结果回传和本机主页画像展示 |
+| [static/career-assessment.js](static/career-assessment.js)、[static/career-assessment.css](static/career-assessment.css) | 注册/更新画像入口、全屏测评容器、受校验的结果回传和单独的本机测评结果展示 |
 | [tests/career-assessment.test.cjs](tests/career-assessment.test.cjs) | 测评结果校验、来源及轮次隔离、重新测评与主页回程回归 |
 | [static/index.html](static/index.html) | 当前页面、专家数据、原型交互与内联样式；含大段嵌入图片，读取时限制输出 |
 | [static/consultation-ui.js](static/consultation-ui.js) | Sally 与公共专家页面的 UI 适配、已有信息面板 |
 | [static/voice.js](static/voice.js)、[static/voice.css](static/voice.css) | 真实对话连接、录音/播放生命周期及补充样式 |
 | [static/audio-worklet.js](static/audio-worklet.js) | 麦克风采样与 PCM 处理 |
 | [static/demo-chat.js](static/demo-chat.js) | 其他专家 mock 回复、按专家隔离的聊天状态 |
-| [static/action-plan.js](static/action-plan.js) | 行动勾选、进度与本地持久化 |
+| [static/my-workspace-data.js](static/my-workspace-data.js) | 林小北大学生示例档案、固定 RIASEC、七类八周任务与独立状态模型；兼容 Node 数据验证 |
+| [static/action-plan.js](static/action-plan.js)、[static/my-workspace.css](static/my-workspace.css) | 我的主页、完整职业画像、行动计划的共享渲染、SVG 雷达、任务/经历/复盘表单和本机持久化 |
+| [tests/my-workspace.test.cjs](tests/my-workspace.test.cjs) | 周时间预算、初始状态、旧档案隔离、状态持久化、兴趣与行动分离及顺延归组回归 |
 | [static/search.js](static/search.js)、[tests/search.test.cjs](tests/search.test.cjs) | 本地专家/岗位方向/推荐问题搜索、结果导航及检索回归；选择问题不自动发送 |
-| [static/robin-li.png](static/robin-li.png)、[static/demo-senior-lin.svg](static/demo-senior-lin.svg)、[static/demo-senior-chen.svg](static/demo-senior-chen.svg)、[static/demo-planner-xu.svg](static/demo-planner-xu.svg) | 新增演示专家头像；李彦宏照片使用用户本次提供的原图，人物简介核对 [百度官网](https://ir.baidu.com/management/robin-li)；其余为虚构角色文字头像 |
+| [static/robin-li-office.png](static/robin-li-office.png)、[static/robin-li.png](static/robin-li.png)、[static/demo-senior-lin.svg](static/demo-senior-lin.svg)、[static/demo-senior-chen.svg](static/demo-senior-chen.svg)、[static/demo-planner-xu.svg](static/demo-planner-xu.svg) | 新增演示专家头像；李彦宏展示图通过内置 imagegen 将用户照片背景换为明亮办公室，robin-li.png 保留原图；人物简介核对 [百度官网](https://ir.baidu.com/management/robin-li)；其余为虚构角色文字头像 |
 | [tests/expert-discovery.test.cjs](tests/expert-discovery.test.cjs) | 专家分类、显示顺序、原专家索引、Demo 问题与回复隔离回归 |
 | [static/careerfly-logo.svg](static/careerfly-logo.svg) | 职升机品牌标志：蓝色对话气泡直升机与橙色旋翼，用于导航、新用户入口、咨询窗口及站点图标 |
 | [static/sally-profile.jpg](static/sally-profile.jpg)、[static/user-avatar.jpg](static/user-avatar.jpg)、[static/advisor.svg](static/advisor.svg) | 页面图片资产 |
