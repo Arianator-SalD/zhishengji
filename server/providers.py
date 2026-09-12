@@ -23,11 +23,79 @@ from websockets.exceptions import InvalidStatus
 from .settings import Settings
 
 
+UPSTREAM_REASONS = {
+    "RESOURCE_ACCESS": "语音合成服务没有当前资源的调用权限，请核对声音复刻服务是否开通及应用是否匹配。",
+    "RESOURCE_MISMATCH": "音色与语音合成模型不匹配，请核对音色 ID 和资源类型。",
+    "VOICE_NOT_FOUND": "语音合成服务未找到当前音色，请核对音色 ID 及所属应用。",
+    "VOICE_NOT_READY": "当前音色尚未训练完成，请先完成声音复刻。",
+    "AUTH": "语音合成鉴权失败，请核对应用 ID 和 Access Token。",
+    "QUOTA": "语音合成额度或并发受限，请检查服务用量。",
+}
+
+
+def upstream_event_error(event, http_status=None):
+    # Inspect upstream text locally, expose only fixed categories, never its contents.
+    text = str(event.get("message", event.get("msg", ""))).lower()
+    reason = None
+    if ("resource" in text and any(x in text for x in ("not granted", "permission", "not authorized", "not allowed"))):
+        reason = "RESOURCE_ACCESS"
+    elif any(x in text for x in ("mismatch", "invalidmodeltype", "invalid model type")):
+        reason = "RESOURCE_MISMATCH"
+    elif any(x in text for x in ("speaker", "voice", "音色")) and any(x in text for x in ("not found", "not exist", "不存在")):
+        reason = "VOICE_NOT_FOUND"
+    elif any(x in text for x in ("untrained", "not trained", "not ready", "未训练")):
+        reason = "VOICE_NOT_READY"
+    elif any(x in text for x in ("quota", "concurrency", "余额", "额度")):
+        reason = "QUOTA"
+    elif any(x in text for x in ("unauthorized", "invalid token", "invalid api key", "authentication")):
+        reason = "AUTH"
+    return ProviderError("upstream rejected request", upstream_code=event.get("code"),
+                         http_status=http_status, reason=reason)
+
+
+async def http_provider_error(response):
+    body = b""
+    async for chunk in response.aiter_bytes():
+        body += chunk[:65536 - len(body)]
+        if len(body) >= 65536:
+            break
+    try:
+        event = json.loads(body)
+        if not isinstance(event, dict):
+            event = {}
+    except (ValueError, UnicodeError):
+        event = {}
+    return upstream_event_error(event, response.status_code)
+
+
+def generation_failure_details(exc, stage):
+    stage = "TTS" if stage == "TTS" else "LLM"
+    parts = [stage]
+    message = "语音合成未完成，请检查音色设置或稍后重试。" if stage == "TTS" else "文字回答生成中断，请稍后重试。"
+    status = exc.response.status_code if isinstance(exc, httpx.HTTPStatusError) else getattr(exc, "http_status", None)
+    if type(status) is int:
+        parts.append(f"HTTP_{status}")
+        if stage == "TTS" and status in (401, 403):
+            message = "语音合成服务拒绝访问，请核对应用凭证和服务权限。"
+    if isinstance(exc, ProviderError):
+        if exc.upstream_code is not None:
+            parts.append(f"UPSTREAM_{exc.upstream_code}")
+        if exc.reason in UPSTREAM_REASONS:
+            parts.append(exc.reason)
+            if stage == "TTS":
+                message = UPSTREAM_REASONS[exc.reason]
+    elif isinstance(exc, TimeoutError):
+        parts.append("TIMEOUT")
+    return {"message": message, "diagnostic": "/".join(parts)}
+
+
 class ProviderError(Exception):
     """Raw upstream messages must never reach the browser."""
-    def __init__(self, message, *, upstream_code=None):
+    def __init__(self, message, *, upstream_code=None, http_status=None, reason=None):
         super().__init__(message)
         self.upstream_code = upstream_code if type(upstream_code) is int else None
+        self.http_status = http_status if type(http_status) is int else None
+        self.reason = reason if reason in UPSTREAM_REASONS else None
 
 
 def asr_failure_details(exc):
@@ -193,7 +261,8 @@ class VolcTTS:
             "audio_params": {"format": "pcm", "sample_rate": self.sample_rate}}}
         async with httpx.AsyncClient(timeout=self.s.provider_timeout, transport=self.transport) as client:
             async with client.stream("POST", self.s.tts_url, headers=speech_headers(self.s, "tts"), json=body) as response:
-                response.raise_for_status()
+                if response.is_error:
+                    raise await http_provider_error(response)
                 # The configured default is SSE; ordinary HTTP chunked JSON lines also work.
                 events = sse_data(response) if self.s.tts_url.rstrip("/").endswith("/sse") else bounded_lines(response)
                 complete = False
@@ -204,7 +273,7 @@ class VolcTTS:
                         continue
                     event = json.loads(data)
                     if event.get("code") not in (0, 20000000):
-                        raise ProviderError("TTS upstream error")
+                        raise upstream_event_error(event)
                     if event.get("data"):
                         tail += base64.b64decode(event["data"], validate=True)
                         emitted += len(tail)

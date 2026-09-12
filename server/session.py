@@ -7,7 +7,7 @@ import uuid
 
 from fastapi import WebSocketDisconnect
 
-from .providers import asr_failure_details
+from .providers import asr_failure_details, generation_failure_details
 
 
 @dataclass
@@ -215,14 +215,16 @@ class VoiceSession:
             await self.event(turn, "state", value="idle")
         except asyncio.CancelledError:
             raise
-        except Exception:
+        except Exception as exc:
+            stage = "TTS" if (speaker_task and speaker_task.done() and not speaker_task.cancelled()
+                              and speaker_task.exception() is exc) else "LLM"
             # Stop output before declaring a failed turn finished. Previously queued
             # complete segments remain ACK-able, but no new audio may follow turn.end.
             if speaker_task:
                 speaker_task.cancel()
                 await asyncio.gather(speaker_task, return_exceptions=True)
             await self.event(turn, "error", code="GENERATION_FAILED",
-                             message="本轮服务调用未完成，请检查模型、语音权限或稍后重试。")
+                             **generation_failure_details(exc, stage))
             await self.event(turn, "turn.end", turn_id=turn.id)
             await self.event(turn, "state", value="idle")
         finally:

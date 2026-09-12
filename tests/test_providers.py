@@ -163,3 +163,25 @@ def test_asr_diagnostics_keep_secrets_out_of_browser_errors():
     with pytest.raises(ProviderError) as caught:
         parse_asr_packet(packet)
     assert asr_failure_details(caught.value)["diagnostic"] == "ASR_PROTOCOL/UPSTREAM_45000030"
+
+
+def test_tts_http_error_keeps_only_status_and_fixed_reason():
+    from server.providers import generation_failure_details
+    adapter = VolcTTS(Settings(), httpx.MockTransport(lambda r: httpx.Response(403, json={
+        "code": 45000030, "message": "requested resource not granted private-key-sentinel"})))
+    with pytest.raises(ProviderError) as caught:
+        run_collect(adapter.synthesize("测试"))
+    result = generation_failure_details(caught.value, "TTS")
+    assert result["diagnostic"] == "TTS/HTTP_403/UPSTREAM_45000030/RESOURCE_ACCESS"
+    assert "private-key-sentinel" not in str(result)
+
+
+def test_tts_stream_error_retains_numeric_code_without_raw_message():
+    from server.providers import generation_failure_details
+    adapter = VolcTTS(Settings(), httpx.MockTransport(lambda r: httpx.Response(200,
+        content=b'data: {"code":45000000,"message":"speaker not found private-key-sentinel"}\n\n')))
+    with pytest.raises(ProviderError) as caught:
+        run_collect(adapter.synthesize("测试"))
+    result = generation_failure_details(caught.value, "TTS")
+    assert result["diagnostic"] == "TTS/UPSTREAM_45000000/VOICE_NOT_FOUND"
+    assert "private-key-sentinel" not in str(result)

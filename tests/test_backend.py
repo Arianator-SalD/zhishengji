@@ -310,6 +310,7 @@ def test_failed_tts_cancels_generation_and_does_not_commit_tail():
         assert any(isinstance(e, dict) and e.get("code") == "GENERATION_FAILED" for e in sock.sent)
         assert not any(m["role"] == "assistant" for m in session.history)
         assert "private upstream error" not in str(sock.sent)
+        assert next(e for e in sock.sent if isinstance(e, dict) and e.get("code") == "GENERATION_FAILED")["diagnostic"] == "TTS"
     asyncio.run(scenario())
 
 
