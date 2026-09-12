@@ -7,7 +7,7 @@ const path = require('node:path');
 
 async function frontend(options = {}) {
   const elements = new Map(), connections = [], memoryUpdates = [], bubbles = [], requests = [];
-  const configs = id => ({expert_id:id,default_use_demo_profile:id==='sally',capabilities:{llm:true,asr:false,tts:false},qa:[{question:id+' question'}],profile:{confirmed:{experience:[id+' profile']}}});
+  const configs = id => ({expert_id:id,default_use_demo_profile:true,capabilities:{llm:true,asr:false,tts:false},qa:[{question:id+' question'}],profile:{confirmed:{experience:[id+' profile']}}});
   const element = id => {
     if (!elements.has(id)) elements.set(id, {value:'', textContent:'', dataset:{}, classList:{toggle(){}}, append(){}});
     return elements.get(id);
@@ -93,7 +93,7 @@ test('live expert switch closes the old socket, clears drafts, ignores late fram
   assert.equal(f.bubbles.length,count);
   f.element('chatInput').value = 'Robin question'; await f.win.zhijianVoice.send();
   assert.match(f.connections[1].url,/expert_id=robin-li$/);
-  assert.equal(f.connections[1].sent.find(m=>m.type==='session.start').use_demo_profile,false);
+  assert.equal(f.connections[1].sent.find(m=>m.type==='session.start').use_demo_profile,true);
   f.select(0);
   f.element('chatInput').value = 'Sally again'; await f.win.zhijianVoice.send();
   assert.match(f.connections[2].url,/expert_id=sally$/);
@@ -154,25 +154,48 @@ test('a profile choice made before config resolves survives the fetch and resets
   f.select(2);
 });
 
-test('Robin UI uses its speaker, blank greeting, correct profile, and live call controls', () => {
-  const ids=new Map(), selectors=new Map(), lines=[];
+test('Robin case is shared by text and call; blank mode restores generic questions and survives expert switches', async () => {
+  const profile=JSON.parse(fs.readFileSync(path.join(__dirname,'../content/robin-li/demo_user.json'),'utf8'));
+  const f=await frontend({fetch:async(id,c)=>({ok:true,json:async()=>({...c,profile:id==='robin-li'?profile:c.profile})})});
+  f.select(1);await tick();
+  assert.equal(f.memoryUpdates.at(-1)[0],true);
+  assert.equal(f.memoryUpdates.at(-1)[1].id,'demo_robin_student_001');
+  assert.deepEqual([...f.context.questionSets[1]],profile.starter_questions);
+  f.element('chatInput').value='根据两位同学的反馈，下一步呢？';await f.win.zhijianVoice.send();
+  const socket=f.connections[0];
+  assert.equal(socket.sent.find(m=>m.type==='session.start').use_demo_profile,true);
+  f.element('voiceTextInput').value='我每周只有四小时';await f.element('voiceTextSend').onclick();
+  assert.equal(f.connections.length,1);
+  assert.equal(socket.sent.filter(m=>m.type==='input.text').length,2);
+  f.win.zhijianVoice.setDemoProfile(false);
+  assert.deepEqual([...f.context.questionSets[1]],['robin-li question']);
+  f.select(0);await tick();assert.equal(f.memoryUpdates.at(-1)[0],true);
+  f.select(1);await tick();assert.equal(f.memoryUpdates.at(-1)[0],false);
+  f.element('chatInput').value='不带入演示身份';await f.win.zhijianVoice.send();
+  assert.equal(f.connections.at(-1).sent.find(m=>m.type==='session.start').use_demo_profile,false);
+  f.select(2);
+});
+
+test('Robin UI shows its own case in both windows, updates delayed greeting, and keeps blank mode', () => {
+  const ids=new Map(), selectors=new Map(), lines=[], created=[], choices=[];
   function element() {
     const children=new Map();
-    return {textContent:'',dataset:{},style:{},hidden:false,classList:{toggle(){},remove(){}},
+    const node={textContent:'',dataset:{},style:{},hidden:false,isConnected:true,childNodes:[],classList:{toggle(){},remove(){}},
       querySelector(key){if(!children.has(key))children.set(key,element());return children.get(key);},
-      querySelectorAll(){return [];},before(){},after(){},append(){},replaceChildren(){},setAttribute(){},remove(){},focus(){}};
+      querySelectorAll(){return [];},before(){},after(){},append(n){this.childNodes.push(n);},replaceChildren(){this.childNodes=[];},setAttribute(){},remove(){},focus(){}};
+    created.push(node);return node;
   }
   const byId=id=>{if(!ids.has(id))ids.set(id,element());return ids.get(id);};
   const selector=s=>{if(!selectors.has(s))selectors.set(s,element());return selectors.get(s);};
   let liveCalls=0,mockCalls=0,selections=0;
   byId('callNext').onclick=()=>mockCalls++;
-  const win={zhijianVoice:{beginMic(){liveCalls++;},open(){},startCall(){}},zhijianChat:{select(){selections++;}}};
+  const win={zhijianVoice:{beginMic(){liveCalls++;},open(){},startCall(){},setDemoProfile(value){choices.push(value);}},zhijianChat:{select(){selections++;}}};
   const context=vm.createContext({window:win,selectedExpert:1,
     experts:[{name:'Sally',voiceId:'sally',tags:[]},{name:'李彦宏',voiceId:'robin-li',publicFigure:true,tags:[],source:'https://ir.baidu.com/management/robin-li'},{name:'Mock',tags:[]}],
     document:{getElementById:byId,querySelector:selector,createElement:element},
     openModal(){},closeModal(){},startCallDemo(){},stopCallDemo(){},startTimer(){},showPage(){},sendMessage(){},
     callControlIcon(){return '';},escapeHTML:s=>s,
-    addCallLine(kind,name,text){lines.push({kind,name,text});return element();}
+    addCallLine(kind,name,text){const node=element();lines.push({kind,name,text,node});return node;}
   });
   vm.runInContext(fs.readFileSync(path.join(__dirname,'../static/consultation-ui.js'),'utf8'),context);
   win.zhijianUI.memory(false,null,'robin-li');
@@ -180,6 +203,22 @@ test('Robin UI uses its speaker, blank greeting, correct profile, and live call 
   assert.equal(lines.at(-1).name,'李彦宏 · AI 分身');
   assert.match(lines.at(-1).text,/公开资料/);
   assert.doesNotMatch(lines.at(-1).text,/Sally|已带入/);
+  const profile=JSON.parse(fs.readFileSync(path.join(__dirname,'../content/robin-li/demo_user.json'),'utf8'));
+  win.zhijianUI.memory(true,profile,'robin-li');
+  const greeting=lines.at(-1).node.querySelector('.call-line-text').textContent;
+  assert.match(greeting,/信息管理/);assert.match(greeting,/林小北/);
+  assert.doesNotMatch(greeting,/金融|硕士/);
+  for(const id of ['chatMemory','callMemory']){
+    const panel=created.find(node=>node.id===id);
+    assert.match(panel.querySelector('.memory-label').textContent,/第一份 AI 产品实习/);
+    assert.equal(panel.querySelector('input').checked,true);
+    assert.ok(panel.querySelector('ul').childNodes.some(node=>node.textContent.includes('两位')));
+    assert.match(panel.querySelector('small').textContent,/演示用户/);
+  }
+  created.find(node=>node.id==='callMemory').querySelector('input').onchange({target:{checked:false}});
+  assert.deepEqual(choices,[false]);
+  win.zhijianUI.memory(false,profile,'robin-li');win.zhijianUI.prepareCall();
+  assert.match(lines.at(-1).text,/空白会话/);assert.doesNotMatch(lines.at(-1).text,/林小北|已带入/);
   win.zhijianUI.profile(1);
   assert.equal(selector('.ai-identity-line > span:last-child').textContent,'基于公开人物资料');
   assert.equal(byId('chatExpertSubtitle').textContent,'AI 分身 · 基于公开资料与本次对话');

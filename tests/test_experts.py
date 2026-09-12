@@ -65,10 +65,13 @@ def test_config_is_allowlisted_and_profiles_are_explicit():
         sally = c.get("/api/config").json()
         robin = c.get("/api/config?expert_id=robin-li").json()
         assert sally["expert_id"] == "sally" and sally["default_use_demo_profile"] is True
-        assert robin["name"] == "李彦宏" and robin["default_use_demo_profile"] is False
+        assert robin["name"] == "李彦宏" and robin["default_use_demo_profile"] is True
         assert all(q["id"].startswith("robin-") for q in robin["qa"])
         assert robin["qa"] != sally["qa"]
-        assert robin["profile"] == sally["profile"]  # One optional student fixture, not expert biography.
+        assert robin["profile"]["id"] != sally["profile"]["id"]
+        assert "信息管理" in robin["profile"]["confirmed"]["education"]
+        assert "金融硕士" in sally["profile"]["confirmed"]["education"]
+        assert robin["profile"]["is_mock"] is True
         assert robin["capabilities"] == {"llm": False, "asr": False, "tts": False}
         assert "persona" not in robin and "speaker" not in robin
         for unknown in ("unknown", "../content", "", "ROBIN-LI"):
@@ -179,6 +182,37 @@ def test_robin_audio_reaches_asr_llm_tts_and_playback_ack_history():
             ws.send_json({"type": "input.text", "text": "继续解释", "speak": False})
             receive_until(ws, "turn.end")
             assert chat.messages[-1][-2]["content"] == "先看使用效果。再看需要改进的地方。"
+            prompt = chat.messages[0][0]["content"]
+            assert "demo_robin_student_001" in prompt and "校园资料" in prompt
+            assert "demo_user_001" not in prompt and "金融硕士" not in prompt
+
+
+def test_robin_case_memory_reaches_text_and_blank_mode_excludes_the_entire_fixture():
+    chat = Chat()
+    bundles = {"sally": Providers(), "robin-li": Providers(llm=chat)}
+    with TestClient(create_app(Settings(allowed_hosts=("testserver",)), bundles)) as c:
+        with c.websocket_connect("/ws/voice?expert_id=robin-li") as ws:
+            start(ws, "robin-li", True)
+            ws.send_json({"type": "input.text", "text": "我做过调研了，下一步怎么试？", "speak": False})
+            receive_until(ws, "turn.end")
+            prompt = chat.messages[-1][0]["content"]
+            profile = json.loads(prompt.split("本次选用的用户资料：", 1)[1])
+            assert profile["confirmed"]["name"] == "林小北"
+            assert "信息管理" in profile["confirmed"]["education"]
+            assert "两位" in profile["completed_actions"][0]["description"]
+            assert "待本次咨询" in profile["next_action"]["status"]
+            assert "演示预置" in profile["memory_source"]
+            assert "demo_user_001" not in prompt
+            assert "不能说成已经做完" in prompt
+            ws.send_json({"type": "session.start", "use_demo_profile": False})
+            assert receive_until(ws, "session.ready")[-1]["expert_id"] == "robin-li"
+            ws.send_json({"type": "input.text", "text": "现在是空白会话", "speak": False})
+            receive_until(ws, "turn.end")
+            blank = chat.messages[-1][0]["content"]
+            assert "尚未提供个人信息" in blank
+            assert "demo_robin_student_001" not in blank and "林小北" not in blank
+            assert "campus-search-interviews" not in blank
+            assert len(chat.messages[-1]) == 2
 
 
 def test_robin_config_does_not_expose_keys_and_does_not_fallback_to_sally_tts():

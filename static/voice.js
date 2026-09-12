@@ -65,13 +65,18 @@
       window.zhijianUI.memory(useDemoProfile, c.profile, id);
       const ready = c.capabilities;
       status(`DeepSeek ${ready.llm?'已配置':'待配置'} · 语音识别 ${ready.asr?'已配置':'待配置'} · 语音合成 ${ready.tts?'已配置':'待配置'}`);
-      const i = experts.findIndex(e => e.voiceId === id);
-      questionSets[i] = c.qa.map(q => q.question);
-      renderSuggestedQuestions(i);
+      refreshQuestions();
       return c;
     }).finally(() => { if (configLoading === pending) configLoading = null; });
     configLoading = pending;
     return pending;
+  }
+  function refreshQuestions() {
+    if (!config || !isActive()) return;
+    const i = experts.findIndex(e => e.voiceId === activeId);
+    const starters = useDemoProfile && config.profile?.starter_questions;
+    questionSets[i] = Array.isArray(starters) && starters.length ? starters : config.qa.map(q => q.question);
+    renderSuggestedQuestions(i);
   }
   async function connect() {
     if (!isActive()) return;
@@ -245,6 +250,7 @@
     if (!isActive()) return;
     send({type:'session.reset'}); discardSession();
     window.zhijianUI.memory(useDemoProfile, config?.profile, activeId);
+    refreshQuestions();
     status(useDemoProfile ? '新会话：已带入演示档案，可以直接提问' : '新会话：不带入档案，只使用接下来的对话');
   }
   window.zhijianVoice = {

@@ -10,19 +10,22 @@
   compose.className = 'sally-voice-compose';
   compose.innerHTML = '<input id="voiceTextInput" aria-label="语音咨询文字输入" placeholder="也可以输入问题，听语音回答"><button id="voiceTextSend" type="button">发送</button>';
   document.querySelector('.call-v12-dialogue').append(compose);
-  let memoryEnabled = true, memoryExpert = null, memoryReady = false;
+  let memoryEnabled = true, memoryExpert = null, memoryReady = false, memoryProfile = null, callGreeting = null;
   const isLive = () => Boolean(experts[selectedExpert]?.voiceId);
   function memoryPanel(id) {
     const panel = document.createElement('details');
     panel.id = id;
     panel.className = 'sally-memory';
     panel.hidden = true;
-    panel.innerHTML = '<summary>已有信息 · 演示档案</summary><label><input type="checkbox" checked> 带入金融转 AI 产品同学档案</label><p class="memory-hint">正在读取档案…</p><ul></ul><small>这是预设演示资料。切换会开始新会话；本轮补充暂不保存到下次。</small>';
+    panel.innerHTML = '<summary>已有信息 · 演示档案</summary><label><input type="checkbox" checked> <span class="memory-label">带入演示同学档案</span></label><p class="memory-hint">正在读取档案…</p><ul></ul><small>这是预设演示资料。切换会开始新会话；本轮补充暂不保存到下次。</small>';
     panel.querySelector('input').onchange = e => window.zhijianVoice?.setDemoProfile(e.target.checked);
     return panel;
   }
   const chatMemory = memoryPanel('chatMemory');
   bar.after(chatMemory);
+  const callMemory = memoryPanel('callMemory');
+  compose.before(callMemory);
+  const memoryPanels = [chatMemory, callMemory];
   let thinking, partial;
   const originalIntro = $('detailIntro2').textContent;
   const identityCopy = document.querySelector('.ai-identity-line > span:last-child');
@@ -43,30 +46,45 @@
     if (follow) follow.onclick = () => { $('chatInput').focus(); $('chatInput').placeholder = '继续追问刚才的建议...'; };
   }
   function removeThinking() { thinking?.remove(); thinking = null; }
+  function callIntroduction() {
+    const expert = experts[selectedExpert];
+    const hasProfile = memoryReady && memoryExpert === expert.voiceId;
+    const context = !hasProfile ? '正在读取咨询资料，你可以先说说这次最想解决的问题。'
+      : memoryEnabled ? (memoryProfile.call_context || '已带入' + memoryProfile.label + '档案，可以直接聊这次最想解决的问题。')
+      : '当前为空白会话，可以先聊你这次最想解决的问题。';
+    return '你好，我是' + expert.name + '的 AI 分身。' + (expert.publicFigure ? '我会结合公开资料和你的问题回答。' : '') + context
+      + '点击左侧「点击说话」，说完后点「说完了，发送」。';
+  }
   window.zhijianUI = {
     bindAnswer,
     memory(enabled, profile, expertId) {
       memoryExpert = expertId; memoryReady = Boolean(profile);
-      memoryEnabled = enabled;
-      chatMemory.hidden = !isLive() || memoryExpert !== experts[selectedExpert].voiceId || !memoryReady;
+      memoryEnabled = enabled; memoryProfile = profile;
       const known = profile?.confirmed;
-      for (const panel of [chatMemory]) {
+      for (const panel of memoryPanels) {
+        panel.hidden = !isLive() || memoryExpert !== experts[selectedExpert].voiceId || !memoryReady;
         panel.querySelector('input').checked = enabled;
-        panel.querySelector('summary').textContent = enabled ? '已带入演示档案 · 查看已有信息' : '空白会话 · 可带入演示档案';
+        panel.querySelector('.memory-label').textContent = '带入' + (profile?.label || '演示同学') + '档案';
+        panel.querySelector('summary').textContent = enabled ? '已带入演示档案 · ' + (profile?.label || '查看已有信息') : '空白会话 · 可带入演示档案';
+        panel.querySelector('small').textContent = profile?.memory_note || '这是预设演示资料。切换会开始新会话；本轮补充暂不保存到下次。';
         panel.querySelector('.memory-hint').textContent = !enabled ? '当前未向模型提供这份档案。' : known ? '回答会结合以下演示背景及本次对话；你可以在对话中纠正。' : '正在读取档案…';
         const list = panel.querySelector('ul');
         list.replaceChildren();
         if (enabled && known) {
-          for (const text of [known.education, ...(known.experience || []), known.ai_exposure, known.goal, known.decision_stage]) {
+          const actions = (profile.completed_actions || []).map(action => typeof action === 'string' ? action
+            : '已做：' + action.description + '。反馈：' + action.feedback + '。限制：' + action.limits);
+          const next = profile.next_action?.proposal ? ['下一步（待讨论）：' + profile.next_action.proposal] : [];
+          for (const text of [known.education, ...(known.experience || []), known.ai_exposure, known.goal, known.decision_stage, ...(known.constraints || []), ...actions, ...next]) {
             if (!text) continue;
             const li = document.createElement('li'); li.textContent = text; list.append(li);
           }
         }
       }
+      if (callGreeting?.isConnected) callGreeting.textContent = callIntroduction();
       if (isLive()) document.querySelector('.chat-v12-actions .context-chip').textContent = enabled ? '已结合演示档案与本次对话' : '基于本次对话';
     },
     profile(i) {
-      chatMemory.hidden = !experts[i].voiceId || memoryExpert !== experts[i].voiceId || !memoryReady;
+      for (const panel of memoryPanels) panel.hidden = !experts[i].voiceId || memoryExpert !== experts[i].voiceId || !memoryReady;
       const expert = experts[i];
       $('chatExpertSubtitle').textContent = expert.publicFigure ? 'AI 分身 · 基于公开资料与本次对话' : expert.voiceId ? 'AI 分身 · 基于本人资料与精选问答' : expert.demoProfile ? '演示分身 · 虚构角色与预设回复' : 'AI 分身 · 基于专家经验与真实案例';
       identityCopy.textContent = expert.publicFigure ? '基于公开人物资料' : expert.demoProfile ? '虚构角色 · 预设回复 · 产品演示' : expert.voiceId ? '基于本人资料与精选问答生成' : originalIdentity;
@@ -124,15 +142,13 @@
       } else if (value !== 'thinking') removeThinking();
       if (value === 'idle') { partial?.remove(); partial = null; }
     },
-    clear() { removeThinking(); partial?.remove(); partial = null; },
+    clear() { removeThinking(); partial?.remove(); partial = null; callGreeting = null; },
     prepareCall() {
       $('callModal').dataset.replay = 'false';
       $('callTranscript').textContent = '';
       partial = null;
       $('callRemaining').textContent = '单次录音最长 60 秒';
-      const expert = experts[selectedExpert];
-      const greeting = '你好，我是' + expert.name + '的 AI 分身。' + (expert.publicFigure ? '我会结合公开资料和你的问题回答。' : '') + (memoryEnabled ? '已带入模拟同学的金融实习与 AI 产品转型档案，可以直接聊这次最想解决的问题。' : '可以先聊你这次最想解决的问题。') + '点击左侧「点击说话」，说完后点「说完了，发送」。';
-      this.bubble('callTranscript', greeting, 'ai');
+      callGreeting = this.bubble('callTranscript', callIntroduction(), 'ai');
     }
   };
 
@@ -145,6 +161,7 @@
     $('callExpertRole').textContent = e.full;
     $('callExpertTags').innerHTML = e.tags.map(t => '<span>' + escapeHTML(t) + '</span>').join('');
     compose.hidden = !isLive() || $('callModal').dataset.replay === 'true';
+    callMemory.hidden = compose.hidden || !memoryReady || memoryExpert !== e.voiceId;
     document.querySelector('.call-permission-note').textContent = e.demoProfile ? (e.publicFigure ? '演示分身 · 未获本人授权，模拟回复不代表本人观点。' : '虚构专家 Demo · 回复为预设演示内容。') : e.voiceId
       ? (e.publicFigure ? 'AI 分身 · 基于公开资料 · 非本人实时回复 · 使用合成音色。说完后手动发送。' : 'AI 分身 · 非本人实时回复 · 使用合成音色。说完后手动发送，停顿不会自动截断。')
       : '首次允许麦克风后，本次咨询将持续复用，无需重复授权。';

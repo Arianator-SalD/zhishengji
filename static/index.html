@@ -244,6 +244,42 @@ svg.ico{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;st
 @media(max-width:650px){#expertStrip{grid-auto-columns:78vw;max-width:calc(100% + 10px)}#expertFilters{gap:8px}#expertFilters .pill{padding:8px 12px}.expert-browse-bar .expert-filter-note{font-size:11px}}
 @media(prefers-reduced-motion:reduce){#expertStrip .expert-card-filter-enter{animation:none}}
 img[src="/static/robin-li-office.png"]{object-position:center 5%}
+
+/* Keep the expert selection headline and portraits together in the first screen. */
+.expert-discovery-stage{min-height:calc(100svh - 96px);display:flex;flex-direction:column;padding-bottom:12px}
+#experts .hero{flex:1;display:flex;align-items:center;margin:0;padding:28px 0 36px;min-height:210px}
+#experts .hero h1{font-size:clamp(48px,4.8vw,72px);font-weight:800;line-height:1.18;letter-spacing:-1.5px;margin:0 0 22px}
+#experts .hero h1 em{display:inline-block}
+#experts .hero p{font-size:17px;line-height:1.8;max-width:850px}
+#experts #expertFilters{flex:none;margin:0 0 20px}
+#experts .expert-browse-bar{flex:none;margin:0 0 12px}
+#experts #expertStrip{flex:none;grid-auto-columns:clamp(260px,23vw,312px);gap:18px;margin-bottom:0}
+#expertStrip .expert-card{border-radius:20px}
+#expertStrip .expert-photo{height:157px;display:block}
+#expertStrip .expert-body{padding:14px 16px 16px}
+#expertStrip .expert-name{font-size:19px;gap:6px}
+#expertStrip .meta{font-size:13.5px;margin-top:6px}
+#expertStrip .tags{gap:7px;margin-top:9px}
+#expertStrip .tag{font-size:12px;padding:6px 9px;border-radius:10px}
+#expertStrip .expert-card-topic{font-size:13.5px;margin-top:11px}
+#expertStrip .aibadge{left:13px;top:11px;font-size:12px;gap:7px;padding:6px 10px 6px 7px}
+#expertStrip .ai-logo-mark{width:25px;height:25px;font-size:10px}
+#expertStrip .verify{width:18px;height:18px;font-size:11px}
+#experts>.actions-title{margin-top:56px}
+@media(min-width:651px) and (max-width:1150px){.expert-discovery-stage{min-height:calc(100svh - 90px)}}
+@media(max-width:650px){
+ .expert-discovery-stage{min-height:calc(100svh - 90px);padding-bottom:8px}
+ #experts .hero{min-height:200px;padding:28px 0 32px}
+ #experts .hero h1{font-size:clamp(30px,8.8vw,48px);letter-spacing:-1px;margin-bottom:16px}
+ #experts .hero p{font-size:14px;line-height:1.8}
+ #experts #expertStrip{grid-auto-columns:84vw}
+ #experts #expertFilters{margin-bottom:16px}
+ #experts>.actions-title{margin-top:36px;align-items:flex-start;gap:16px}
+ #experts>.actions-title h3{font-size:17px}
+ #experts>.actions-title h3 small{display:block;margin:8px 0 0!important;font-size:12px}
+ #experts>.actions-title button{flex:none;font-size:12px;padding-top:3px!important}
+ #experts>.action-row{grid-template-columns:1fr}
+}
 </style>
 <link rel="stylesheet" href="/static/voice.css?v=entry-buttons-1">
 <link rel="icon" type="image/svg+xml" href="/static/careerfly-logo.svg">
@@ -279,7 +315,7 @@ img[src="/static/robin-li-office.png"]{object-position:center 5%}
 <symbol id="i-check" viewbox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></symbol><symbol id="i-bulb" viewbox="0 0 24 24"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M12 2a7 7 0 0 0-4 12.7c.6.42 1 1.07 1 1.8V18h6v-1.5c0-.73.4-1.38 1-1.8A7 7 0 0 0 12 2Z"></path></symbol>
 <symbol id="i-gear" viewbox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21h-4v-.1A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3v-4h.1A1.7 1.7 0 0 0 4.6 8.6a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3h4v.1A1.7 1.7 0 0 0 15.4 4a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.12.37.34.7.64.96.3.26.68.4 1.08.4H21v4h-.1c-.4 0-.78.14-1.08.4-.3.26-.52.59-.64.96Z"></path></symbol></defs></svg>
 <header class="header">
-<div class="brand"><img class="brandmark" src="/static/careerfly-logo.svg" alt=""/><strong>职升机</strong><span class="tagline">遇见更好的职业自己</span></div>
+<div class="brand"><img class="brandmark" src="/static/careerfly-logo.svg" alt=""/><strong>职升机</strong></div>
 <nav class="topnav">
 <button class="active" data-page="experts">专家分身</button>
 <button data-page="community">社区</button>
@@ -333,12 +369,14 @@ img[src="/static/robin-li-office.png"]{object-position:center 5%}
 <main class="shell">
 <!-- Experts -->
 <section class="page active" id="experts">
+<div class="expert-discovery-stage">
 <div class="hero">
-<div><h1>今天先解决哪个 <em>求职问题</em>？</h1><p>与各领域资深专家的 AI 分身对话，获得专业、实用、可落地的建议，遇见更好的职业自己。</p></div>
+<div><h1>请选择你的<em>数字专家</em></h1><p>与各领域资深专家的 AI 分身对话，获得专业、实用、可落地的建议，遇见更好的职业自己。</p></div>
 </div>
 <div class="pills" id="expertFilters" aria-label="专家分类"><button class="pill active" data-filter="全部" aria-pressed="true">全部</button><button class="pill" data-filter="行业大牛" aria-pressed="false">行业大牛</button><button class="pill" data-filter="师兄师姐" aria-pressed="false">师兄师姐</button><button class="pill" data-filter="职业规划师" aria-pressed="false">职业规划师</button></div>
 <div class="expert-browse-bar"><div class="expert-filter-note" id="expertFilterNote" role="status"></div><div class="expert-scroll-controls"><button id="expertPrev" type="button" aria-label="向左浏览专家" aria-controls="expertStrip"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg></button><button id="expertNext" type="button" aria-label="向右浏览专家" aria-controls="expertStrip"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6 6 6-6 6"/></svg></button></div></div>
 <div class="expert-strip" id="expertStrip" role="region" aria-label="专家分身列表"></div>
+</div>
 
 <div class="actions-title"><h3>🚀 为你推荐的行动 <small style="font-weight:400;color:var(--muted);margin-left:12px">从一个小行动开始，让改变发生</small></h3><button type="button" id="viewMoreActions" data-page-jump="myActionPlan" style="color:var(--muted);border:0;background:transparent;padding:0">查看更多行动 ›</button></div>
 <div class="action-row">
@@ -837,9 +875,11 @@ const experts=[
 {group:'行业大牛',name:'唐可宁',role:'前字节增长策略负责人 · 8年经验',full:'前字节增长策略负责人 ｜ 8 年增长、用户与商业化经验',img:IMG.e9,tags:['市场营销','增长策略'],categories:['市场营销','互联网','产品经理','数据分析','模拟面试','应届生'],quote:'用增长视角连接用户、产品与商业',intro:'做过用户增长、商业化策略和内容生态增长，擅长把市场营销经验转译成增长策略、产品协作和数据驱动能力，适合互联网增长、商业化与策略岗位。'},
 {group:'职业规划师',name:'顾言川',role:'前京东校招负责人 · 9年经验',full:'前京东校招负责人 ｜ 9 年校园招聘与人才评估经验',img:IMG.e1,tags:['应届生','校招面试'],categories:['应届生','简历优化','模拟面试','职业定位','互联网','产品经理'],quote:'帮你把校招每一步走得更清楚',intro:'长期参与大型互联网企业校园招聘、面试官培训与人才评估。熟悉应届生在简历、群面、业务面和 HR 面中的常见问题，尤其擅长帮助缺少“标准经历”的同学建立可验证的竞争力。'},
 {"name":"李彦宏","group":"行业大牛","featured":true,"publicFigure":true,"role":"百度联合创始人、董事长兼 CEO","full":"百度联合创始人、董事长兼首席执行官｜行业大牛","img":"/static/robin-li-office.png","tags":["AI 应用","技术创业"],"categories":["AI","互联网","产品经理"],"quote":"AI 应用机会与技术职业选择","intro":"李彦宏是百度联合创始人、董事长兼首席执行官，负责百度的整体战略和业务运营。2000 年 1 月创立百度并担任董事长，2004 年 2 月起担任首席执行官。","intro2":"李彦宏拥有北京大学信息科学学士学位，以及美国纽约州立大学布法罗分校计算机科学硕士学位。创立百度之前，他曾在搜索引擎公司 Infoseek 担任工程师，并在 IDD Information Services 担任高级顾问。","source":"https://ir.baidu.com/management/robin-li","voiceId":"robin-li"},
-{"name":"林知夏","group":"师兄师姐","demoProfile":true,"role":"产品校招生 · 入职第 2 年","full":"师姐 Demo｜产品实习与校招经验","img":"/static/demo-senior-lin.svg","tags":["第一份实习","产品校招"],"categories":["产品经理","实习","应届生"],"quote":"从第一份实习聊到第一份工作","intro":"虚构师姐角色，模拟从校园项目、产品实习到校招入职的求职路径。适合讨论没有实习怎么开始、如何选第一份工作，以及入职后的适应。","intro2":"你可以从一份目标岗位描述或一段校园经历开始，试着把“我还差什么”拆成这一周能完成的准备。该角色与回复均为产品演示。","demoPerspective":"产品校招与早期实习准备","demoAnswer":"如果还没有产品实习，可以先选一个真实校园需求，做几次用户访谈，再把发现的问题、方案取舍和验证结果写成两页案例。拿这份案例投一小批匹配岗位，根据过筛和面试反馈迭代，避免一直准备却迟迟不开始。"},
-{"name":"陈一舟","group":"师兄师姐","demoProfile":true,"role":"计算机专业学长 · 研发求职","full":"师兄 Demo｜技术求职与项目准备","img":"/static/demo-senior-chen.svg","tags":["技术面试","项目复盘"],"categories":["技术","互联网","应届生"],"quote":"让一个小项目经得住追问","intro":"虚构学长角色，模拟计算机专业学生准备研发实习、整理项目与参加技术面试的过程。帮助你把复习清单和项目表达放到同一条主线上。","intro2":"可以带着一个做过的项目来聊：实现了什么、为什么这样设计、哪里遇到瓶颈。该角色没有真实公司背书，回答为预设演示。","demoPerspective":"研发实习与技术项目准备","demoAnswer":"先把一个项目跑通，再围绕一个具体瓶颈做深入复盘：问题怎样复现、考虑过哪些方案、为什么选择当前实现、测试结果是什么。每天留一段时间补基础和做题，同时练习三分钟讲项目，避免项目和面试准备脱节。"},
-{"name":"许望舒","group":"职业规划师","demoProfile":true,"role":"职业探索与方向选择 · Demo","full":"职业规划师 Demo｜职业探索与行动设计","img":"/static/demo-planner-xu.svg","tags":["职业探索","方向选择"],"categories":["职业定位","转型","职业规划"],"quote":"把模糊的方向变成一次小尝试","intro":"虚构职业规划师角色，模拟兴趣、能力与现实约束的梳理过程。适合还没确定方向、想比较不同岗位，或希望把选择转成行动的同学。","intro2":"先说清你最近犹豫的两三个选择，再找出影响决定的信息缺口。这里提供产品体验，不代表真实咨询师资质或服务。","demoPerspective":"职业探索与行动验证","demoAnswer":"把候选方向控制在两三个，分别写下你想做的具体任务、已有能力证据和不能妥协的现实条件。每个方向安排一次岗位访谈或小任务体验，一周后比较实际感受与反馈，再决定哪一个值得继续投入。"}
+{"name":"林知夏","group":"师兄师姐","demoProfile":true,"role":"产品校招生 · 入职第 2 年","full":"师姐 Demo｜产品实习与校招经验","img":"/static/demo-senior-lin.png","tags":["第一份实习","产品校招"],"categories":["产品经理","实习","应届生"],"quote":"从第一份实习聊到第一份工作","intro":"虚构师姐角色，模拟从校园项目、产品实习到校招入职的求职路径。适合讨论没有实习怎么开始、如何选第一份工作，以及入职后的适应。","intro2":"你可以从一份目标岗位描述或一段校园经历开始，试着把“我还差什么”拆成这一周能完成的准备。该角色与回复均为产品演示。","demoPerspective":"产品校招与早期实习准备","demoAnswer":"如果还没有产品实习，可以先选一个真实校园需求，做几次用户访谈，再把发现的问题、方案取舍和验证结果写成两页案例。拿这份案例投一小批匹配岗位，根据过筛和面试反馈迭代，避免一直准备却迟迟不开始。"},
+{"name":"陈一舟","group":"师兄师姐","demoProfile":true,"role":"计算机专业学长 · 研发求职","full":"师兄 Demo｜技术求职与项目准备","img":"/static/demo-senior-chen.png","tags":["技术面试","项目复盘"],"categories":["技术","互联网","应届生"],"quote":"让一个小项目经得住追问","intro":"虚构学长角色，模拟计算机专业学生准备研发实习、整理项目与参加技术面试的过程。帮助你把复习清单和项目表达放到同一条主线上。","intro2":"可以带着一个做过的项目来聊：实现了什么、为什么这样设计、哪里遇到瓶颈。该角色没有真实公司背书，回答为预设演示。","demoPerspective":"研发实习与技术项目准备","demoAnswer":"先把一个项目跑通，再围绕一个具体瓶颈做深入复盘：问题怎样复现、考虑过哪些方案、为什么选择当前实现、测试结果是什么。每天留一段时间补基础和做题，同时练习三分钟讲项目，避免项目和面试准备脱节。"},
+{"name":"许望舒","group":"职业规划师","demoProfile":true,"role":"职业探索与方向选择 · Demo","full":"职业规划师 Demo｜职业探索与行动设计","img":"/static/demo-planner-xu.png","tags":["职业探索","方向选择"],"categories":["职业定位","转型","职业规划"],"quote":"把模糊的方向变成一次小尝试","intro":"虚构职业规划师角色，模拟兴趣、能力与现实约束的梳理过程。适合还没确定方向、想比较不同岗位，或希望把选择转成行动的同学。","intro2":"先说清你最近犹豫的两三个选择，再找出影响决定的信息缺口。这里提供产品体验，不代表真实咨询师资质或服务。","demoPerspective":"职业探索与行动验证","demoAnswer":"把候选方向控制在两三个，分别写下你想做的具体任务、已有能力证据和不能妥协的现实条件。每个方向安排一次岗位访谈或小任务体验，一周后比较实际感受与反馈，再决定哪一个值得继续投入。"},
+{"name":"乔予安","group":"师兄师姐","demoProfile":true,"role":"数据分析学姐 · 入职第 2 年","full":"师姐 Demo｜数据分析实习与校招准备","img":"/static/demo-senior-qiao.png","tags":["数据分析","SQL 面试"],"categories":["数据分析","实习","应届生"],"quote":"把课程数据做成一份能讲清楚的分析","intro":"虚构学姐角色，模拟统计学学生从课程作业、数据分析实习到校招入职的成长过程。适合讨论 SQL 与统计基础、第一份数据实习，以及如何把分析项目讲出业务意义。","intro2":"可以带来一份课程报告或目标岗位描述，从问题定义、指标选择、分析过程到结论限制逐步梳理。该角色与回复均为产品演示。","demoPerspective":"数据分析实习与业务问题表达","demoAnswer":"如果还没有数据实习，可以从公开数据或课程数据中挑一个能说清楚的问题，先定义指标，再用 SQL 完成清洗与汇总，最后把发现、可能的原因和数据限制写成一页分析。面试时练习解释每一步为什么这样做，不把相关关系直接说成因果；用目标岗位的要求检查自己的基础短板。"},
+{"name":"周亦辰","group":"师兄师姐","demoProfile":true,"role":"用户运营学长 · 入职第 3 年","full":"师兄 Demo｜运营实习与活动项目复盘","img":"/static/demo-senior-zhou.png","tags":["运营实习","活动复盘"],"categories":["运营","市场营销","实习","应届生"],"quote":"把一次校园活动讲成有依据的运营经历","intro":"虚构学长角色，模拟从社团活动、用户运营实习到校招入职的求职路径。适合讨论第一份运营实习、用户反馈整理，以及如何复盘一次活动的目标与效果。","intro2":"可以从你真正负责过的一次招新、活动或社群维护开始，分清自己的动作、团队成果和无法核实的数字。该角色没有真实公司背书，回答为预设演示。","demoPerspective":"用户运营实习与校园活动复盘","demoAnswer":"先选一次你实际参与的校园活动，讲清楚服务谁、希望解决什么问题、你具体负责哪一步。把报名、到场、反馈等已有记录整理出来，缺失的数据如实说明，再复盘一个做得好的动作和一个下次要调整的环节。用这份材料练习三分钟项目表达，并对照运营实习岗位补用户沟通与基础数据能力。"}
 ];
 let currentExpertFilter='全部';
 function filteredExperts(filter=currentExpertFilter){
@@ -887,7 +927,9 @@ const questionSets=[
 ["想进入 AI 行业，应该先做什么作品？", "怎样判断一个 AI 应用是否有价值？", "技术背景和产品背景如何选择发展方向？", "如何用小项目验证创业想法？", "大学生该怎样练习发现真实需求？"],
 ["没有实习，第一份产品实习怎么找？", "校园项目怎样写进简历？", "第一份工作该看哪些因素？", "实习期间如何主动争取任务？", "校招准备怎么安排到每周？"],
 ["技术面试怎么讲项目亮点？", "做题与项目时间如何分配？", "研发实习项目怎样复盘？", "项目太简单，如何做出深度？", "没有比赛经历，如何准备研发校招？"],
-["兴趣很多，怎么选职业方向？", "两个岗位之间犹豫怎么办？", "怎样验证自己适不适合一个职业？", "职业规划怎样转成每周行动？", "转方向之前应该补充哪些信息？"]
+["兴趣很多，怎么选职业方向？", "两个岗位之间犹豫怎么办？", "怎样验证自己适不适合一个职业？", "职业规划怎样转成每周行动？", "转方向之前应该补充哪些信息？"],
+["没有数据实习，课程项目怎么整理？", "SQL 和统计基础应该先补什么？", "数据分析项目怎么讲出业务价值？", "数据岗面试里的业务问题怎么拆？", "分析结论不明显，项目还能写进简历吗？"],
+["没有大厂经历，第一份运营实习怎么找？", "社团活动怎样写成运营项目？", "运营面试怎么讲清楚个人贡献？", "活动效果一般，应该怎样复盘？", "内容运营和用户运营怎么选择？"]
 ];
 function renderSuggestedQuestions(i){
   const box=document.getElementById('suggestedQuestions'); if(!box)return;
@@ -1621,5 +1663,5 @@ document.querySelectorAll('.consult-record-v13').forEach((el,i)=>el.onclick=()=>
 
 
 
-<script src="/static/action-plan.js?v=student-2"></script><script src="/static/career-assessment.js?v=robin-entry-1"></script><script src="/static/consultation-ui.js?v=entry-buttons-1"></script><script src="/static/demo-chat.js?v=robin-live-1"></script><script src="/static/voice.js?v=robin-live-1"></script><script src="/static/search.js?v=1"></script>
+<script src="/static/action-plan.js?v=student-2"></script><script src="/static/career-assessment.js?v=robin-entry-1"></script><script src="/static/consultation-ui.js?v=robin-student-case-1"></script><script src="/static/demo-chat.js?v=robin-live-1"></script><script src="/static/voice.js?v=robin-student-case-1"></script><script src="/static/search.js?v=1"></script>
 </body></html>

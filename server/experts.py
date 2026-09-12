@@ -43,6 +43,6 @@ def build_experts(settings: Settings, providers=None, content_dir=None):
     return {
         "sally": Expert("sally", "Sally", Content(root), sally_providers, True),
         "robin-li": Expert("robin-li", "李彦宏",
-                           Content(root / "robin-li", name="李彦宏", profile_path=root / "demo_user.json"),
-                           robin_providers, False),
+                           Content(root / "robin-li", name="李彦宏"),
+                           robin_providers, True),
     }
