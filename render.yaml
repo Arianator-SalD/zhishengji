@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: zhishengji-voice
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn server.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeployTrigger: off
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.12
+      - key: REQUIRE_ACCESS_PASSWORD
+        value: "true"
+      - key: DEMO_ACCESS_PASSWORD
+        sync: false
+      - key: LLM_MODEL
+        value: deepseek-flash
+      - key: LLM_API_KEY
+        sync: false
+      - key: VOLC_ASR_API_KEY
+        sync: false
+      - key: VOLC_TTS_API_KEY
+        sync: false
+      - key: VOLC_TTS_SPEAKER
+        value: zh_female_vv_uranus_bigtts

@@ -1,0 +1,21 @@
+{
+  "id": "demo_user_001",
+  "label": "金融转 AI 产品 · 模拟同学",
+  "is_mock": true,
+  "confirmed": {
+    "education": "头部高校金融硕士在读（演示设定，具体学校未知）",
+    "experience": ["金融投研或战略研究类实习", "资料搜集、行业分析、竞品研究、报告输出"],
+    "ai_exposure": "接触并使用过 AI 工具，没有真正负责过产品需求、研发协作或上线迭代",
+    "goal": "判断是否尝试互联网 AI 产品，并找到低成本的验证方式",
+    "decision_stage": "正在纠结，尚未决定转型，仍保留金融方向"
+  },
+  "hypotheses": [
+    "可能在意成长空间，需通过对话确认",
+    "可能担心金融积累浪费，需通过对话确认"
+  ],
+  "unknown": ["具体学校", "毕业时间", "城市", "可投入时间", "经济约束", "薪酬与成长排序", "性格", "真实项目结果", "转型触发事件"],
+  "accepted_advice": [],
+  "completed_actions": [],
+  "next_action": null,
+  "decision_history": [{"option": "金融／投研／战略", "status": "保留"}, {"option": "互联网 AI 产品", "status": "探索"}]
+}
