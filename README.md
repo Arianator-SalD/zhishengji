@@ -57,7 +57,7 @@ cp .env.example .env
 ## 检查与部署
 
 ```sh
-.venv/bin/python -m pytest tests/test_backend.py tests/test_providers.py -q
+.venv/bin/python -m pytest tests -q
 node --test tests/audio-worklet.test.cjs
 ```
 
