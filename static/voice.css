@@ -9,3 +9,8 @@
 #callModal .voice-controls{margin:16px 0 8px}
 #callModal .voice-transcript{height:clamp(120px,25vh,240px)}
 @media(max-height:700px){#callModal .voice-call{padding:12px 16px}#callModal .voice-call h2{margin:8px 0;font-size:20px}#callModal .voice-orb{width:48px;height:48px;margin:10px auto;font-size:22px}}
+
+#chatModal .modal{display:flex;flex-direction:column;max-height:90vh;max-height:90dvh}
+#chatModal .modal-head,#chatModal .chat-input,#chatModal .chat-session-bar{flex-shrink:0}
+#chatModal .chat-body{min-height:0;flex:1 1 470px}
+.chat-session-bar{padding:8px 20px;display:flex;align-items:center;justify-content:space-between;gap:8px}

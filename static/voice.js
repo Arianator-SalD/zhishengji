@@ -52,7 +52,7 @@
       const ws = new WebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/ws/voice`);
       socket = ws; ws.binaryType = 'arraybuffer';
       const timeout = setTimeout(() => { ws.close(); reject(new Error('连接超时，请确认后端已启动')); }, 8000);
-      ws.onopen = () => send({type:'session.start',use_demo_profile:$('useDemoProfile').checked});
+      ws.onopen = () => send({type:'session.start',use_demo_profile:false});
       ws.onmessage = e => {
         if (ws !== socket) return;
         if (typeof e.data !== 'string') { playPCM(e.data); return; }
@@ -146,7 +146,7 @@
   }
   async function submit(text, speak = false) {
     if (!text.trim()) return;
-    if (!config?.capabilities?.llm) { status('管理员尚未配置 DeepSeek API Key', true); toast('DeepSeek 尚未配置，可先展开下方的示例参考稿'); return; }
+    if (!config?.capabilities?.llm) { status('管理员尚未配置 DeepSeek API Key', true); toast('暂时无法连接咨询服务，请稍后重试'); return; }
     interrupt(); const epoch = micEpoch;
     try {
       if (speak) await context(); if (epoch !== micEpoch) return;
@@ -168,7 +168,7 @@
   };
   $('muteBtn').onclick = beginMic; $('interruptBtn').onclick = interrupt;
   $('endCall').onclick = () => closeModal('callModal');
-  $('resetSession').onclick = reset; $('useDemoProfile').onchange = reset;
+  $('resetSession').onclick = reset;
   $('voiceTextSend').onclick = () => { const text = $('voiceTextInput').value; $('voiceTextInput').value = ''; submit(text, !!config?.capabilities?.tts); };
   $('voiceTextInput').onkeydown = e => { if (e.key === 'Enter' && !e.isComposing) $('voiceTextSend').click(); };
   document.querySelector('.mic-btn').onclick = () => openModal('callModal');
@@ -176,14 +176,8 @@
   fetch('/api/config').then(r => { if (!r.ok) throw new Error('后端尚未启动'); return r.json(); }).then(c => {
     config = c; const ready = c.capabilities;
     status(`DeepSeek ${ready.llm?'已配置':'待配置'} · 语音识别 ${ready.asr?'已配置':'待配置'} · 语音合成 ${ready.tts?'已配置':'待配置'}`);
-    questionSets[0] = c.qa.map(q => q.question); renderSuggestedQuestions(0);
-    for (const q of c.qa) {
-      const detail = document.createElement('details'), summary = document.createElement('summary'), p = document.createElement('p');
-      summary.textContent = q.question; p.textContent = q.answer || '参考稿见项目 content/qa.json';
-      detail.append(summary,p);
-      if (q.followup) { const followup = document.createElement('p'); followup.textContent = '追问：' + q.followup.question + '\n' + q.followup.answer; detail.append(followup); }
-      $('qaPreview').append(detail);
-    }
+    questionSets[0] = c.qa.map(q => q.question); renderSuggestedQuestions(selectedExpert);
+
   }).catch(e => status(e.message + '。请通过 FastAPI 提供的网址打开页面。',true));
   state('idle');
 })();
