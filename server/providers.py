@@ -18,12 +18,42 @@ from urllib.parse import urlparse
 
 import httpx
 from websockets.asyncio.client import connect
+from websockets.exceptions import InvalidStatus
 
 from .settings import Settings
 
 
 class ProviderError(Exception):
-    """Internal marker only; raw upstream messages must never reach the browser."""
+    """Raw upstream messages must never reach the browser."""
+    def __init__(self, message, *, upstream_code=None):
+        super().__init__(message)
+        self.upstream_code = upstream_code if type(upstream_code) is int else None
+
+
+def asr_failure_details(exc):
+    """Only emit bounded status codes and fixed labels; never exception text or headers."""
+    parts = []
+    message = "语音识别未完成，请重新开始。"
+    if isinstance(exc, InvalidStatus):
+        status = exc.response.status_code
+        parts.append(f"HTTP_{status}")
+        code = exc.response.headers.get("X-Api-Status-Code", "")
+        if code.isascii() and code.isdecimal() and len(code) <= 10:
+            parts.append(f"UPSTREAM_{code}")
+        if status in (401, 403):
+            message = "语音识别服务拒绝访问，请核对语音 API Key、所属项目及服务开通状态。"
+        elif status == 429:
+            message = "语音识别服务暂时繁忙，请稍后重试。"
+    elif isinstance(exc, ProviderError):
+        parts.append("ASR_PROTOCOL")
+        if exc.upstream_code is not None:
+            parts.append(f"UPSTREAM_{exc.upstream_code}")
+    elif isinstance(exc, TimeoutError):
+        parts.append("ASR_TIMEOUT")
+        message = "语音识别连接超时，请重新开始。"
+    else:
+        parts.append("ASR_CONNECTION")
+    return {"message": message, "diagnostic": "/".join(parts)}
 
 
 @dataclass(frozen=True)
@@ -208,7 +238,7 @@ def parse_asr_packet(raw):
     if flags & 1:
         offset += 4
     if kind == 15:
-        raise ProviderError("ASR upstream error")
+        raise ProviderError("ASR upstream error", upstream_code=struct.unpack_from(">I", raw, offset)[0] if len(raw) >= offset + 4 else None)
     if kind != 9 or len(raw) < offset + 4:
         raise ProviderError("invalid ASR response")
     length = struct.unpack_from(">I", raw, offset)[0]
@@ -225,7 +255,7 @@ def parse_asr_packet(raw):
         raise ProviderError("ASR serialization")
     payload = json.loads(data)
     if payload.get("code", 0) not in (0, 1000, 20000000):
-        raise ProviderError("ASR response error")
+        raise ProviderError("ASR response error", upstream_code=payload.get("code"))
     return payload, bool(flags & 2)
 
 

@@ -146,3 +146,20 @@ def test_asr_rechunks_pcm_and_waits_for_terminal_packet_not_definite_utterance()
         assert len(gzip.decompress(socket.sent[2][8:])) == 600
         assert socket.sent[2][1] & 2
     asyncio.run(scenario())
+
+
+def test_asr_diagnostics_keep_secrets_out_of_browser_errors():
+    from server.providers import asr_failure_details
+    from websockets.exceptions import InvalidStatus
+    from websockets.http11 import Response
+    from websockets.datastructures import Headers
+    exc = InvalidStatus(Response(403, "private-key-sentinel", Headers({
+        "X-Api-Status-Code": "45000030", "X-Api-Message": "private-key-sentinel"}), body=b"private-key-sentinel"))
+    result = asr_failure_details(exc)
+    assert result["diagnostic"] == "HTTP_403/UPSTREAM_45000030"
+    assert "private-key-sentinel" not in str(result)
+    assert "private-key-sentinel" not in str(asr_failure_details(RuntimeError("private-key-sentinel")))
+    packet = bytes((0x11, 0xf0, 0x11, 0)) + struct.pack(">I", 45000030) + b"private-key-sentinel"
+    with pytest.raises(ProviderError) as caught:
+        parse_asr_packet(packet)
+    assert asr_failure_details(caught.value)["diagnostic"] == "ASR_PROTOCOL/UPSTREAM_45000030"

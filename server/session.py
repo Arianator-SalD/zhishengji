@@ -7,6 +7,8 @@ import uuid
 
 from fastapi import WebSocketDisconnect
 
+from .providers import asr_failure_details
+
 
 @dataclass
 class Segment:
@@ -40,6 +42,7 @@ class VoiceSession:
         self.audio_queue = None
         self.audio_bytes = 0
         self.audio_ending = False
+        self.audio_closed = False
         self.closed = False
         self.send_lock = asyncio.Lock()
 
@@ -77,6 +80,7 @@ class VoiceSession:
         task, self.task = self.task, None
         self.audio_queue = None
         self.audio_ending = False
+        self.audio_closed = True
         if task:
             task.cancel()
             await asyncio.gather(task, return_exceptions=True)
@@ -245,6 +249,7 @@ class VoiceSession:
                     if item.final:
                         self.audio_queue = None
                         self.audio_ending = False
+                        self.audio_closed = True
                         text = item.text.strip()
                         await self.event(turn, "transcript.final", text=text)
                         break
@@ -260,10 +265,11 @@ class VoiceSession:
                 await self.event(turn, "state", value="idle")
         except asyncio.CancelledError:
             raise
-        except Exception:
+        except Exception as exc:
             self.audio_queue = None
             self.audio_ending = False
-            await self.event(turn, "error", code="ASR_FAILED", message="语音识别未完成，请检查权限或重试。")
+            self.audio_closed = True
+            await self.event(turn, "error", code="ASR_FAILED", **asr_failure_details(exc))
             await self.event(turn, "state", value="idle")
         finally:
             if "iterator" in locals() and hasattr(iterator, "aclose"):
@@ -318,6 +324,7 @@ class VoiceSession:
             self.audio_queue = asyncio.Queue(maxsize=self.s.max_audio_queue)
             self.audio_bytes = 0
             self.audio_ending = False
+            self.audio_closed = False
             self.task = asyncio.create_task(self.recognize(turn, self.audio_queue))
             return await self.event(turn, "state", value="listening")
         if kind == "audio.end":
@@ -335,7 +342,10 @@ class VoiceSession:
 
     async def receive_audio(self, chunk):
         tags = self.turn_tags(self.turn)
-        if self.audio_queue is None or self.audio_ending:
+        if self.audio_closed or self.audio_ending:
+            return
+        if self.audio_queue is None:
+            self.audio_closed = True
             return await self.error("AUDIO_NOT_STARTED", "请先开始语音输入。", **tags)
         self.audio_bytes += len(chunk)
         if (not chunk or len(chunk) % 2 or len(chunk) > self.s.max_audio_frame_bytes

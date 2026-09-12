@@ -467,3 +467,30 @@ def test_request_id_survives_audio_limit_cancellation():
             events = until(ws, "error")
             assert events[-1]["code"] == "AUDIO_LIMIT"
             assert all(e["request_id"] == "oversized-audio" for e in events)
+
+
+def test_asr_failure_is_not_overwritten_by_late_microphone_packets():
+    class BrokenASR:
+        async def transcribe(self, audio):
+            raise RuntimeError("private upstream secret")
+            yield Transcript("never")
+    async def scenario():
+        sock = Socket()
+        session = VoiceSession(sock, Providers(llm=Chat(), asr=BrokenASR()), Settings(), Content(ROOT / "content"))
+        await session.handle({"type": "session.start"})
+        await session.handle({"type": "audio.start", "request_id": "failed-recording"})
+        await session.task
+        for _ in range(12):
+            await session.receive_audio(bytes(3200))
+        errors = [e for e in sock.sent if e.get("type") == "error"]
+        assert len(errors) == 1
+        assert errors[0]["code"] == "ASR_FAILED"
+        assert "private upstream secret" not in str(sock.sent)
+        # A later recording must still accept audio.
+        session.p.asr = Recognition()
+        await session.handle({"type": "audio.start", "request_id": "retry-recording"})
+        await session.receive_audio(bytes(3200))
+        await session.handle({"type": "audio.end"})
+        await session.task
+        assert any(e.get("type") == "transcript.final" and e.get("request_id") == "retry-recording" for e in sock.sent)
+    asyncio.run(scenario())

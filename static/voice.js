@@ -3,7 +3,7 @@
   const $ = id => document.getElementById(id);
   let socket, connecting, config, turn = null, activeSegment = null, playbackTime = 0;
   let audioContext, sources = new Set(), mic, micNode, micSource, silentGain;
-  let recording = false, micEpoch = 0, hasSpeech = false, silence = 0, frames = 0;
+  let recording = false, micEpoch = 0, frames = 0;
   let mode = 'text', liveReply, voiceReply, busy = false, generationDone = false;
   let ignoreTurn = false, ignoredTurns = new Set(), currentReplyText = '';
   let requestId = null, failed = false;
@@ -18,7 +18,7 @@
   }
   function state(value) {
     $('voiceCall').dataset.state = value;
-    $('muteBtn').textContent = recording ? '说完了' : '开始说话';
+    $('muteBtn').textContent = recording ? '说完了，发送' : '开始说话';
     $('interruptBtn').disabled = !busy && !sources.size;
   }
   function stopPlayback() {
@@ -116,7 +116,7 @@
     if (m.type === 'audio.start' && acceptTurn(m)) activeSegment = {...m,remaining:0,ended:false,acked:false};
     if (m.type === 'audio.end' && activeSegment?.segment_id === m.segment_id) { activeSegment.ended = true; acknowledge(activeSegment); activeSegment = null; }
     if (m.type === 'turn.end' && !ignoreTurn && !ignoredTurns.has(m.turn_id)) { generationDone = true; finished(); }
-    if (m.type === 'error') { failed = true; endMic(false); stopPlayback(); busy = false; status(m.message, true); state('idle'); bubble(mode === 'voice' ? 'voiceTranscript' : 'chatBody', m.message, 'ai'); }
+    if (m.type === 'error') { failed = true; endMic(false); stopPlayback(); busy = false; const message = m.message + (m.diagnostic ? `（${m.diagnostic}）` : ''); status(message, true); state('idle'); bubble(mode === 'voice' ? 'voiceTranscript' : 'chatBody', message, 'ai'); }
   }
   async function beginMic() {
     if (recording) { endMic(); return; }
@@ -133,16 +133,15 @@
       micSource = ctx.createMediaStreamSource(stream); micNode = new AudioWorkletNode(ctx,'pcm-recorder');
       silentGain = ctx.createGain(); silentGain.gain.value = 0;
       micSource.connect(micNode); micNode.connect(silentGain); silentGain.connect(ctx.destination);
-      recording = true; hasSpeech = false; silence = 0; frames = 0;
+      recording = true; frames = 0;
       requestId = crypto.randomUUID(); send({type:'audio.start',request_id:requestId});
       micNode.port.onmessage = ({data}) => {
         if (!recording) return;
         if (socket?.readyState !== WebSocket.OPEN || socket.bufferedAmount > 640000) { endMic(false); status('网络发送堵塞，请重新开始',true); return; }
         socket.send(data.buffer); frames++;
-        if (data.rms > 0.015) { hasSpeech = true; silence = 0; } else silence++;
-        if ((hasSpeech && silence >= 13) || frames >= 600) endMic();
+        if (frames >= 600) endMic();
       };
-      status('正在听，停顿后会自动回答'); state('listening');
+      status('正在听，说完后点击「说完了，发送」（最长 60 秒）'); state('listening');
     } catch (e) { if (epoch !== micEpoch) return; endMic(false); status(e.name === 'NotAllowedError' ? '麦克风权限未开启，可改用文字提问' : e.message, true); }
   }
   async function submit(text, speak = false) {
