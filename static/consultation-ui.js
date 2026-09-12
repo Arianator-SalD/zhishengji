@@ -66,7 +66,7 @@
       chatMemory.hidden = callMemory.hidden = i !== 0;
       document.querySelector('.chat-v12-actions .context-chip').textContent = i === 0 ? (memoryEnabled ? '已结合演示档案与本次对话' : '基于本次对话') : '已结合你的职业画像';
       identityCopy.textContent = i === 0 ? '基于本人资料与精选问答生成' : originalIdentity;
-      $('detailIntro2').textContent = i === 0 ? '这里是 Sally 的 AI 分身，回答根据已整理的本人资料和本次对话生成，不是本人实时回复。' : originalIntro;
+      $('detailIntro2').textContent = experts[i].intro2 || originalIntro;
     },
     chatRow(text, who) {
       if (who === 'me') return appendChatUser(text);
