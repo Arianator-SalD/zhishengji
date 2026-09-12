@@ -13,13 +13,12 @@
     $('callStatus').textContent = text;
   }
   function bubble(container, text, who) {
-    const el = document.createElement('div'); el.className = 'bubble ' + who; el.textContent = text;
-    $(container).append(el); $(container).scrollTop = $(container).scrollHeight; return el;
+    return window.zhijianUI.bubble(container, text, who);
   }
   function state(value) {
-    $('voiceCall').dataset.state = value;
-    $('muteBtn').textContent = recording ? '说完了，发送' : '开始说话';
-    $('interruptBtn').disabled = !busy && !sources.size;
+    $('callModal').dataset.state = value;
+    $('muteBtn').disabled = !busy && !sources.size;
+    window.zhijianUI.state(value, {recording, busy, hasAudio: sources.size > 0, mode});
   }
   function stopPlayback() {
     for (const s of sources) { s.onended = null; try { s.stop(); } catch {} }
@@ -106,19 +105,19 @@
     const scoped = ['transcript.partial','transcript.final','reply.delta','audio.start','audio.end','turn.end'];
     if ((scoped.includes(m.type) || m.request_id != null) && m.request_id !== requestId) return;
     if (scoped.includes(m.type) && !requestId) return;
-    if (m.type === 'transcript.partial') $('liveTranscript').textContent = m.text;
+    if (m.type === 'transcript.partial') window.zhijianUI.partial(m.text);
     if (m.type === 'transcript.final') {
-      $('liveTranscript').textContent = ''; if (m.text) { bubble('voiceTranscript',m.text,'me'); bubble('chatBody',m.text,'me'); }
+      window.zhijianUI.finishTranscript(m.text); if (m.text) bubble('chatBody',m.text,'me');
     }
     if (m.type === 'reply.delta' && acceptTurn(m)) {
-      liveReply ||= bubble('chatBody','','ai'); voiceReply ||= bubble('voiceTranscript','','ai');
+      liveReply ||= bubble('chatBody','','ai'); voiceReply ||= bubble('callTranscript','','ai');
       currentReplyText += m.text; liveReply.textContent = voiceReply.textContent = currentReplyText;
-      for (const id of ['chatBody','voiceTranscript']) $(id).scrollTop = $(id).scrollHeight;
+      for (const id of ['chatBody','callTranscript']) $(id).scrollTop = $(id).scrollHeight;
     }
     if (m.type === 'audio.start' && acceptTurn(m)) activeSegment = {...m,remaining:0,ended:false,acked:false};
     if (m.type === 'audio.end' && activeSegment?.segment_id === m.segment_id) { activeSegment.ended = true; acknowledge(activeSegment); activeSegment = null; }
     if (m.type === 'turn.end' && !ignoreTurn && !ignoredTurns.has(m.turn_id)) { generationDone = true; finished(); }
-    if (m.type === 'error') { failed = true; endMic(false); stopPlayback(); busy = false; const message = m.message + (m.diagnostic ? `（${m.diagnostic}）` : ''); status(message, true); state('idle'); bubble(mode === 'voice' ? 'voiceTranscript' : 'chatBody', message, 'ai'); }
+    if (m.type === 'error') { failed = true; endMic(false); stopPlayback(); busy = false; const message = m.message + (m.diagnostic ? `（${m.diagnostic}）` : ''); status(message, true); state('idle'); bubble(mode === 'voice' ? 'callTranscript' : 'chatBody', message, 'ai'); }
   }
   async function beginMic() {
     if (recording) { endMic(); return; }
@@ -154,27 +153,26 @@
       if (speak) await context(); if (epoch !== micEpoch) return;
       await connect(); if (epoch !== micEpoch) return;
       ignoreTurn = false; generationDone = false; failed = false; turn = null; currentReplyText = ''; liveReply = voiceReply = null;
-      bubble('chatBody',text,'me'); bubble('voiceTranscript',text,'me'); busy = true; state('thinking'); status('正在思考…');
+      bubble('chatBody',text,'me'); bubble('callTranscript',text,'me'); busy = true; state('thinking'); status('正在思考…');
       requestId = crypto.randomUUID(); send({type:'input.text',text,speak,request_id:requestId});
     } catch (e) { if (epoch === micEpoch) status(e.message,true); }
   }
   function reset() {
     interrupt(); send({type:'session.reset'}); socket?.close(); socket = null; connecting = null;
-    $('chatBody').textContent = ''; $('voiceTranscript').textContent = ''; $('liveTranscript').textContent = '';
+    $('chatBody').textContent = ''; $('callTranscript').textContent = ''; window.zhijianUI.clear();
     status('新会话：只使用接下来的对话内容');
   }
   window.zhijianVoice = {
     suspend() { interrupt(); },
+    beginMic,
+    startCall() { mode = 'voice'; state('idle'); status('点击说话，说完后手动发送'); },
     open(id) { mode = id === 'callModal' ? 'voice' : 'text'; },
     close(id) { if (id === 'callModal') interrupt(); },
     send() { const text = $('chatInput').value.trim(); $('chatInput').value = ''; return submit(text); }
   };
-  $('muteBtn').onclick = beginMic; $('interruptBtn').onclick = interrupt;
-  $('endCall').onclick = () => closeModal('callModal');
   $('resetSession').onclick = reset;
   $('voiceTextSend').onclick = () => { const text = $('voiceTextInput').value; $('voiceTextInput').value = ''; submit(text, !!config?.capabilities?.tts); };
   $('voiceTextInput').onkeydown = e => { if (e.key === 'Enter' && !e.isComposing) $('voiceTextSend').click(); };
-  document.querySelector('.mic-btn').onclick = () => openModal('callModal');
   window.addEventListener('pagehide',() => { endMic(false); stopPlayback(); socket?.close(); });
   fetch('/api/config').then(r => { if (!r.ok) throw new Error('后端尚未启动'); return r.json(); }).then(c => {
     config = c; const ready = c.capabilities;

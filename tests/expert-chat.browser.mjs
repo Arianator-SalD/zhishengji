@@ -30,12 +30,12 @@ export async function verifyExpertChat(page) {
     assert.equal(state.controlsVisible, false);
     await page.fill('#chatInput', `专家 ${i} 的测试问题 <img src=x onerror=alert(1)>`);
     await page.click('#sendChat');
-    await page.waitForFunction(() => chatBody.children.length === 5);
+    await page.waitForFunction(() => chatBody.querySelectorAll('.chat-msg').length === 5 && !chatBody.querySelector('.chat-thinking-row'));
     const result = await page.evaluate(() => ({
       answer: chatBody.lastElementChild.textContent,
-      hasImage: !!chatBody.querySelector('img'), frames: window.__chatFrames
+      hasImage: !!chatBody.querySelector('.user-msg img'), frames: window.__chatFrames
     }));
-    assert.ok(result.answer.startsWith('我先帮你拆成三个部分：'));
+    assert.ok(result.answer.includes('我的核心判断是'));
     assert.equal(result.hasImage, false);
     assert.deepEqual(result.frames, []);
   }
@@ -47,7 +47,7 @@ export async function verifyExpertChat(page) {
   assert.equal(sally.controlsVisible, true);
   assert.equal(await page.evaluate(() => chatBody.children.length), 0);
   await open(1);
-  await page.waitForFunction(() => chatBody.children.length === 7);
+  await page.waitForFunction(() => chatBody.querySelectorAll('.chat-msg').length === 7 && !chatBody.querySelector('.chat-thinking-row'));
   await open(0);
   assert.equal(await page.evaluate(() => chatBody.children.length), 0);
 
@@ -65,10 +65,10 @@ export async function verifyExpertChat(page) {
   await open(2);
   await page.fill('#chatInput', '切换后继续模拟咨询');
   await page.click('#sendChat');
-  await page.waitForFunction(() => chatBody.children.length === 7);
+  await page.waitForFunction(() => chatBody.querySelectorAll('.chat-msg').length === 7 && !chatBody.querySelector('.chat-thinking-row'));
   assert.equal(await page.evaluate(() => chatBody.textContent.includes('浏览器集成测试')), false);
   await open(0);
   assert.equal(await page.evaluate(() => chatBody.textContent.includes('切换后继续模拟咨询')), false);
   assert.equal(await page.evaluate(() => chatBody.textContent.includes('Sally 后端路由测试')), true);
-  console.log('PASS: 9 expert identities, original mock replies, zero mock WebSocket traffic, safe input rendering, isolated histories and delayed replies, Sally backend routing');
+  console.log('PASS: 9 expert identities, V4 topic-aware mock replies, zero mock WebSocket traffic, safe input rendering, isolated histories and delayed replies, Sally backend routing');
 }

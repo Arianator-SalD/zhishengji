@@ -1,16 +1,17 @@
-.voice-panel{margin:22px 0;padding:20px;background:#f3f5ff;border:1px solid #dce1f6;border-radius:18px}.voice-panel p{margin:8px 0;color:#59657b;font-size:13px;line-height:1.7}.voice-panel label{display:flex;gap:10px;align-items:center;font-size:13px;margin:14px 0}.voice-panel details{border-top:1px solid #dce1f6;padding:12px 0}.voice-panel summary{cursor:pointer;font-size:14px;font-weight:600}.voice-panel details p{white-space:pre-wrap}.voice-status{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:#5264ba}.voice-status:before{content:'';width:8px;height:8px;background:currentColor;border-radius:50%}.voice-call{padding:24px;text-align:center}.voice-call h2{font-size:22px}.voice-orb{margin:18px auto;width:74px;height:74px;border-radius:50%;display:grid;place-items:center;background:#eef0ff;color:#5264ff;font-size:26px}.voice-call[data-state=listening] .voice-orb,.voice-call[data-state=speaking] .voice-orb{animation:voicePulse 1.2s infinite alternate}.voice-transcript{height:240px;overflow:auto;text-align:left;padding:12px;background:#f7f8fc;border-radius:12px;margin:16px 0}.voice-transcript:empty:after{content:'开始后，说出你想咨询的问题。也可以先用文字测试。';color:#7a8497;font-size:14px}.voice-controls{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}.voice-help{color:#738097;font-size:12px;line-height:1.7}.voice-error{color:#af4141!important}.bubble{white-space:pre-wrap}.voice-live-text{font-size:13px;min-height:22px;color:#5264ba}.voice-reset{margin-left:12px;font-size:12px;border:0;background:none;color:#64709b;cursor:pointer}#callAvatar{display:none}#callModal .modal{max-width:620px!important}#chatModal .modal-head{flex-wrap:wrap}#voiceTextInput{width:100%;border:1px solid #dce1f6;padding:12px;border-radius:10px;margin:12px 0}#voiceTextSend{margin-bottom:10px}.voice-prototype{position:fixed;bottom:12px;left:12px;background:#fff;border:1px solid #e1e5f3;border-radius:8px;padding:8px 12px;color:#68758b;font-size:11px;z-index:9}@keyframes voicePulse{to{box-shadow:0 0 0 12px #5264ff15}}@media(max-width:600px){.voice-call{padding:16px}.voice-transcript{height:210px}.voice-prototype{display:none}}
-
-#voiceStatus{display:flex;margin-top:12px}.expert-chat-dock input{min-width:0}.expert-profile-main{min-width:0}@media(max-width:650px){header{padding:12px!important;gap:12px!important;flex-wrap:wrap}.header-right{display:none!important}.topnav{gap:16px!important}.expert-profile-grid{grid-template-columns:1fr!important}.expert-profile-left{max-width:260px}.expert-profile-wrap{padding:16px!important}.expert-chat-dock{width:calc(100vw - 24px);flex-wrap:wrap;border-radius:16px;bottom:10px}.expert-chat-dock .attach-btn{display:none}.expert-chat-dock input{width:calc(100% - 45px);flex:auto;min-height:36px}.expert-chat-dock .dock-call{white-space:nowrap;min-height:40px}.question-grid{grid-template-columns:1fr!important}.voice-panel{padding:16px}.expert-profile-main .profile-actions{flex-wrap:wrap}}
-
-/* Keep the microphone controls reachable on small windows and zoomed pages. */
-#callModal .modal{display:flex;flex-direction:column;max-height:90vh;max-height:90dvh}
-#callModal .modal-head{flex-shrink:0}
-#callModal .voice-call{min-height:0;overflow-y:auto;overscroll-behavior:contain}
-#callModal .voice-controls{margin:16px 0 8px}
-#callModal .voice-transcript{height:clamp(120px,25vh,240px)}
-@media(max-height:700px){#callModal .voice-call{padding:12px 16px}#callModal .voice-call h2{margin:8px 0;font-size:20px}#callModal .voice-orb{width:48px;height:48px;margin:10px auto;font-size:22px}}
-
+/* Sally uses the V4 prototype layout; only backend-specific controls live here. */
+.chat-session-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 24px;background:#fff;border-bottom:1px solid #eceef5;font-size:12px;color:#778198;flex-shrink:0}
+.chat-session-bar button{border:0;background:#f0f2ff;color:#606bce;padding:6px 12px;border-radius:10px;cursor:pointer;white-space:nowrap}
+.voice-error{color:#af4141!important}
+.chat-answer-card p,.chat-bubble,.call-line-text{white-space:pre-wrap;overflow-wrap:anywhere}
+.sally-voice-compose{display:flex;gap:8px;padding:10px 18px;border-top:1px solid #e8e6e2;background:#fff;flex-shrink:0}
+.sally-voice-compose[hidden]{display:none}
+.sally-voice-compose input{flex:1;min-width:0;border:1px solid #deddd9;background:#fafaf9;border-radius:12px;padding:10px;font:inherit;font-size:13px}
+.sally-voice-compose button{border:0;border-radius:12px;padding:0 16px;background:#5868d9;color:white;cursor:pointer}
 #chatModal .modal{display:flex;flex-direction:column;max-height:90vh;max-height:90dvh}
-#chatModal .modal-head,#chatModal .chat-input,#chatModal .chat-session-bar{flex-shrink:0}
-#chatModal .chat-body{min-height:0;flex:1 1 470px}
-.chat-session-bar{padding:8px 20px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+#chatBody{min-height:0;overflow-y:auto;flex:1}
+.chat-v12-head,.chat-v12-topbar,.chat-v12-expert,.chat-v12-compose,.chat-v12-foot{flex-shrink:0}
+.chat-v12-compose input{min-width:0}
+#callModal .modal{max-height:90vh;max-height:90dvh;display:flex;flex-direction:column}
+.call-v12-topbar{flex-shrink:0}.call-v12-layout{min-height:0;flex:1}.call-v12-profile{overflow-y:auto;min-height:0}.call-v12-dialogue{min-height:0}.call-transcript{min-height:100px}
+.voice-side-btn:disabled{opacity:.45;cursor:default}.expert-chat-dock input,.expert-profile-main{min-width:0}
+@media(max-width:650px){header{padding:12px!important;gap:12px!important;flex-wrap:wrap}.header-right{display:none!important}.topnav{gap:16px!important}.expert-profile-grid{grid-template-columns:1fr!important}.expert-profile-left{max-width:260px}.expert-profile-wrap{padding:16px!important}.expert-chat-dock{width:calc(100vw - 24px);flex-wrap:wrap;border-radius:16px;bottom:10px}.expert-chat-dock .attach-btn{display:none}.expert-chat-dock input{width:calc(100% - 45px);flex:auto;min-height:36px}.expert-chat-dock .dock-call{white-space:nowrap;min-height:40px}.question-grid{grid-template-columns:1fr!important}.expert-profile-main .profile-actions{flex-wrap:wrap}.chat-session-bar{padding:6px 14px}.call-v12-layout{overflow-y:auto;display:block}.call-v12-profile{overflow:visible}.call-v12-dialogue{min-height:340px}.call-v12-controls{position:relative}.call-brand-mini small{display:none}}
