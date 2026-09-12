@@ -1,8 +1,8 @@
-# 职升机 · 任妍乐语音咨询 Demo
+# 职升机 · Sally语音咨询 Demo
 
 保留原 HTML 的页面与咨询入口，接入 FastAPI。对话链路是：浏览器麦克风 → 火山流式语音识别 2.0 → DeepSeek 流式回答 → 火山语音合成 2.0 → 浏览器边收边播。无需数字人形象。
 
-本次使用最新的 `职升机_Web交互Demo.html`。原文件完整保存在 `prototype/`，线上使用 `static/index.html` 的后端接入版本。其余专家、注册、社区和咨询记录为原型交互；当前实际咨询身份为任妍乐。
+本次使用最新的 `职升机_Web交互Demo.html`。原文件完整保存在 `prototype/`，线上使用 `static/index.html` 的后端接入版本。其余专家、注册、社区和咨询记录为原型交互；当前实际咨询身份为Sally。
 
 Render 操作见 [部署步骤](RENDER部署.md)。真实 Key 仅在 Render 的 Environment 页面输入。另需设置至少 12 位的 `DEMO_ACCESS_PASSWORD`，供团队成员进入演示使用；它不是模型 Key。Render 环境缺少访问口令时，除健康检查外默认不开放页面和对话。
 
@@ -17,7 +17,7 @@ cp .env.example .env
 .venv/bin/python -m uvicorn server.main:app --host 127.0.0.1 --port 8765
 ```
 
-打开 http://127.0.0.1:8765 ，点击任妍乐卡片。不要直接双击 HTML，页面需要同源后端。
+打开 http://127.0.0.1:8765 ，点击Sally卡片。不要直接双击 HTML，页面需要同源后端。
 
 本机已有 `.venv` 时，可直接双击 `启动本地Demo.command`。它只监听本机地址。
 
