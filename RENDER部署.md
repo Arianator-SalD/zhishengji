@@ -1,5 +1,9 @@
 # Render 部署配置
 
+## 当前服务名称与网址
+
+Render 后台服务名称为 `careerfly`，服务 ID 仍为 `srv-dain4m3m8hqs73dhvur0`。改名后实际访问网址仍是 [职升机](https://zhishengji-voice.onrender.com)，没有变成 careerfly.onrender.com。若需要新网址，需另建服务或绑定自有域名；新名称可用性尚未确认。render.yaml 的服务名已同步；配置随本轮版本发布，部署状态见最新迭代日志。
+
 ## 已有 Sally 服务：增加李彦宏分身
 
 在现有 Render 服务的 Environment 中新增以下两项，不需要创建第二个服务：
@@ -25,7 +29,7 @@ ROBIN_TTS_RESOURCE_ID=seed-tts-2.0
 
 | 字段 | 填写内容 |
 | --- | --- |
-| Name | zhishengji-voice |
+| Name | careerfly |
 | Language | Python 3 |
 | Root Directory | 如果直接上传部署包里的文件到仓库根目录，留空 |
 | Build Command | `pip install -r requirements.txt` |

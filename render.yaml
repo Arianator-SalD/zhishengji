@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: zhishengji-voice
+    name: careerfly
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt

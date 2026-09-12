@@ -245,9 +245,9 @@ svg.ico{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;st
 @media(prefers-reduced-motion:reduce){#expertStrip .expert-card-filter-enter{animation:none}}
 img[src="/static/robin-li-office.png"]{object-position:center 5%}
 
-/* Keep the expert selection headline and portraits together in the first screen. */
-.expert-discovery-stage{min-height:calc(100svh - 96px);display:flex;flex-direction:column;padding-bottom:12px}
-#experts .hero{flex:1;display:flex;align-items:center;margin:0;padding:28px 0 36px;min-height:210px}
+/* Keep expert discovery compact instead of stretching the hero to fill the viewport. */
+.expert-discovery-stage{display:flex;flex-direction:column;padding-bottom:12px}
+#experts .hero{flex:none;display:flex;align-items:flex-start;margin:0;padding:24px 0 32px;min-height:0}
 #experts .hero h1{font-size:clamp(48px,4.8vw,72px);font-weight:800;line-height:1.18;letter-spacing:-1.5px;margin:0 0 22px}
 #experts .hero h1 em{display:inline-block}
 #experts .hero p{font-size:17px;line-height:1.8;max-width:850px}
@@ -266,10 +266,9 @@ img[src="/static/robin-li-office.png"]{object-position:center 5%}
 #expertStrip .ai-logo-mark{width:25px;height:25px;font-size:10px}
 #expertStrip .verify{width:18px;height:18px;font-size:11px}
 #experts>.actions-title{margin-top:56px}
-@media(min-width:651px) and (max-width:1150px){.expert-discovery-stage{min-height:calc(100svh - 90px)}}
 @media(max-width:650px){
- .expert-discovery-stage{min-height:calc(100svh - 90px);padding-bottom:8px}
- #experts .hero{min-height:200px;padding:28px 0 32px}
+ .expert-discovery-stage{padding-bottom:8px}
+ #experts .hero{padding:16px 0 24px}
  #experts .hero h1{font-size:clamp(30px,8.8vw,48px);letter-spacing:-1px;margin-bottom:16px}
  #experts .hero p{font-size:14px;line-height:1.8}
  #experts #expertStrip{grid-auto-columns:84vw}
@@ -325,7 +324,7 @@ img[src="/static/robin-li-office.png"]{object-position:center 5%}
 <div class="header-right">
 <div class="search"><svg class="ico" aria-hidden="true"><use href="#i-search"></use></svg><input id="globalSearch" role="combobox" aria-label="搜索专家、职位、求职问题" aria-autocomplete="list" aria-expanded="false" aria-controls="globalSearchResults" autocomplete="off" maxlength="100" placeholder="搜索专家、职位、求职问题..."/><button id="clearGlobalSearch" type="button" aria-label="清空搜索" hidden>×</button><div id="globalSearchPanel" class="search-panel" hidden><p id="globalSearchCaption" class="search-caption" role="status"></p><div id="globalSearchResults" role="listbox" aria-label="搜索结果"></div><p class="search-footnote">搜索站内专家与推荐问题 · 选择问题后可编辑再发送</p></div></div>
 <button class="iconbtn"><svg class="ico"><use href="#i-bell"></use></svg><span class="notif">3</span></button>
-<button class="new-user-demo-btn" id="newUserDemoBtn">新用户体验</button><button class="header-user-link" type="button" data-page-jump="my" aria-label="林小北，进入我的"><img alt="" class="avatar" src="/static/user-avatar.jpg"/><strong style="font-size:13px">林小北⌄</strong></button>
+<button class="new-user-demo-btn" id="newUserDemoBtn">新用户体验</button><button class="header-user-link" type="button" data-page-jump="my" aria-label="林小北，进入我的"><img alt="" class="avatar" src="/static/user-avatar.jpg"/><strong style="font-size:13px">林小北</strong></button>
 </div>
 </header>
 <div class="onboard-overlay hidden" id="onboardOverlay" aria-hidden="true">
@@ -875,8 +874,8 @@ const experts=[
 {group:'行业大牛',name:'唐可宁',role:'前字节增长策略负责人 · 8年经验',full:'前字节增长策略负责人 ｜ 8 年增长、用户与商业化经验',img:IMG.e9,tags:['市场营销','增长策略'],categories:['市场营销','互联网','产品经理','数据分析','模拟面试','应届生'],quote:'用增长视角连接用户、产品与商业',intro:'做过用户增长、商业化策略和内容生态增长，擅长把市场营销经验转译成增长策略、产品协作和数据驱动能力，适合互联网增长、商业化与策略岗位。'},
 {group:'职业规划师',name:'顾言川',role:'前京东校招负责人 · 9年经验',full:'前京东校招负责人 ｜ 9 年校园招聘与人才评估经验',img:IMG.e1,tags:['应届生','校招面试'],categories:['应届生','简历优化','模拟面试','职业定位','互联网','产品经理'],quote:'帮你把校招每一步走得更清楚',intro:'长期参与大型互联网企业校园招聘、面试官培训与人才评估。熟悉应届生在简历、群面、业务面和 HR 面中的常见问题，尤其擅长帮助缺少“标准经历”的同学建立可验证的竞争力。'},
 {"name":"李彦宏","group":"行业大牛","featured":true,"publicFigure":true,"role":"百度联合创始人、董事长兼 CEO","full":"百度联合创始人、董事长兼首席执行官｜行业大牛","img":"/static/robin-li-office.png","tags":["AI 应用","技术创业"],"categories":["AI","互联网","产品经理"],"quote":"AI 应用机会与技术职业选择","intro":"李彦宏是百度联合创始人、董事长兼首席执行官，负责百度的整体战略和业务运营。2000 年 1 月创立百度并担任董事长，2004 年 2 月起担任首席执行官。","intro2":"李彦宏拥有北京大学信息科学学士学位，以及美国纽约州立大学布法罗分校计算机科学硕士学位。创立百度之前，他曾在搜索引擎公司 Infoseek 担任工程师，并在 IDD Information Services 担任高级顾问。","source":"https://ir.baidu.com/management/robin-li","voiceId":"robin-li"},
-{"name":"林知夏","group":"师兄师姐","demoProfile":true,"role":"产品校招生 · 入职第 2 年","full":"师姐 Demo｜产品实习与校招经验","img":"/static/demo-senior-lin.png","tags":["第一份实习","产品校招"],"categories":["产品经理","实习","应届生"],"quote":"从第一份实习聊到第一份工作","intro":"虚构师姐角色，模拟从校园项目、产品实习到校招入职的求职路径。适合讨论没有实习怎么开始、如何选第一份工作，以及入职后的适应。","intro2":"你可以从一份目标岗位描述或一段校园经历开始，试着把“我还差什么”拆成这一周能完成的准备。该角色与回复均为产品演示。","demoPerspective":"产品校招与早期实习准备","demoAnswer":"如果还没有产品实习，可以先选一个真实校园需求，做几次用户访谈，再把发现的问题、方案取舍和验证结果写成两页案例。拿这份案例投一小批匹配岗位，根据过筛和面试反馈迭代，避免一直准备却迟迟不开始。"},
-{"name":"陈一舟","group":"师兄师姐","demoProfile":true,"role":"计算机专业学长 · 研发求职","full":"师兄 Demo｜技术求职与项目准备","img":"/static/demo-senior-chen.png","tags":["技术面试","项目复盘"],"categories":["技术","互联网","应届生"],"quote":"让一个小项目经得住追问","intro":"虚构学长角色，模拟计算机专业学生准备研发实习、整理项目与参加技术面试的过程。帮助你把复习清单和项目表达放到同一条主线上。","intro2":"可以带着一个做过的项目来聊：实现了什么、为什么这样设计、哪里遇到瓶颈。该角色没有真实公司背书，回答为预设演示。","demoPerspective":"研发实习与技术项目准备","demoAnswer":"先把一个项目跑通，再围绕一个具体瓶颈做深入复盘：问题怎样复现、考虑过哪些方案、为什么选择当前实现、测试结果是什么。每天留一段时间补基础和做题，同时练习三分钟讲项目，避免项目和面试准备脱节。"},
+{"name":"林知夏","group":"师兄师姐","demoProfile":true,"role":"产品校招生 · 入职第 2 年","full":"师姐 Demo｜产品实习与校招经验","img":"/static/demo-senior-lin-v2.png","tags":["第一份实习","产品校招"],"categories":["产品经理","实习","应届生"],"quote":"从第一份实习聊到第一份工作","intro":"虚构师姐角色，模拟从校园项目、产品实习到校招入职的求职路径。适合讨论没有实习怎么开始、如何选第一份工作，以及入职后的适应。","intro2":"你可以从一份目标岗位描述或一段校园经历开始，试着把“我还差什么”拆成这一周能完成的准备。该角色与回复均为产品演示。","demoPerspective":"产品校招与早期实习准备","demoAnswer":"如果还没有产品实习，可以先选一个真实校园需求，做几次用户访谈，再把发现的问题、方案取舍和验证结果写成两页案例。拿这份案例投一小批匹配岗位，根据过筛和面试反馈迭代，避免一直准备却迟迟不开始。"},
+{"name":"陈一舟","group":"师兄师姐","demoProfile":true,"role":"计算机专业学长 · 研发求职","full":"师兄 Demo｜技术求职与项目准备","img":"/static/demo-senior-chen-v2.png","tags":["技术面试","项目复盘"],"categories":["技术","互联网","应届生"],"quote":"让一个小项目经得住追问","intro":"虚构学长角色，模拟计算机专业学生准备研发实习、整理项目与参加技术面试的过程。帮助你把复习清单和项目表达放到同一条主线上。","intro2":"可以带着一个做过的项目来聊：实现了什么、为什么这样设计、哪里遇到瓶颈。该角色没有真实公司背书，回答为预设演示。","demoPerspective":"研发实习与技术项目准备","demoAnswer":"先把一个项目跑通，再围绕一个具体瓶颈做深入复盘：问题怎样复现、考虑过哪些方案、为什么选择当前实现、测试结果是什么。每天留一段时间补基础和做题，同时练习三分钟讲项目，避免项目和面试准备脱节。"},
 {"name":"许望舒","group":"职业规划师","demoProfile":true,"role":"职业探索与方向选择 · Demo","full":"职业规划师 Demo｜职业探索与行动设计","img":"/static/demo-planner-xu.png","tags":["职业探索","方向选择"],"categories":["职业定位","转型","职业规划"],"quote":"把模糊的方向变成一次小尝试","intro":"虚构职业规划师角色，模拟兴趣、能力与现实约束的梳理过程。适合还没确定方向、想比较不同岗位，或希望把选择转成行动的同学。","intro2":"先说清你最近犹豫的两三个选择，再找出影响决定的信息缺口。这里提供产品体验，不代表真实咨询师资质或服务。","demoPerspective":"职业探索与行动验证","demoAnswer":"把候选方向控制在两三个，分别写下你想做的具体任务、已有能力证据和不能妥协的现实条件。每个方向安排一次岗位访谈或小任务体验，一周后比较实际感受与反馈，再决定哪一个值得继续投入。"},
 {"name":"乔予安","group":"师兄师姐","demoProfile":true,"role":"数据分析学姐 · 入职第 2 年","full":"师姐 Demo｜数据分析实习与校招准备","img":"/static/demo-senior-qiao.png","tags":["数据分析","SQL 面试"],"categories":["数据分析","实习","应届生"],"quote":"把课程数据做成一份能讲清楚的分析","intro":"虚构学姐角色，模拟统计学学生从课程作业、数据分析实习到校招入职的成长过程。适合讨论 SQL 与统计基础、第一份数据实习，以及如何把分析项目讲出业务意义。","intro2":"可以带来一份课程报告或目标岗位描述，从问题定义、指标选择、分析过程到结论限制逐步梳理。该角色与回复均为产品演示。","demoPerspective":"数据分析实习与业务问题表达","demoAnswer":"如果还没有数据实习，可以从公开数据或课程数据中挑一个能说清楚的问题，先定义指标，再用 SQL 完成清洗与汇总，最后把发现、可能的原因和数据限制写成一页分析。面试时练习解释每一步为什么这样做，不把相关关系直接说成因果；用目标岗位的要求检查自己的基础短板。"},
 {"name":"周亦辰","group":"师兄师姐","demoProfile":true,"role":"用户运营学长 · 入职第 3 年","full":"师兄 Demo｜运营实习与活动项目复盘","img":"/static/demo-senior-zhou.png","tags":["运营实习","活动复盘"],"categories":["运营","市场营销","实习","应届生"],"quote":"把一次校园活动讲成有依据的运营经历","intro":"虚构学长角色，模拟从社团活动、用户运营实习到校招入职的求职路径。适合讨论第一份运营实习、用户反馈整理，以及如何复盘一次活动的目标与效果。","intro2":"可以从你真正负责过的一次招新、活动或社群维护开始，分清自己的动作、团队成果和无法核实的数字。该角色没有真实公司背书，回答为预设演示。","demoPerspective":"用户运营实习与校园活动复盘","demoAnswer":"先选一次你实际参与的校园活动，讲清楚服务谁、希望解决什么问题、你具体负责哪一步。把报名、到场、反馈等已有记录整理出来，缺失的数据如实说明，再复盘一个做得好的动作和一个下次要调整的环节。用这份材料练习三分钟项目表达，并对照运营实习岗位补用户沟通与基础数据能力。"}
@@ -1663,5 +1662,5 @@ document.querySelectorAll('.consult-record-v13').forEach((el,i)=>el.onclick=()=>
 
 
 
-<script src="/static/action-plan.js?v=student-2"></script><script src="/static/career-assessment.js?v=robin-entry-1"></script><script src="/static/consultation-ui.js?v=robin-student-case-1"></script><script src="/static/demo-chat.js?v=robin-live-1"></script><script src="/static/voice.js?v=robin-student-case-1"></script><script src="/static/search.js?v=1"></script>
+<script src="/static/action-plan.js?v=student-3"></script><script src="/static/career-assessment.js?v=robin-entry-1"></script><script src="/static/consultation-ui.js?v=robin-student-case-1"></script><script src="/static/demo-chat.js?v=robin-live-1"></script><script src="/static/voice.js?v=robin-student-case-1"></script><script src="/static/search.js?v=1"></script>
 </body></html>

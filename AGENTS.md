@@ -39,7 +39,8 @@
 | [tests/my-workspace.test.cjs](tests/my-workspace.test.cjs) | 周时间预算、初始状态、旧档案隔离、状态持久化、兴趣与行动分离及顺延归组回归 |
 | [static/search.js](static/search.js)、[tests/search.test.cjs](tests/search.test.cjs) | 本地专家/岗位方向/推荐问题搜索、结果导航及检索回归；选择问题不自动发送 |
 | [static/robin-li-office.png](static/robin-li-office.png)、[static/robin-li.png](static/robin-li.png)、[static/demo-senior-lin.svg](static/demo-senior-lin.svg)、[static/demo-senior-chen.svg](static/demo-senior-chen.svg)、[static/demo-planner-xu.svg](static/demo-planner-xu.svg) | 新增演示专家头像；李彦宏展示图通过内置 imagegen 将用户照片背景换为明亮办公室，robin-li.png 保留原图；人物简介核对 [百度官网](https://ir.baidu.com/management/robin-li)；其余 SVG 为虚构角色历史文字头像，当前展示使用下方 PNG |
-| [static/demo-senior-lin.png](static/demo-senior-lin.png)、[static/demo-senior-chen.png](static/demo-senior-chen.png)、[static/demo-planner-xu.png](static/demo-planner-xu.png) | 用户提供的林知夏、陈一舟、许望舒照片头像，卡片、详情与聊天共用；原 SVG 文字头像保留为历史素材 |
+| [static/demo-senior-lin.png](static/demo-senior-lin.png)、[static/demo-senior-chen.png](static/demo-senior-chen.png)、[static/demo-planner-xu.png](static/demo-planner-xu.png) | 用户提供的第一版照片头像；许望舒仍在使用，林知夏与陈一舟改用下方 v2；原 PNG 与 SVG 保留为历史素材 |
+| [static/demo-senior-lin-v2.png](static/demo-senior-lin-v2.png)、[static/demo-senior-chen-v2.png](static/demo-senior-chen-v2.png) | 林知夏、陈一舟年轻版头像，内置 imagegen 生成；自然窗光、浅木书架与绿植背景，分别采用年轻学姐便装西装与学长休闲外搭；卡片、详情与聊天共用 |
 | [static/demo-senior-qiao.png](static/demo-senior-qiao.png)、[static/demo-senior-zhou.png](static/demo-senior-zhou.png) | 乔予安（数据分析学姐）、周亦辰（运营学长）的内置 imagegen 职业照；师兄师姐分类共 5 人，图片、角色资料与咨询问题均用于演示 |
 | [tests/expert-discovery.test.cjs](tests/expert-discovery.test.cjs) | 专家分类、显示顺序、原专家索引、Demo 问题与回复隔离回归 |
 | [static/careerfly-logo.svg](static/careerfly-logo.svg) | 职升机品牌标志：蓝色对话气泡直升机与橙色旋翼，用于导航、新用户入口、咨询窗口及站点图标 |
