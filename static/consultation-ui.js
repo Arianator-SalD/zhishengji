@@ -19,9 +19,8 @@
     panel.querySelector('input').onchange = e => window.zhijianVoice?.setDemoProfile(e.target.checked);
     return panel;
   }
-  const chatMemory = memoryPanel('chatMemory'), callMemory = memoryPanel('callMemory');
+  const chatMemory = memoryPanel('chatMemory');
   bar.after(chatMemory);
-  document.querySelector('.call-v12-profile').append(callMemory);
   let thinking, partial;
   const originalIntro = $('detailIntro2').textContent;
   const identityCopy = document.querySelector('.ai-identity-line > span:last-child');
@@ -47,7 +46,7 @@
     memory(enabled, profile) {
       memoryEnabled = enabled;
       const known = profile?.confirmed;
-      for (const panel of [chatMemory, callMemory]) {
+      for (const panel of [chatMemory]) {
         panel.querySelector('input').checked = enabled;
         panel.querySelector('summary').textContent = enabled ? '已带入演示档案 · 查看已有信息' : '空白会话 · 可带入演示档案';
         panel.querySelector('.memory-hint').textContent = !enabled ? '当前未向模型提供这份档案。' : known ? '回答会结合以下演示背景及本次对话；你可以在对话中纠正。' : '正在读取档案…';
@@ -63,9 +62,17 @@
       if (selectedExpert === 0) document.querySelector('.chat-v12-actions .context-chip').textContent = enabled ? '已结合演示档案与本次对话' : '基于本次对话';
     },
     profile(i) {
-      chatMemory.hidden = callMemory.hidden = i !== 0;
-      document.querySelector('.chat-v12-actions .context-chip').textContent = i === 0 ? (memoryEnabled ? '已结合演示档案与本次对话' : '基于本次对话') : '已结合你的职业画像';
-      identityCopy.textContent = i === 0 ? '基于本人资料与精选问答生成' : originalIdentity;
+      chatMemory.hidden = i !== 0;
+      const expert = experts[i];
+      identityCopy.textContent = expert.demoProfile ? (expert.publicFigure ? '未获本人授权 · 模拟回复不代表本人观点' : '虚构角色 · 预设回复 · 产品演示') : i === 0 ? '基于本人资料与精选问答生成' : originalIdentity;
+      document.querySelector('.ai-identity-line b').textContent = expert.demoProfile ? '演示分身' : 'AI 分身 · 非本人实时回复';
+      document.querySelector('.profile-title-row .verify').hidden = Boolean(expert.demoProfile);
+      document.querySelector('.chat-v12-actions .context-chip').textContent = expert.demoProfile ? '演示会话 · 模拟回复' : i === 0 ? (memoryEnabled ? '已结合演示档案与本次对话' : '基于本次对话') : '已结合你的职业画像';
+      let source = $('expertProfileSource');
+      if (!source) { source = document.createElement('a'); source.id = 'expertProfileSource'; source.className = 'profile-source'; $('detailIntro2').after(source); }
+      source.hidden = !expert.source;
+      if (expert.source) { source.href = expert.source; source.target = '_blank'; source.rel = 'noopener noreferrer'; source.textContent = '人物资料来源 · 百度官网'; }
+
       $('detailIntro2').textContent = experts[i].intro2 || originalIntro;
     },
     chatRow(text, who) {
@@ -99,10 +106,10 @@
     state(value, {recording, busy, hasAudio, mode}) {
       if (selectedExpert !== 0) return;
       const label = recording ? '说完了，发送' : busy || hasAudio ? '打断并说话' : '点击说话';
-      $('callNext').innerHTML = '<span class="voice-main-icon">▥</span><small>' + label + '</small>';
+      $('callNext').innerHTML = callControlIcon(recording ? 'send' : 'mic', true) + '<small>' + label + '</small>';
+      $('callNext').setAttribute('aria-label', label);
       $('callNext').className = 'voice-main-btn ' + (recording ? 'listening' : value === 'speaking' ? 'speaking' : 'listen');
-      $('muteBtn').innerHTML = '<span>■</span><small>停止回答</small>';
-      $('muteBtn').title = '停止回答';
+      $('muteBtn').hidden = true;
       $('callThinking').classList.toggle('show', value === 'thinking');
       $('callWave').classList.toggle('listening', recording);
       $('callWave').classList.toggle('speaking', value === 'speaking');
@@ -127,11 +134,11 @@
   const nativeListen = $('callNext').onclick;
   function updateCallProfile() {
     const e = experts[selectedExpert];
-    callMemory.hidden = selectedExpert !== 0 || $('callModal').dataset.replay === 'true';
+    $('muteBtn').hidden = selectedExpert === 0;
     $('callExpertRole').textContent = e.full;
     $('callExpertTags').innerHTML = e.tags.map(t => '<span>' + escapeHTML(t) + '</span>').join('');
     compose.hidden = selectedExpert !== 0 || $('callModal').dataset.replay === 'true';
-    document.querySelector('.call-permission-note').textContent = selectedExpert === 0
+    document.querySelector('.call-permission-note').textContent = e.demoProfile ? (e.publicFigure ? '演示分身 · 未获本人授权，模拟回复不代表本人观点。' : '虚构专家 Demo · 回复为预设演示内容。') : selectedExpert === 0
       ? 'AI 分身 · 非本人实时回复 · 使用合成音色。说完后手动发送，停顿不会自动截断。'
       : '首次允许麦克风后，本次咨询将持续复用，无需重复授权。';
   }
@@ -151,8 +158,9 @@
     updateCallProfile();
     if (selectedExpert !== 0) {
       $('muteBtn').disabled = false;
-      $('muteBtn').innerHTML = '<span>🎙</span><small>静音</small>';
-      $('muteBtn').title = '静音';
+      $('muteBtn').innerHTML = callControlIcon(voiceMuted ? 'muted' : 'volume') + '<small>' + (voiceMuted ? '取消静音' : '静音') + '</small>';
+      $('muteBtn').setAttribute('aria-pressed', String(voiceMuted));
+      $('muteBtn').title = voiceMuted ? '取消静音' : '静音';
       return nativeStart();
     }
     stopCallDemo();

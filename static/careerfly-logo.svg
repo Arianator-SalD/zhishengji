@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 250" fill="none">
+  <title>职升机</title>
+  <defs>
+    <linearGradient id="body" x1="42" y1="74" x2="309" y2="224" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5269F5"/><stop offset="1" stop-color="#4054DE"/>
+    </linearGradient>
+    <linearGradient id="rotor" x1="20" y1="12" x2="288" y2="45" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFB64A"/><stop offset="1" stop-color="#FFA63E"/>
+    </linearGradient>
+  </defs>
+  <g fill="url(#rotor)">
+    <path d="M137 31C107 25 58 11 32 12C16 12 12 22 15 33C18 46 31 49 49 48C77 46 111 39 137 35Z"/>
+    <path d="M173 31C203 25 252 11 278 12C294 12 298 22 295 33C292 46 279 49 261 48C233 46 199 39 173 35Z"/>
+    <circle cx="155" cy="34" r="15"/>
+  </g>
+  <path fill="url(#body)" fill-rule="evenodd" d="M137 57C77 57 30 90 30 147C30 177 43 198 63 212L59 235C58 241 62 243 67 240L95 223C108 227 123 228 141 228C204 228 248 200 260 152H307L330 175C333 178 338 178 341 175L345 167C347 164 346 161 343 158L328 141L350 85C352 79 349 76 344 76H329C325 76 323 78 321 81L299 115H261C246 77 203 57 137 57ZM111 94C94 94 77 105 69 120C64 130 62 143 65 151C69 162 83 163 99 162L126 160C143 158 150 148 150 134V115C150 100 135 92 122 92L111 94Z" clip-rule="evenodd"/>
+</svg>

@@ -15,7 +15,13 @@ const demoChatConfig = {
   function sessionFor(i) {
     if (!sessions.has(i)) {
       const seed = document.createElement('div');
-      if (i !== 0) {
+      if (experts[i].demoProfile) {
+        const row = document.createElement('div'); row.className = 'chat-msg ai-msg';
+        const avatar = document.createElement('img'); avatar.className = 'chat-inline-avatar'; avatar.src = experts[i].img; avatar.alt = experts[i].name;
+        const greeting = document.createElement('div'); greeting.className = 'chat-bubble ai';
+        greeting.textContent = '这是' + experts[i].name + '的演示分身。' + (experts[i].publicFigure ? '未获本人授权，以下为模拟回复，不代表本人观点。' : '这是虚构角色，以下为模拟回复。') + '可以从推荐问题开始体验。';
+        row.append(avatar, greeting); seed.append(row);
+      } else if (i !== 0) {
         seed.innerHTML = demoChatConfig.initialHTML;
         seed.querySelectorAll('img').forEach(img => { img.src = experts[i].img; img.alt = experts[i].name; });
         const greeting = seed.querySelector('.chat-bubble.ai');
@@ -66,6 +72,7 @@ const demoChatConfig = {
       // Capture the expert's avatar and answer before a possible expert switch.
       const row = appendChatAI(reply);
       window.zhijianUI.bindAnswer(row);
+      if (experts[expert].demoProfile) row.querySelector('.answer-context').textContent = experts[expert].name + ' · 演示分身 · 模拟回复';
       row.remove();
       setTimeout(() => {
         thinking.remove();
