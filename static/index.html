@@ -581,8 +581,8 @@ function renderSuggestedQuestions(i){
   box.innerHTML=questionSets[i%questionSets.length].map(q=>`<button class="question-chip" data-q="${q}"><span>${q}</span><span>→</span></button>`).join('');
   box.querySelectorAll('.question-chip').forEach(btn=>btn.onclick=()=>{detailChatInput.value=btn.dataset.q;detailChatInput.focus()});
 }
-function selectExpert(i){selectedExpert=i;const e=experts[i];document.querySelectorAll('.expert-card').forEach((c,j)=>c.classList.toggle('selected',j===i));detailPhoto.src=e.img;detailName.textContent=e.name;detailQuote.textContent=e.quote;detailQuoteBy.textContent='—— '+e.name;detailRole.textContent=e.full;detailIntro.textContent=e.intro;detailTags.innerHTML=e.tags.concat(['项目管理','职场成长']).map(t=>`<span class="tag">${t}</span>`).join('');chatAvatar.src=e.img;callAvatar.src=e.img;chatExpert.textContent=e.name+' · AI 分身';callExpert.textContent='正在与 '+e.name+' AI 分身通话';renderSuggestedQuestions(i);}
-function openExpertDetail(i){if(i!==0){toast('其他专家为原型展示，当前接入Sally AI 分身');return;}selectExpert(i);showPage('expertDetail');}
+function selectExpert(i){selectedExpert=i;const e=experts[i];document.querySelector('#expertDetail .voice-panel').hidden=i!==0;document.querySelectorAll('.expert-card').forEach((c,j)=>c.classList.toggle('selected',j===i));detailPhoto.src=e.img;detailName.textContent=e.name;detailQuote.textContent=e.quote;detailQuoteBy.textContent='—— '+e.name;detailRole.textContent=e.full;detailIntro.textContent=e.intro;detailTags.innerHTML=e.tags.concat(['项目管理','职场成长']).map(t=>`<span class="tag">${t}</span>`).join('');chatAvatar.src=e.img;callAvatar.src=e.img;chatExpert.textContent=e.name+' · AI 分身';callExpert.textContent='正在与 '+e.name+' AI 分身通话';renderSuggestedQuestions(i);}
+function openExpertDetail(i){selectExpert(i);showPage('expertDetail');}
 expertCards();
 
 const feed=document.getElementById('feed');
