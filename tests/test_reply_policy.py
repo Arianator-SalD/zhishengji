@@ -80,7 +80,7 @@ def test_even_original_and_alias_questions_use_model_routing(card, question):
 def test_copy_preserves_conditional_capabilities_and_application_thesis():
     digital, applications = (c["answer"] for c in CARDS)
     assert all(x in digital for x in ("降低", "门槛", "声音", "表情", "陪伴", "若", "视觉感知"))
-    assert all(x in applications for x in ("2023", "应用驱动", "真实需求", "持续使用", "时间检验"))
+    assert all(x in applications for x in ("2023", "应用驱动", "创造价值", "机会最大的是在应用层", "不在模型层、不在芯片层", "我希望未来很多年以后"))
     assert all(100 <= len(c["answer"]) <= 230 for c in CARDS)
 
 
