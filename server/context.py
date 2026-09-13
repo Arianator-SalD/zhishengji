@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 
 from .reply_policy import ReplyPolicy
+from .fixed_replies import FixedReply
 
 
 class Content:
@@ -17,6 +18,7 @@ class Content:
         self.reply_policy = ReplyPolicy(json.loads(reply_path.read_text(encoding="utf-8"))) if reply_path.exists() else None
         if not isinstance(self.qa, list) or not isinstance(self.profile, dict):
             raise ValueError("Invalid bundled content schema")
+        self.fixed_reply = FixedReply(directory) if (directory / "fixed_reply.json").exists() else None
 
     @property
     def questions(self):

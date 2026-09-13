@@ -130,11 +130,15 @@ def test_classification_timeout_failure_and_cancellation():
 @pytest.mark.parametrize("voice,profile", [(False, False), (False, True), (True, False), (True, True)])
 @pytest.mark.parametrize("card", CARDS, ids=[c["id"] for c in CARDS])
 def test_text_and_asr_both_generate_from_selected_strategy(voice, profile, card):
+    # The application overview is now a frozen answer. Specific follow-ups must
+    # still use the existing strategy/generation branch rather than replay it.
+    question = (card["question"] if card["id"] == CARDS[0]["id"]
+                else "应用层的护城河是什么，模型替代应用的风险怎么考虑？")
     class ASR:
         async def transcribe(self, audio):
             async for _ in audio:
                 pass
-            yield Transcript(card["aliases"][0], True)
+            yield Transcript(question, True)
 
     async def run():
         chat, tts = Chat({"id": card["id"]}), Speech()
@@ -151,11 +155,11 @@ def test_text_and_asr_both_generate_from_selected_strategy(voice, profile, card)
             assert "".join(tts.texts) == "根据当前问题继续讨论。"
             assert any(e["type"] == "binary" for e in s.ws.events)
         else:
-            await s.generate(turn, card["question"], speak=False)
+            await s.generate(turn, question, speak=False)
         assert reply(s) == "根据当前问题继续讨论。"
         assert s.history[-1]["role"] == "assistant"
         assert s.history[-1]["content"] == "根据当前问题继续讨论。"
-        assert len(chat.generated) == 1 and len(chat.classified) == 1
+        assert len(chat.generated) == 1 and len(chat.classified) == 2
         assert chat.temperatures == [0.2]
         prompt = chat.generated[0][0]["content"]
         assert card["id"] in prompt and "不是要逐字照读的脚本" in prompt
@@ -177,7 +181,7 @@ def test_semantic_hit_enters_session_with_generation(card):
         question = next(c["text"] for c in CASES if c["expected"] == card["id"])
         await s.generate(s.new_turn(), question, speak=False)
         assert reply(s) != card["answer"]
-        assert len(chat.classified) == 1 and len(chat.generated) == 1
+        assert len(chat.classified) == 2 and len(chat.generated) == 1
     asyncio.run(run())
 
 
@@ -189,7 +193,7 @@ def test_nonmatching_followup_retains_history_and_user_correction():
         chat.decision = {"id": "none"}
         correction = "我现在每周只有两小时，你说的门槛怎么验证？"
         await s.generate(s.new_turn(), correction, speak=False)
-        assert len(chat.generated) == 2 and len(chat.classified) == 2
+        assert len(chat.generated) == 2 and len(chat.classified) == 4
         assert chat.temperatures == [0.2, 0.6]
         messages = chat.generated[-1]
         assert messages[-1] == {"role": "user", "content": correction}
@@ -223,7 +227,9 @@ def test_sally_never_uses_robin_classification_or_copy():
         chat = Chat({"id": CARDS[1]["id"]})
         s = session(chat, expert="sally")
         await s.generate(s.new_turn(), CARDS[1]["question"], speak=False)
-        assert not chat.classified and len(chat.generated) == 1
+        assert len(chat.classified) == 1 and len(chat.generated) == 1
+        assert "fixed-finance-to-product" in chat.classified[0][0]["content"]
+        assert "application-driven-decade" not in chat.classified[0][0]["content"]
         assert chat.temperatures == [0.6]
         assert reply(s) == "根据当前问题继续讨论。"
         assert "application-driven-decade" not in chat.generated[0][0]["content"]

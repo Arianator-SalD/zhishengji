@@ -1,4 +1,6 @@
 import asyncio
+from asyncio import sleep as pause_fixed_stream
+from time import monotonic as fixed_stream_clock
 from contextlib import suppress
 from dataclasses import dataclass, field
 import json
@@ -93,6 +95,7 @@ class VoiceSession:
 
     async def ready(self):
         await self.send("session.ready", expert_id=self.expert_id, capabilities=self.p.capabilities,
+                        fixed_audio=self.content.fixed_reply is not None,
                         qa=self.content.questions, profile=self.content.profile)
         await self.send("state", value="idle")
 
@@ -175,6 +178,35 @@ class VoiceSession:
 
         try:
             await self.event(turn, "state", value="thinking")
+            fixed = self.content.fixed_reply
+            if fixed and fixed.expert_id == self.expert_id:
+                selected = await fixed.select(text, self.p.llm, history=self.history[:-1],
+                                              timeout=min(6, self.s.provider_timeout))
+                if selected:
+                    # Fake streaming of the approved copy: no model generation.
+                    # Start the file alongside the first three characters, then
+                    # reveal small deltas over ~6 seconds (user target: <7s).
+                    size = 3
+                    pieces = [selected.answer[i:i + size] for i in range(0, len(selected.answer), size)]
+                    duration = 6.0
+                    interval = duration / max(1, len(pieces) - 1)
+                    started = fixed_stream_clock()
+                    await self.event(turn, "reply.delta", text=pieces[0])
+                    if speak:
+                        # The file is already validated at startup. Commit history
+                        # only after the client confirms this entire clip ended.
+                        turn.segments.append(Segment(selected.answer, complete=True))
+                        await self.event(turn, "audio.file", segment_id=0,
+                                         reply_id=selected.id, text=selected.answer, url=selected.audio_url)
+                    for index, piece in enumerate(pieces[1:], 1):
+                        await pause_fixed_stream(max(0, started + index * interval - fixed_stream_clock()))
+                        await self.event(turn, "reply.delta", text=piece)
+                    if not speak:
+                        turn.assistant = {"role": "assistant", "content": selected.answer}
+                        self.history.append(turn.assistant)
+                    await self.event(turn, "turn.end")
+                    await self.event(turn, "state", value="idle")
+                    return
             if speech:
                 speaker_task = asyncio.create_task(speak_sentences())
             full, buffer = "", ""

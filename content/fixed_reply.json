@@ -1,0 +1,26 @@
+{
+  "id": "fixed-finance-to-product",
+  "source": "qa.json",
+  "source_id": "career_switch",
+  "aliases": [
+    "金融背景想转AI产品，有什么建议？",
+    "我是金融专业，想转AI产品经理，怎么开始？",
+    "金融转产品有什么具体建议？"
+  ],
+  "intent": "金融背景学生初步考虑转产品／AI 产品，询问总体建议或如何开始探索；没有已经选定的具体项目或新的经历需要处理。",
+  "expert_id": "sally",
+  "question": "学姐，我是一个读金融的同学，最近想考虑转 AI 产品，想问问有什么建议吗？",
+  "answer_sha256": "6b0552679b1ad40fb026dd8bd1056c12888b0e67bc7f9a26bf81fcbb35a0f0dd",
+  "audio": {
+    "url": "/static/fixed-audio/sally-fixed-finance-to-product-adb4e6637b83.wav",
+    "sha256": "adb4e6637b835446cc5325ac4059d3a740c5a0275fcd94a9c27dd68543f9a7df",
+    "sample_rate": 24000,
+    "duration_seconds": 28.527666666666665
+  },
+  "production": {
+    "method": "one-off demo WebSocket TTS capture",
+    "segments": 4,
+    "copy_check": "exact after whitespace removal",
+    "human_listening_verified": false
+  }
+}

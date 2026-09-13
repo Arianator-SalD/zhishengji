@@ -219,7 +219,7 @@ test('live welcome omits user profiles before and after config loads and removes
   assert.doesNotMatch(lines.at(-1).text,/私人|金融|档案|已带入/);
   context.selectedExpert=1;
   win.zhijianUI.profile(1);
-  assert.equal(selector('.ai-identity-line > span:last-child').textContent,'基于公开人物资料');
+  assert.equal(selector('.ai-identity-line > span:last-child').textContent,'AI 生成内容，仅供交流参考');
   assert.equal(byId('chatExpertSubtitle').textContent,'AI 分身 · 基于公开资料与本次对话');
   win.zhijianUI.profile(0);
   assert.equal(byId('chatExpertSubtitle').textContent,'AI 分身 · 基于本人资料与精选问答');
