@@ -49,13 +49,14 @@ Environment 中设置 `PYTHON_VERSION=3.12.12`。再由你亲自在平台中填�
 | `LLM_API_KEY` | DeepSeek 官方 API Key |
 | `VOLC_ASR_API_KEY` | 火山语音识别 API Key |
 | `VOLC_TTS_API_KEY` | 火山语音合成 API Key |
-| `DEMO_ACCESS_PASSWORD` | 自己设置一个至少 12 位的演示口令，只提供给受邀体验者 |
+| `DEMO_PUBLIC_ACCESS` | `true` 开放免口令访问；`false` 恢复密码门槛 |
+| `DEMO_ACCESS_PASSWORD` | 仅启用密码门槛时需要，至少 12 位；公开访问时不使用 |
 
 `VOLC_TTS_SPEAKER` 默认是 `zh_female_vv_uranus_bigtts`，如音色不在已开通权限内，请换成控制台音色 ID。
 
 `render.yaml` 也可用于 Blueprint 创建，包含相同配置；不要同时创建两份服务。已有服务需在 Settings 中将 Auto-Deploy 设置为 On Commit，并确认关联分支为 `main`；仅修改仓库文件不会自动更改未由 Blueprint 同步的服务设置。Blueprint 的 Auto Sync 控制部署配置同步，与服务的代码自动部署是独立设置。
 
-访问演示需要先输入口令；口令不会发送给对话模型。口令不足 12 位或未设置时，Render 页面会显示未开放。健康检查仍正常返回，避免部署反复重启。限制每个 IP 每分钟 5 次登录尝试、最多 3 个同时对话连接。GitHub 私有仓库不代表 Render 网页自动私有，所以保留此访问门槛。
+公开演示使用 `DEMO_PUBLIC_ACCESS=true`，首页、静态资源、专家配置及对话连接均免口令。该开关优先于 Render 的强制密码要求和已保存的密码，口令无需删除。恢复访问门槛时设为 `false`，并确保 `DEMO_ACCESS_PASSWORD` 至少 12 位；私有模式保留每 IP 每分钟 5 次登录尝试限制。两种模式都保留允许域名、WebSocket 来源校验及最多 3 个同时对话连接。当前变更待本轮部署核对后回填状态。
 
 免费实例可能休眠，唤醒会延迟；以实际页面展示的套餐限制为准。真正的语音延迟还受部署地区和火山/DeepSeek 接口网络连接影响。
 

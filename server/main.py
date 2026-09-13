@@ -17,8 +17,9 @@ def create_app(settings=None, providers=None, content_dir=None, static_dir=None)
     experts = build_experts(settings, providers, content_dir)
     static = Path(static_dir) if static_dir else ROOT / "static"
     app = FastAPI(title="职升机语音演示", docs_url=None, redoc_url=None, openapi_url=None)
-    app.add_middleware(DemoAccess, password=settings.demo_access_password,
-                       required=settings.require_access_password)
+    if not settings.demo_public_access:
+        app.add_middleware(DemoAccess, password=settings.demo_access_password,
+                           required=settings.require_access_password)
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=list(settings.allowed_hosts))
     active_sessions = 0
 

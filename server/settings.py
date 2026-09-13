@@ -12,6 +12,7 @@ class Settings:
     llm_model: str = "deepseek-flash"
     demo_access_password: str = field(default="", repr=False)
     require_access_password: bool = False
+    demo_public_access: bool = False
     asr_api_key: str = field(default="", repr=False)
     asr_app_id: str = ""
     asr_access_token: str = field(default="", repr=False)
@@ -51,7 +52,7 @@ class Settings:
                 continue
             if name in {"allowed_hosts", "allowed_origins"}:
                 values[name] = tuple(x.strip().rstrip("/") for x in value.split(",") if x.strip())
-            elif name == "require_access_password":
+            elif name in {"require_access_password", "demo_public_access"}:
                 values[name] = value.lower() in {"1", "true", "yes"}
             elif name in {"provider_timeout", "max_audio_seconds"}:
                 values[name] = max(1, min(float(value), 300))

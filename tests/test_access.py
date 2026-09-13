@@ -85,3 +85,31 @@ def test_websocket_concurrency_limit_releases_after_close():
         with c.websocket_connect('wss://testserver/ws/voice') as ws:
             ws.send_json({'type':'session.start'})
             assert ws.receive_json()['type']=='session.ready'
+
+
+@pytest.mark.parametrize('password', ['', PASSWORD])
+def test_explicit_public_mode_bypasses_cloud_password_without_cookie(password):
+    settings = Settings(allowed_hosts=('testserver',), demo_access_password=password,
+                        require_access_password=True, demo_public_access=True)
+    with TestClient(create_app(settings, Providers()), base_url='https://testserver') as c:
+        home = c.get('/')
+        assert home.status_code == 200 and '演示访问口令' not in home.text
+        assert 'set-cookie' not in home.headers
+        assert c.get('/static/voice.js').status_code == 200
+        assert c.get('/api/config?expert_id=robin-li').status_code == 200
+        with c.websocket_connect('wss://testserver/ws/voice', headers={'origin':'https://testserver'}) as ws:
+            ws.send_json({'type':'session.start'})
+            assert ws.receive_json()['type'] == 'session.ready'
+        with pytest.raises(WebSocketDisconnect):
+            with c.websocket_connect('wss://testserver/ws/voice', headers={'origin':'https://untrusted.invalid'}):
+                pass
+        assert c.get('/', headers={'host':'untrusted.invalid'}).status_code == 400
+
+
+@pytest.mark.parametrize('value,expected', [('true',True), ('false',False)])
+def test_render_public_mode_env_is_explicit(monkeypatch,value,expected):
+    monkeypatch.setenv('RENDER_EXTERNAL_HOSTNAME','demo.onrender.com')
+    monkeypatch.setenv('DEMO_PUBLIC_ACCESS',value)
+    settings = Settings.from_env()
+    assert settings.demo_public_access is expected
+    assert settings.require_access_password

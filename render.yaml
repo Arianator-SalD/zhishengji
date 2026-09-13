@@ -10,6 +10,8 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.12
+      - key: DEMO_PUBLIC_ACCESS
+        value: "true"
       - key: REQUIRE_ACCESS_PASSWORD
         value: "true"
       - key: DEMO_ACCESS_PASSWORD
