@@ -91,11 +91,6 @@
       document.querySelector('.ai-identity-line b').textContent = expert.publicFigure ? 'AI 分身' : expert.demoProfile ? '演示分身' : 'AI 分身 · 非本人实时回复';
       document.querySelector('.profile-title-row .verify').hidden = Boolean(expert.demoProfile || expert.publicFigure);
       document.querySelector('.chat-v12-actions .context-chip').textContent = expert.demoProfile ? '演示会话 · 模拟回复' : expert.voiceId ? (memoryEnabled && memoryExpert === expert.voiceId ? '已结合演示档案与本次对话' : '基于本次对话') : '已结合你的职业画像';
-      let source = $('expertProfileSource');
-      if (!source) { source = document.createElement('a'); source.id = 'expertProfileSource'; source.className = 'profile-source'; $('detailIntro2').after(source); }
-      source.hidden = !expert.source;
-      if (expert.source) { source.href = expert.source; source.target = '_blank'; source.rel = 'noopener noreferrer'; source.textContent = '人物资料来源 · 百度官网'; }
-
       $('detailIntro2').textContent = experts[i].intro2 || originalIntro;
     },
     chatRow(text, who) {
