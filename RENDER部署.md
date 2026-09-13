@@ -15,7 +15,9 @@ ROBIN_TTS_RESOURCE_ID=seed-tts-2.0
 
 `ROBIN_TTS_SPEAKER` 为云舟 2.0 预置男声音色，`ROBIN_TTS_RESOURCE_ID` 为该专家使用的 TTS 模型资源。这两项仅在包含李彦宏接入功能的代码部署后生效，代码也提供相同默认值。它们不是 API Key。
 
-语速配置（本次仅本地接入，需部署本次代码后生效）：`ROBIN_TTS_SPEECH_RATE=20`，约为原语速的 1.2 倍；设为 `0` 恢复默认，`30` 约为 1.3 倍。代码默认值为 `20`，未设置时也生效。Sally 使用独立的 `VOLC_TTS_SPEECH_RATE=20`，代码默认也为 `20`（约 1.2 倍）；两位专家可分别调整，设为 `0` 恢复各自原速。两个参数支持整数 `-50` 至 `100`，环境变量超界时限制到边界；语速调整不改变音色 ID、采样率或回复内容，也不缩短模型开始回复前的等待时间。依据 [火山引擎语速说明](https://www.volcengine.com/docs/6348/1807452?lang=zh) 与 [官方 V3 SSE 请求示例](https://github.com/bytedance/agentkit-samples/blob/main/skills/byted-text-to-speech/scripts/text_to_speech.py)。
+语速配置（已随 `fbc2d3a` 部署）：`ROBIN_TTS_SPEECH_RATE=20`，约为原语速的 1.2 倍；设为 `0` 恢复默认，`30` 约为 1.3 倍。代码默认值为 `20`，未设置时也生效。Sally 使用独立的 `VOLC_TTS_SPEECH_RATE=20`，代码默认也为 `20`（约 1.2 倍）；两位专家可分别调整，设为 `0` 恢复各自原速。两个参数支持整数 `-50` 至 `100`，环境变量超界时限制到边界；语速调整不改变音色 ID、采样率或回复内容，也不缩短模型开始回复前的等待时间。依据 [火山引擎语速说明](https://www.volcengine.com/docs/6348/1807452?lang=zh) 与 [官方 V3 SSE 请求示例](https://github.com/bytedance/agentkit-samples/blob/main/skills/byted-text-to-speech/scripts/text_to_speech.py)。
+
+本次生产核对：Render 已配置 `VOLC_TTS_SPEECH_RATE=80`、`ROBIN_TTS_SPEECH_RATE=30`，因此实际分别采用约 1.8 倍、1.3 倍；环境变量优先于代码默认值，本次发布未修改这两个值。
 
 现有 `LLM_API_KEY`、`VOLC_ASR_API_KEY`、`VOLC_TTS_API_KEY` 继续共用；已有旧版 App ID / Access Token 鉴权也可继续使用。保留原来的 `VOLC_TTS_SPEAKER` 和 `VOLC_TTS_RESOURCE_ID`，它们继续控制 Sally。云舟音色需要现有火山账号具有对应 TTS 2.0 资源权限；鉴权错误或音色不匹配时页面会显示服务错误，不会悄悄改用 Sally 音色。
 
