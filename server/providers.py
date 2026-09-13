@@ -268,13 +268,16 @@ class VolcTTS:
     def __init__(self, settings, transport=None):
         self.s, self.transport = settings, transport
         self.sample_rate = settings.tts_sample_rate
+        if type(settings.tts_speech_rate) is not int or not -50 <= settings.tts_speech_rate <= 100:
+            raise ValueError("Unsupported TTS speech rate")
         if self.sample_rate not in {8000, 16000, 22050, 24000, 32000, 44100, 48000}:
             raise ValueError("Unsupported TTS sample rate")
 
     async def synthesize(self, text):
         body = {"user": {"uid": "zhijian-demo"}, "req_params": {
             "text": text, "speaker": self.s.tts_speaker,
-            "audio_params": {"format": "pcm", "sample_rate": self.sample_rate}}}
+            "audio_params": {"format": "pcm", "sample_rate": self.sample_rate,
+                             "speech_rate": self.s.tts_speech_rate}}}
         async with httpx.AsyncClient(timeout=self.s.provider_timeout, transport=self.transport) as client:
             async with client.stream("POST", self.s.tts_url, headers=speech_headers(self.s, "tts"), json=body) as response:
                 if response.is_error:

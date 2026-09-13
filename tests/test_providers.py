@@ -103,7 +103,7 @@ def test_tts_base64_stream_and_documented_completion():
     adapter = VolcTTS(Settings(tts_api_key="test-only"), httpx.MockTransport(handler))
     assert b"".join(run_collect(adapter.synthesize("测试"))) == data
     request = json.loads(seen[0].content)
-    assert request["req_params"]["audio_params"] == {"format": "pcm", "sample_rate": 24000}
+    assert request["req_params"]["audio_params"] == {"format": "pcm", "sample_rate": 24000, "speech_rate": 20}
     assert request["req_params"]["text"] == "测试"
 
 
@@ -185,3 +185,9 @@ def test_tts_stream_error_retains_numeric_code_without_raw_message():
     result = generation_failure_details(caught.value, "TTS")
     assert result["diagnostic"] == "TTS/UPSTREAM_45000000/VOICE_NOT_FOUND"
     assert "private-key-sentinel" not in str(result)
+
+
+@pytest.mark.parametrize("rate", [-51, 101, 1.2, True])
+def test_tts_rejects_invalid_speech_rate(rate):
+    with pytest.raises(ValueError, match="speech rate"):
+        VolcTTS(Settings(tts_speech_rate=rate))

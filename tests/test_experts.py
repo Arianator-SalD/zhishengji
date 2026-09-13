@@ -121,6 +121,8 @@ def test_each_actual_tts_request_uses_its_own_voice_without_mutating_settings():
         ("seed-tts-2.0", "zh_male_m191_uranus_bigtts"),
         ("sally-resource", "sally-voice"),
     ]
+    assert [body["req_params"]["audio_params"]["speech_rate"] for _, body in requests] == [20, 20, 20]
+    assert settings.tts_speech_rate == 20
     assert settings.tts_speaker == "sally-voice"
     assert sally.providers.tts is not robin.providers.tts
 
@@ -223,3 +225,16 @@ def test_robin_config_does_not_expose_keys_and_does_not_fallback_to_sally_tts():
         assert robin.json()["capabilities"] == {"llm": False, "asr": False, "tts": False}
         assert c.get("/api/config").json()["capabilities"]["tts"] is True
         assert "private-" not in robin.text
+
+
+@pytest.mark.parametrize("value,expected", [("0", 0), ("-20", -20), ("35", 35), ("-51", -50), ("101", 100)])
+def test_speech_rate_env_accepts_zero_negative_and_clamps_bounds(monkeypatch, value, expected):
+    monkeypatch.setenv("VOLC_TTS_SPEECH_RATE", "10")
+    monkeypatch.setenv("ROBIN_TTS_SPEECH_RATE", value)
+    settings = Settings.from_env()
+    assert settings.tts_speech_rate == 10
+    assert settings.robin_tts_speech_rate == expected
+    settings.tts_api_key = "test-only"
+    experts = build_experts(settings)
+    assert experts["sally"].providers.tts.s.tts_speech_rate == 10
+    assert experts["robin-li"].providers.tts.s.tts_speech_rate == expected

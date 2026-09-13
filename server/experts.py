@@ -37,7 +37,8 @@ def build_experts(settings: Settings, providers=None, content_dir=None):
     else:
         sally_providers = Providers.configured(settings)
         robin_settings = replace(settings, tts_speaker=settings.robin_tts_speaker,
-                                 tts_resource_id=settings.robin_tts_resource_id)
+                                 tts_resource_id=settings.robin_tts_resource_id,
+                                 tts_speech_rate=settings.robin_tts_speech_rate)
         robin_tts = Providers.configured(robin_settings).tts
         robin_providers = Providers(sally_providers.llm, sally_providers.asr, robin_tts)
     return {

@@ -25,6 +25,8 @@ class Settings:
     tts_speaker: str = "zh_female_vv_uranus_bigtts"
     robin_tts_speaker: str = "zh_male_m191_uranus_bigtts"
     robin_tts_resource_id: str = "seed-tts-2.0"
+    tts_speech_rate: int = 20
+    robin_tts_speech_rate: int = 20
     tts_sample_rate: int = 24000
     provider_timeout: float = 45
     max_audio_seconds: float = 60
@@ -53,6 +55,8 @@ class Settings:
                 values[name] = value.lower() in {"1", "true", "yes"}
             elif name in {"provider_timeout", "max_audio_seconds"}:
                 values[name] = max(1, min(float(value), 300))
+            elif name in {"tts_speech_rate", "robin_tts_speech_rate"}:
+                values[name] = max(-50, min(int(value), 100))
             elif isinstance(getattr(cls(), name), int):
                 values[name] = max(1, int(value))
             else:
