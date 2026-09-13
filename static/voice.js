@@ -14,6 +14,7 @@
   const send = obj => { if (socket?.readyState === WebSocket.OPEN) socket.send(JSON.stringify(obj)); };
   function status(text, error = false) {
     $('voiceStatus').textContent = text; $('voiceStatus').classList.toggle('voice-error', error);
+    $('voiceStatus').hidden = !error;
     $('callStatus').textContent = text;
   }
   function bubble(container, text, who) {
@@ -63,8 +64,7 @@
       config = c;
       if (!profileModes.has(id)) useDemoProfile = c.default_use_demo_profile ?? (id === 'sally');
       window.zhijianUI.memory(useDemoProfile, c.profile, id);
-      const ready = c.capabilities;
-      status(`DeepSeek ${ready.llm?'已配置':'待配置'} · 语音识别 ${ready.asr?'已配置':'待配置'} · 语音合成 ${ready.tts?'已配置':'待配置'}`);
+      status('可以开始咨询');
       refreshQuestions();
       return c;
     }).finally(() => { if (configLoading === pending) configLoading = null; });
@@ -251,10 +251,11 @@
     send({type:'session.reset'}); discardSession();
     window.zhijianUI.memory(useDemoProfile, config?.profile, activeId);
     refreshQuestions();
-    status(useDemoProfile ? '新会话：已带入演示档案，可以直接提问' : '新会话：不带入档案，只使用接下来的对话');
+    status('可以开始新的对话');
   }
   window.zhijianVoice = {
     select,
+    reset,
     suspend() { interrupt(); },
     setDemoProfile(enabled) {
       if (!isActive() || typeof enabled !== 'boolean' || enabled === useDemoProfile) return;
@@ -270,7 +271,6 @@
       if (await submit(text)) { if ($('chatInput').value.trim() === text) $('chatInput').value = ''; }
     }
   };
-  $('resetSession').onclick = reset;
   $('voiceTextSend').onclick = async () => {
     const text = $('voiceTextInput').value;
     if (await submit(text, true)) { if ($('voiceTextInput').value === text) $('voiceTextInput').value = ''; }

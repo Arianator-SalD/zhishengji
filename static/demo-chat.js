@@ -47,7 +47,6 @@ const demoChatConfig = {
       body.replaceChildren(...(experts[i].voiceId ? [] : next.nodes));
       input.value = experts[i].voiceId ? '' : next.draft;
     }
-    document.querySelector('.chat-session-bar').style.display = experts[i].voiceId ? '' : 'none';
   }
   function append(i, node) {
     sessionFor(i).nodes.push(node);

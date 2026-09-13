@@ -17,7 +17,7 @@ ROBIN_TTS_RESOURCE_ID=seed-tts-2.0
 
 现有 `LLM_API_KEY`、`VOLC_ASR_API_KEY`、`VOLC_TTS_API_KEY` 继续共用；已有旧版 App ID / Access Token 鉴权也可继续使用。保留原来的 `VOLC_TTS_SPEAKER` 和 `VOLC_TTS_RESOURCE_ID`，它们继续控制 Sally。云舟音色需要现有火山账号具有对应 TTS 2.0 资源权限；鉴权错误或音色不匹配时页面会显示服务错误，不会悄悄改用 Sally 音色。
 
-两位专家共用 `/ws/voice`，由 `expert_id=sally` 或 `expert_id=robin-li` 在建立连接时选择，各自拥有独立会话。当前代码中李彦宏默认带入 `content/robin-li/demo_user.json` 的“林小北 · 第一份 AI 产品实习”独立演示档案；Sally 继续使用原金融同学档案。聊天与通话窗口均可切换为空白会话；切换专家会关闭旧连接，回到真实专家时开始新会话。人物 Prompt、精选知识和用户档案随仓库 `content/robin-li/` 交付，不依赖外层工作目录。新 case 无需新增环境变量，部署状态见迭代日志；预置经历不是实际咨询历史，本轮新信息尚不写回长期记忆。
+两位专家共用 `/ws/voice`，由 `expert_id=sally` 或 `expert_id=robin-li` 在建立连接时选择，各自拥有独立会话。当前代码中李彦宏默认带入 `content/robin-li/demo_user.json` 的“林小北 · 第一份 AI 产品实习”独立演示档案；Sally 继续使用原金融同学档案。本地界面已移除档案面板与空白模式切换控件，默认档案仍用于咨询上下文，欢迎语不复述用户信息；空白模式保留底层接口。切换专家会关闭旧连接，回到真实专家时开始新会话。人物 Prompt、精选知识和用户档案随仓库 `content/robin-li/` 交付，不依赖外层工作目录。新 case 无需新增环境变量，部署状态见迭代日志；预置经历不是实际咨询历史，本轮新信息尚不写回长期记忆。
 
 验证时先访问有权限的 `/api/config?expert_id=robin-li` 确认对应能力已配置，再在李彦宏页面分别试文字、录音、语音窗口文字播报、打断和切换 Sally。`capabilities` 只表示配置完整，不表示账号余额、权限、网络或实际音质已通过验证。
 

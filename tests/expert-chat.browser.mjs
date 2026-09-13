@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 
 export async function verifyExpertChat(page) {
   await page.reload();
-  await page.waitForFunction(() => window.zhijianChat && document.getElementById('voiceStatus').textContent.includes('DeepSeek'));
+  await page.waitForFunction(() => window.zhijianChat && document.getElementById('voiceStatus').textContent.includes('可以开始咨询'));
   await page.evaluate(() => {
     window.__chatFrames = [];
     const send = WebSocket.prototype.send;
@@ -19,7 +19,7 @@ export async function verifyExpertChat(page) {
     return {
       selected: selectedExpert, name: experts[i].name, title: chatExpert.textContent,
       greeting: chatBody.firstElementChild?.textContent,
-      controlsVisible: getComputedStyle(document.querySelector('.chat-session-bar')).display !== 'none'
+      controlsVisible: Boolean(document.querySelector('.chat-session-bar'))
     };
   }, i);
   for (let i = 1; i < 10; i++) {
@@ -44,7 +44,7 @@ export async function verifyExpertChat(page) {
   await page.fill('#chatInput', '延迟模拟回复');
   await page.click('#sendChat');
   const sally = await open(0);
-  assert.equal(sally.controlsVisible, true);
+  assert.equal(sally.controlsVisible, false);
   assert.equal(await page.evaluate(() => chatBody.children.length), 0);
   await open(1);
   await page.waitForFunction(() => chatBody.querySelectorAll('.chat-msg').length === 7 && !chatBody.querySelector('.chat-thinking-row'));
