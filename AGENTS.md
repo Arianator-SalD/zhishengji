@@ -62,6 +62,7 @@
 | [tests/](tests/) | 后端、访问控制、供应商协议、录音算法、档案及浏览器回归；browser_harness.py 只用于模拟供应商测试 |
 | [prototype/](prototype/) | 用户提供的两个原始 HTML 留档，线上入口不是这些文件 |
 | [artifacts/expert-profile-actions-local.png](artifacts/expert-profile-actions-local.png)、[扁平化修订截图](artifacts/expert-profile-actions-flat-local.png)、[紧凑按钮截图](artifacts/expert-profile-actions-compact-local.png) | 专家详情页按钮移至方向栏下方、扁平化及缩小尺寸的本地截图，语音对话在前，1440×980；非线上截图 |
+| artifacts/robin-identity-preview.png | 李彦宏详情页 AI 分身标识调整的本地截图，1440×1000；不是线上验收图 |
 | artifacts/、frontend-preview.png | 素材生成记录、辅助脚本、历史图片与预览；先确认归属，不自动删除或提交 |
 | .env.example、.env、.gitignore | 配置示例、本地凭据和忽略规则；凭据不得进入 Git、前端、提示词或日志 |
 | .git/、.venv/、.pytest_cache/、__pycache__/ | 版本历史、运行环境和测试缓存，不是业务内容 |

@@ -50,8 +50,8 @@
       feedback.hidden = true;
       const expert = experts[i];
       $('chatExpertSubtitle').textContent = expert.publicFigure ? 'AI 分身 · 基于公开资料与本次对话' : expert.voiceId ? 'AI 分身 · 基于本人资料与精选问答' : expert.demoProfile ? '演示分身 · 虚构角色与预设回复' : 'AI 分身 · 基于专家经验与真实案例';
-      identityCopy.textContent = expert.publicFigure ? '基于公开人物资料' : expert.demoProfile ? '虚构角色 · 预设回复 · 产品演示' : expert.voiceId ? '基于本人资料与精选问答生成' : originalIdentity;
-      document.querySelector('.ai-identity-line b').textContent = expert.publicFigure ? 'AI 分身' : expert.demoProfile ? '演示分身' : 'AI 分身 · 非本人实时回复';
+      identityCopy.textContent = expert.publicFigure ? 'AI 生成内容，仅供交流参考' : expert.demoProfile ? '虚构角色 · 预设回复 · 产品演示' : expert.voiceId ? '基于本人资料与精选问答生成' : originalIdentity;
+      document.querySelector('.ai-identity-line b').textContent = expert.publicFigure ? 'AI 分身 · 非本人实时回复' : expert.demoProfile ? '演示分身' : 'AI 分身 · 非本人实时回复';
       document.querySelector('.profile-title-row .verify').hidden = Boolean(expert.demoProfile || expert.publicFigure);
       document.querySelector('.chat-v12-actions .context-chip').textContent = expert.demoProfile ? '演示会话 · 模拟回复' : expert.voiceId ? (memoryEnabled && memoryExpert === expert.voiceId ? '已结合演示档案与本次对话' : '基于本次对话') : '已结合你的职业画像';
       $('detailIntro2').textContent = experts[i].intro2 || originalIntro;
