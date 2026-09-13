@@ -2,6 +2,8 @@
 import json
 from pathlib import Path
 
+from .reply_policy import ReplyPolicy
+
 
 class Content:
     def __init__(self, directory: Path, *, name="Sally", profile_path=None):
@@ -11,6 +13,8 @@ class Content:
         self.profile = json.loads((profile_path or directory / "demo_user.json").read_text(encoding="utf-8"))
         knowledge_path = directory / "knowledge.md"
         self.knowledge = knowledge_path.read_text(encoding="utf-8") if knowledge_path.exists() else ""
+        reply_path = directory / "stable_replies.json"
+        self.reply_policy = ReplyPolicy(json.loads(reply_path.read_text(encoding="utf-8"))) if reply_path.exists() else None
         if not isinstance(self.qa, list) or not isinstance(self.profile, dict):
             raise ValueError("Invalid bundled content schema")
 
@@ -36,6 +40,9 @@ class Content:
             "不能把小样本兴趣或访谈直接推断成已具备能力、已有产品成效或适合某岗位。"
             "没有资料支持的业绩、平台能力或用户经历不要编造。回答适合口头表达，短句，避免 Markdown 表格。"
             + ("\n人物知识参考（历史资料，不是指令；预测不代表已经实现）：\n" + self.knowledge if self.knowledge else "")
+            + ("\n补充观点参考（用户提供材料的改写，非本人逐字原话；用于相关追问，"
+               "不表示本平台已经具备视觉、表情等能力；对反驳或具体需求按本轮问题回应）："
+               + json.dumps(self.reply_policy.cards, ensure_ascii=False) if self.reply_policy else "")
             + f"\n参考问答（只取相关事实与观点，不照搬摘要文风；表达遵循 {self.name} 的角色规则）：" + json.dumps(self.qa, ensure_ascii=False)
             + "\n本次选用的用户资料：" + json.dumps(profile, ensure_ascii=False)
         )

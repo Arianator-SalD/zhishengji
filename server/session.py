@@ -8,6 +8,7 @@ import uuid
 from fastapi import WebSocketDisconnect
 
 from .providers import asr_failure_details, generation_failure_details
+from .reply_policy import stream_reply
 
 
 @dataclass
@@ -180,7 +181,12 @@ class VoiceSession:
                 speaker_task = asyncio.create_task(speak_sentences())
             full, buffer = "", ""
             async with asyncio.timeout(self.s.provider_timeout * 3):
-                iterator = self.p.llm.stream(messages).__aiter__()
+                approved = None
+                if self.expert_id == "robin-li" and self.content.reply_policy:
+                    approved = await self.content.reply_policy.select(
+                        text, self.p.llm, timeout=min(6, self.s.provider_timeout))
+                iterator = (stream_reply(approved) if approved is not None
+                            else self.p.llm.stream(messages)).__aiter__()
                 while True:
                     try:
                         delta = await asyncio.wait_for(anext(iterator), self.s.provider_timeout)

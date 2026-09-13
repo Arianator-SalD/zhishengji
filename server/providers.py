@@ -200,6 +200,22 @@ class OpenAIChat:
     def __init__(self, settings, transport=None):
         self.s, self.transport = settings, transport
 
+    async def classify_reply(self, messages):
+        """Small JSON decision; caller enforces the allowlist and total deadline."""
+        body = {"model": self.s.llm_model, "messages": messages, "stream": False,
+                "max_tokens": 80, "temperature": 0,
+                "response_format": {"type": "json_object"}}
+        if urlparse(self.s.llm_url).hostname == "api.deepseek.com":
+            body["thinking"] = {"type": "disabled"}
+        async with httpx.AsyncClient(timeout=min(6, self.s.provider_timeout), transport=self.transport) as client:
+            response = await client.post(self.s.llm_url,
+                                         headers={"Authorization": f"Bearer {self.s.llm_api_key}"}, json=body)
+            response.raise_for_status()
+            choice = response.json()["choices"][0]
+            if choice.get("finish_reason") != "stop":
+                raise ProviderError("incomplete reply classification")
+            return json.loads(choice["message"]["content"])
+
     async def stream(self, messages):
         body = {"model": self.s.llm_model, "messages": messages, "stream": True,
                 "max_tokens": 1200, "temperature": 0.6}
