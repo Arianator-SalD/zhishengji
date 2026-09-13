@@ -131,7 +131,7 @@ class Transcript:
 
 
 class LLM(Protocol):
-    def stream(self, messages: list[dict]) -> AsyncIterator[str]: ...
+    def stream(self, messages: list[dict], *, temperature: float = 0.6) -> AsyncIterator[str]: ...
 
 
 class ASR(Protocol):
@@ -216,9 +216,9 @@ class OpenAIChat:
                 raise ProviderError("incomplete reply classification")
             return json.loads(choice["message"]["content"])
 
-    async def stream(self, messages):
+    async def stream(self, messages, *, temperature=0.6):
         body = {"model": self.s.llm_model, "messages": messages, "stream": True,
-                "max_tokens": 1200, "temperature": 0.6}
+                "max_tokens": 1200, "temperature": temperature}
         # DeepSeek defaults to thinking enabled; voice needs the documented opt-out.
         # Other OpenAI-compatible endpoints don't receive vendor-specific fields.
         if urlparse(self.s.llm_url).hostname == "api.deepseek.com":

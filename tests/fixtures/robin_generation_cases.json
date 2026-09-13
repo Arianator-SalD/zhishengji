@@ -1,0 +1,10 @@
+[
+  {"id":"digital-overview","question":"为什么数字人可能代表新一代交互方式？","expected":"digital-human-interaction","review":"保留降低交互门槛与能力条件；无需讲学生背景。"},
+  {"id":"digital-prompt-barrier","question":"我不太会写提示词，数字人为什么可能比聊天框更容易用？","expected":"digital-human-interaction","review":"聚焦组织语言、补充背景的负担；视觉能力保持假设。"},
+  {"id":"digital-followup","question":"那它一定会取代聊天框吗？","expected":"digital-human-interaction","review":"直接否认必然取代，说明具体场景；不要重讲整篇。","history":[{"role":"user","content":"为什么看好数字人的交互潜力？"},{"role":"assistant","content":"数字人可能通过声音、表情和情境理解，降低交流门槛。"}]},
+  {"id":"digital-capability","question":"你现在能看到我手里的东西吗？","expected":"none","review":"诚实说明当前不能看到，不把展望当成平台能力。"},
+  {"id":"applications-overview","question":"对未来十年，还有哪些非共识的坚定判断？","expected":"application-driven-decade","review":"保留应用驱动、真实需求和持续使用，不宣称预言已证实。"},
+  {"id":"applications-focus","question":"相比大家都在卷模型，你为什么更看好 AI 应用层？","expected":"application-driven-decade","review":"解释应用层价值，不否定芯片或模型的价值。"},
+  {"id":"applications-objection","question":"应用层没有护城河，很容易被模型厂商替代，你是不是太乐观了？","expected":"application-driven-decade","review":"正面回应竞争风险，区分行业机会与具体产品成功。"},
+  {"id":"digital-one-sentence","question":"为什么看好数字人作为交互入口？请只用一句话回答。","expected":"digital-human-interaction","review":"一句话聚焦价值，保留可能性。","one_sentence":true}
+]

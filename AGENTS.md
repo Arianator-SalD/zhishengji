@@ -50,8 +50,10 @@
 | [content/qa.json](content/qa.json)、[content/demo_user.json](content/demo_user.json) | 展示 QA 与模拟咨询者档案，不得混淆专家与咨询者身份 |
 | [content/robin-li/persona.md](content/robin-li/persona.md)、[knowledge.md](content/robin-li/knowledge.md)、[qa.json](content/robin-li/qa.json) | 李彦宏运行版 Prompt、带时间语境的精选公开观点与 6 组咨询 QA；与 Sally 独立，模型建议不冒充本人原话 |
 | [content/robin-li/demo_user.json](content/robin-li/demo_user.json)、[case.md](content/robin-li/case.md) | 林小北“大三信息管理学生探索第一份 AI 产品实习”的独立演示档案、预置调研反馈、待验证行动与案例验收说明；不是真实历史咨询，未自动读取游戏结果或写回长期记忆 |
-| [content/robin-li/stable_replies.json](content/robin-li/stable_replies.json)、[说明与文稿](content/robin-li/stable_replies.md) | 数字人交互、应用驱动两组精简文稿；原问与预设改写直出，新问法按语义分类选择，命中后不再生成改写；已随 `0fd7443` 上线，线上问答与真实 TTS 已核对 |
-| [server/reply_policy.py](server/reply_policy.py)、[tests/test_reply_policy.py](tests/test_reply_policy.py)、[语义评测集](tests/fixtures/robin_reply_semantics.json) | Robin 固定回复路由、分类失败回退、会话/语音隔离回归与显式启用的真实模型评测 |
+| [content/robin-li/stable_replies.json](content/robin-li/stable_replies.json)、[说明与文稿](content/robin-li/stable_replies.md) | 数字人交互、应用驱动两组参考答案及回答原则；本地新版本由模型分类后按策略生成，支持同主题追问和反驳；线上 `0fd7443` 仍为固定文稿版本 |
+| [server/reply_policy.py](server/reply_policy.py)、[tests/test_reply_policy.py](tests/test_reply_policy.py)、[语义评测集](tests/fixtures/robin_reply_semantics.json) | Robin 话题路由与生成约束、分类失败回退、会话/语音隔离回归与显式启用的真实模型评测 |
+| [tests/evaluate_robin_generation.py](tests/evaluate_robin_generation.py)、[生成评测题](tests/fixtures/robin_generation_cases.json) | 两阶段真实模型评测脚本，8 组模拟问题各生成两次；需显式提供模型配置，不读取真实咨询记录 |
+| artifacts/robin-generation-evaluation.json、同名前缀的 -initial.json / -tuning.json / -boundary-review.json / -retry.json | 本地模拟问题的真实模型输出与检查结果，不自动发布；分别保留当前评测、初测、篇幅调优、事实边界复核及网络超时复测。当前报告保留被复测替代的原记录；中间版本不能当作定稿或人物原话 |
 | [server/experts.py](server/experts.py)、[tests/test_experts.py](tests/test_experts.py) | 专家白名单与供应商／资料注册、默认档案模式、真实 TTS 请求参数及跨专家隔离回归 |
 | [server/main.py](server/main.py)、[server/access.py](server/access.py) | FastAPI 路由、静态资源、访问控制 |
 | [server/context.py](server/context.py)、[server/session.py](server/session.py) | 上下文拼装、会话历史、语音轮次与打断处理 |

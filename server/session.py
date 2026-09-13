@@ -8,7 +8,6 @@ import uuid
 from fastapi import WebSocketDisconnect
 
 from .providers import asr_failure_details, generation_failure_details
-from .reply_policy import stream_reply
 
 
 @dataclass
@@ -129,7 +128,6 @@ class VoiceSession:
         self.history = self.history[-self.s.max_history_messages:]
         while self.history and self.history[0]["role"] == "assistant":
             self.history.pop(0)
-        messages = self.content.messages(self.history, self.use_demo_profile)
         speech = bool(speak and self.p.tts)
         queue = asyncio.Queue(maxsize=8)
         speaker_task = None
@@ -181,11 +179,12 @@ class VoiceSession:
                 speaker_task = asyncio.create_task(speak_sentences())
             full, buffer = "", ""
             async with asyncio.timeout(self.s.provider_timeout * 3):
-                approved = None
+                reply_card = None
                 if self.expert_id == "robin-li" and self.content.reply_policy:
-                    approved = await self.content.reply_policy.select(
-                        text, self.p.llm, timeout=min(6, self.s.provider_timeout))
-                iterator = (stream_reply(approved) if approved is not None
+                    reply_card = await self.content.reply_policy.select(
+                        text, self.p.llm, timeout=min(6, self.s.provider_timeout), history=self.history[:-1])
+                messages = self.content.messages(self.history, self.use_demo_profile, reply_card)
+                iterator = (self.p.llm.stream(messages, temperature=0.2) if reply_card is not None
                             else self.p.llm.stream(messages)).__aiter__()
                 while True:
                     try:
