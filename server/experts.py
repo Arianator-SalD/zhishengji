@@ -21,7 +21,6 @@ class Expert:
             "name": self.name,
             "default_use_demo_profile": self.default_use_demo_profile,
             "capabilities": self.providers.capabilities,
-            "fixed_audio": self.content.fixed_reply is not None,
             "qa": self.content.qa,
             "profile": self.content.profile,
         }

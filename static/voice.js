@@ -3,7 +3,6 @@
   const $ = id => document.getElementById(id);
   let socket, connecting, config, turn = null, activeSegment = null, playbackTime = 0;
   let audioContext, sources = new Set(), mic, micNode, micSource, silentGain;
-  let filePlayback = null, fileSegments = new Set();
   let recording = false, micEpoch = 0, frames = 0, cancelWorklet;
   let mode = 'text', liveReply, voiceReply, busy = false, generationDone = false;
   let ignoreTurn = false, ignoredTurns = new Set(), currentReplyText = '';
@@ -23,18 +22,10 @@
   }
   function state(value) {
     $('callModal').dataset.state = value;
-    $('muteBtn').disabled = !busy && !sources.size && !filePlayback;
-    window.zhijianUI.state(value, {recording, busy, hasAudio: sources.size > 0 || Boolean(filePlayback), mode});
+    $('muteBtn').disabled = !busy && !sources.size;
+    window.zhijianUI.state(value, {recording, busy, hasAudio: sources.size > 0, mode});
   }
   function stopPlayback() {
-    const file = filePlayback; filePlayback = null; fileSegments.clear();
-    if (file) {
-      clearTimeout(file.timer);
-      if (file.audio) {
-        file.audio.onended = file.audio.onerror = file.audio.onplaying = file.audio.ontimeupdate = null;
-        file.audio.pause(); file.audio.removeAttribute('src'); file.audio.load();
-      }
-    }
     for (const s of sources) { s.onended = null; try { s.stop(); } catch {} }
     sources.clear(); playbackTime = 0; activeSegment = null;
   }
@@ -53,7 +44,7 @@
     state(wasRecording && notify ? 'thinking' : 'idle');
   }
   function interrupt() {
-    const wasActive = busy || sources.size > 0 || Boolean(filePlayback);
+    const wasActive = busy || sources.size > 0;
     endMic(false); if (turn) ignoredTurns.add(turn);
     ignoreTurn = true; requestId = null; send({type:'interrupt'}); stopPlayback(); busy = false;
     if (currentReplyText && wasActive) { liveReply?.append('\n（已打断）'); voiceReply?.append('\n（已打断）'); }
@@ -147,10 +138,7 @@
     return true;
   }
   function finished() {
-    if (generationDone && sources.size === 0 && !filePlayback) {
-      busy = false; state('idle');
-      if (!failed) status('回答完成，可以继续追问');
-    }
+    if (!failed && generationDone && sources.size === 0) { busy = false; state('idle'); status('回答完成，可以继续追问'); }
   }
   function acknowledge(segment) {
     if (segment && segment.ended && segment.remaining === 0 && !segment.acked && !ignoredTurns.has(segment.turn_id)) {
@@ -176,48 +164,9 @@
     playbackTime = Math.max(audioContext.currentTime + 0.04, playbackTime);
     source.start(playbackTime); playbackTime += audio.duration; state('speaking'); status('正在回答…');
   }
-  function playFile(message) {
-    const key = `${message.turn_id}:${message.segment_id}`;
-    if (failed || fileSegments.has(key)) return;
-    fileSegments.add(key);
-    const segment = {...message, remaining:1, ended:false, acked:false};
-    const file = {audio:null, timer:null}, epoch = sessionEpoch;
-    filePlayback = file;
-    const current = () => filePlayback === file && epoch === sessionEpoch &&
-      requestId === message.request_id && turn === message.turn_id && !ignoreTurn && !ignoredTurns.has(turn);
-    const fail = () => {
-      if (!current()) return;
-      // Audio failure must not cancel the remaining fake text stream.
-      failed = true; stopPlayback(); busy = !generationDone;
-      state(busy ? 'thinking' : 'idle');
-      status('固定语音未能播放，请查看文字回答，或重新提问播放。', true);
-    };
-    const refreshDeadline = () => { clearTimeout(file.timer); file.timer = setTimeout(fail, 20000); };
-    try {
-      if (!/^\/static\/fixed-audio\/[a-z0-9-]+\.wav$/.test(message.url) ||
-          !message.url.startsWith(`/static/fixed-audio/${activeId}-`)) throw new Error('Invalid fixed audio');
-      // A complete, versioned file uses the browser media pipeline. It does not
-      // pass through the per-chunk PCM AudioBufferSource scheduling above.
-      const audio = new Audio(message.url); file.audio = audio; audio.preload = 'auto';
-      audio.onerror = fail;
-      audio.onplaying = () => {
-        if (!current()) return;
-        refreshDeadline(); state('speaking'); status('正在回答…');
-      };
-      audio.ontimeupdate = () => { if (current()) refreshDeadline(); };
-      audio.onended = () => {
-        if (!current()) return;
-        clearTimeout(file.timer); filePlayback = null;
-        audio.onended = audio.onerror = audio.onplaying = audio.ontimeupdate = null;
-        segment.ended = true; segment.remaining = 0; acknowledge(segment);
-      };
-      refreshDeadline(); state('thinking'); status('正在加载语音…');
-      Promise.resolve(audio.play()).catch(fail);
-    } catch { fail(); }
-  }
   function handle(m) {
     if (!isActive()) return;
-    const scoped = ['transcript.partial','transcript.final','reply.delta','audio.start','audio.end','audio.file','turn.end'];
+    const scoped = ['transcript.partial','transcript.final','reply.delta','audio.start','audio.end','turn.end'];
     if ((scoped.includes(m.type) || m.request_id != null) && m.request_id !== requestId) return;
     if (scoped.includes(m.type) && !requestId) return;
     if (m.type === 'transcript.partial') window.zhijianUI.partial(m.text);
@@ -230,7 +179,6 @@
       for (const id of ['chatBody','callTranscript']) $(id).scrollTop = $(id).scrollHeight;
     }
     if (m.type === 'audio.start' && acceptTurn(m)) activeSegment = {...m,remaining:0,ended:false,acked:false};
-    if (m.type === 'audio.file' && acceptTurn(m)) playFile(m);
     if (m.type === 'audio.end' && activeSegment?.segment_id === m.segment_id) { activeSegment.ended = true; acknowledge(activeSegment); activeSegment = null; }
     if (m.type === 'turn.end' && !ignoreTurn && !ignoredTurns.has(m.turn_id)) { generationDone = true; finished(); }
     if (m.type === 'error') { failed = true; endMic(false); stopPlayback(); busy = false; const message = m.message + (m.diagnostic ? `（${m.diagnostic}）` : ''); status(message, true); state('idle'); bubble(mode === 'voice' ? 'callTranscript' : 'chatBody', message, 'ai'); }
@@ -256,7 +204,7 @@
     const openingEpoch = sessionEpoch, openingMicEpoch = micEpoch;
     try { await loadConfig(); } catch (e) { if (openingEpoch === sessionEpoch) status(e.message, true); return; }
     if (openingEpoch !== sessionEpoch || openingMicEpoch !== micEpoch || !isActive()) return;
-    if (!config?.capabilities?.asr || !config?.capabilities?.llm || !(config?.capabilities?.tts || config?.fixed_audio)) { status('语音咨询需要配置对话模型、语音识别和可用音频', true); return; }
+    if (!config?.capabilities?.asr || !config?.capabilities?.llm || !config?.capabilities?.tts) { status('语音咨询需要配置 DeepSeek、语音识别和语音合成 API', true); return; }
     interrupt(); ignoreTurn = false; generationDone = false; failed = false;
     status('正在准备麦克风…');
     const epoch = ++micEpoch;
@@ -287,7 +235,7 @@
     try { await loadConfig(); } catch (e) { if (openingEpoch === sessionEpoch) status(e.message, true); return; }
     if (openingEpoch !== sessionEpoch || openingMicEpoch !== micEpoch || !isActive()) return;
     if (!config?.capabilities?.llm) { status('暂时无法连接咨询服务，请稍后重试', true); return; }
-    speak = speak && Boolean(config.capabilities.tts || config.fixed_audio);
+    speak = speak && Boolean(config.capabilities.tts);
     interrupt(); const epoch = micEpoch;
     try {
       if (speak) await context(); if (epoch !== micEpoch) return;

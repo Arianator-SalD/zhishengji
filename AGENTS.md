@@ -53,10 +53,6 @@
 | [content/robin-li/demo_user.json](content/robin-li/demo_user.json)、[case.md](content/robin-li/case.md) | 林小北“大三信息管理学生探索第一份 AI 产品实习”的独立演示档案、预置调研反馈、待验证行动与案例验收说明；不是真实历史咨询，未自动读取游戏结果或写回长期记忆 |
 | [content/robin-li/stable_replies.json](content/robin-li/stable_replies.json)、[说明与文稿](content/robin-li/stable_replies.md) | 数字人交互、应用驱动两组参考答案及回答原则；由模型分类后按策略生成，支持同主题追问和反驳；已随 `0faf5f9` 部署，线上核对见最新日志 |
 | [server/reply_policy.py](server/reply_policy.py)、[tests/test_reply_policy.py](tests/test_reply_policy.py)、[语义评测集](tests/fixtures/robin_reply_semantics.json) | Robin 话题路由与生成约束、分类失败回退、会话/语音隔离回归与显式启用的真实模型评测 |
-| [content/fixed-replies.md](content/fixed-replies.md)、[Sally 清单](content/fixed_reply.json)、[Robin 清单](content/robin-li/fixed_reply.json) | 两条固定文稿、源文件绑定、精确别名与音频版本；本地实现，尚未部署，真人听感待试听 |
-| [server/fixed_replies.py](server/fixed_replies.py)、[tests/test_fixed_replies.py](tests/test_fixed_replies.py)、[tests/fixed-audio.test.cjs](tests/fixed-audio.test.cjs) | 固定稿与音频完整性验证、严格语义匹配、零实时生成／TTS 回归、原生媒体播放及取消／专家隔离回归 |
-| [Robin 固定音频](static/fixed-audio/robin-li-fixed-ai-non-consensus-0194f93d77a5.wav)、[Sally 固定音频](static/fixed-audio/sally-fixed-finance-to-product-adb4e6637b83.wav) | 24 kHz 单声道 WAV，分别约 24.53／28.53 秒，正文与音频摘要绑定，文件名包含音频摘要 |
-| [scripts/prepare_fixed_audio.py](scripts/prepare_fixed_audio.py) | 显式的一次性音频制作脚本，借助指定 Demo 的现有模型／TTS 生成并核对固定文稿；不在用户请求路径运行，不保存凭据 |
 | [tests/evaluate_robin_generation.py](tests/evaluate_robin_generation.py)、[生成评测题](tests/fixtures/robin_generation_cases.json) | 两阶段真实模型评测脚本，8 组模拟问题各生成两次；需显式提供模型配置，不读取真实咨询记录 |
 | [server/experts.py](server/experts.py)、[tests/test_experts.py](tests/test_experts.py) | 专家白名单与供应商／资料注册、默认档案模式、真实 TTS 请求参数及跨专家隔离回归 |
 | [server/main.py](server/main.py)、[server/access.py](server/access.py) | FastAPI 路由、静态资源、访问控制 |
