@@ -35,7 +35,7 @@
   function removeThinking() { thinking?.remove(); thinking = null; }
   function callIntroduction() {
     const expert = experts[selectedExpert];
-    return '你好，我是' + expert.name + '的 AI 分身。' + (expert.publicFigure ? '我会结合公开资料和你的问题回答。' : '')
+    return '你好，我是' + expert.name + '的 AI 分身。'
       + '你这次最想聊什么？'
       + '点击左侧「点击说话」，说完后点「说完了，发送」。';
   }

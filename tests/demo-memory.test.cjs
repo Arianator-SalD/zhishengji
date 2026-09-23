@@ -201,7 +201,7 @@ test('live welcome omits user profiles before and after config loads and removes
   win.zhijianUI.memory(false,null,'robin-li');
   win.zhijianUI.prepareCall();
   assert.equal(lines.at(-1).name,'李彦宏 · AI 分身');
-  assert.match(lines.at(-1).text,/公开资料/);
+  assert.doesNotMatch(lines.at(-1).text,/公开资料/);
   assert.doesNotMatch(lines.at(-1).text,/Sally|已带入/);
   const profile=JSON.parse(fs.readFileSync(path.join(__dirname,'../content/robin-li/demo_user.json'),'utf8'));
   win.zhijianUI.memory(true,profile,'robin-li');

@@ -47,10 +47,10 @@ rtk proxy env ROBIN_LIVE_EVAL=1 .venv/bin/python -m pytest tests/test_reply_poli
 回复生成评测采用 [8 组模拟问题](../../tests/fixtures/robin_generation_cases.json)，每题生成两次，自动检查分类、空回复、是否整段照抄、180 字符篇幅上限、一句话格式及核心主题词，再人工核对每个回答的核心观点与限制条件。字符检查和主题词检查不能替代语义复核：
 
 ```sh
-rtk proxy .venv/bin/python tests/evaluate_robin_generation.py --output artifacts/robin-generation-evaluation.json
+rtk proxy .venv/bin/python tests/evaluate_robin_generation.py --output /tmp/robin-generation-evaluation.json
 ```
 
-测试仅使用仓库中的演示问题，不读取真实咨询记录。所有调用凭据仅用于进程内，不写入报告。最新结果见 [迭代日志](../../迭代日志.md) 与 [生成评测输出](../../artifacts/robin-generation-evaluation.json)（本地产物，不自动发布）。报告包含策略文件校验值，初测、篇幅调优和事实边界复核版本保留在同目录，不能当作最终回复。
+测试仅使用仓库中的演示问题，不读取真实咨询记录。所有调用凭据仅用于进程内，不写入报告。评测过程和结论见 [迭代日志](../../迭代日志.md)；本地评测输出已清理，不作为运行时资料或定稿回复。
 
 当前两阶段版本已随 `0faf5f9` 推送并部署，Render 显示 Live。线上原问、相似问法及同一会话连续追问已验证，原固定文稿版本 `0fd7443` 的历史记录保留于迭代日志；当前生产验证结果见最新条目。
 
