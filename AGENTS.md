@@ -22,6 +22,9 @@
 | --- | --- |
 | [README.md](README.md) | 对外产品介绍，不放内部配置和资料链接 |
 | [迭代日志.md](迭代日志.md)、[AGENTS.md](AGENTS.md) | 迭代记录、工程协作约定与索引 |
+| [docs/project-background.md](docs/project-background.md) | 项目背景、产品边界和当前实现地图 |
+| [docs/robin-li/](docs/robin-li/) | 李彦宏分身的设计评审、公开资料整理和 Prompt 说明；运行版资料在 `content/robin-li/` |
+| [docs/sally-initial-voice-plan.md](docs/sally-initial-voice-plan.md) | Sally 首版语音接入方案，作为历史设计参考 |
 | [RENDER部署.md](RENDER部署.md)、[render.yaml](render.yaml) | 部署说明与服务配置，现有环境变量在部署平台维护 |
 | [requirements.txt](requirements.txt)、[启动本地Demo.command](启动本地Demo.command) | Python 依赖、本地启动入口 |
 | [static/campus-assessment.html](static/campus-assessment.html) | 用户提供的《夏日未完》六站校园游戏化测评，保留问答、画像计算、手记及接待演示；原文件不修改 |
